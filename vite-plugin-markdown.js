@@ -300,8 +300,8 @@ function processImagesForDev(htmlContent, blogPostDir, blogPostName) {
     
     // Check if image exists in source
     if (existsSync(sourceImgPath)) {
-      // Update image path to be absolute from root (e.g., /blog/first/test.png)
-      const newImgSrc = `/blog/${blogPostName}/${imgSrc}`;
+      // Update image path to be absolute from root (e.g., /articles/first/test.png)
+      const newImgSrc = `/articles/${blogPostName}/${imgSrc}`;
       // Escape special regex characters in the source path
       const escapedSrc = imgSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       // Replace all occurrences of this image path
@@ -365,7 +365,7 @@ function processImages(htmlContent, sourceDir, distHtmlDir, distDir) {
         // Update image path in HTML to be absolute from root (for Vercel compatibility)
         // Calculate the path relative to dist directory root
         const distHtmlDirRelative = relative(distDir, dirname(distHtmlDir));
-        // Convert to absolute path starting with / (e.g., /blog/first/test.png)
+        // Convert to absolute path starting with / (e.g., /articles/first/test.png)
         // Handle case where HTML is at dist root (relative path is empty or '.')
         let absoluteImgPath;
         if (!distHtmlDirRelative || distHtmlDirRelative === '.' || distHtmlDirRelative === './') {
@@ -396,7 +396,7 @@ function processImages(htmlContent, sourceDir, distHtmlDir, distDir) {
  * Copy shared CSS to dist
  */
 function copySharedCSS(distDir) {
-  const blogDir = resolve(process.cwd(), 'blog');
+  const blogDir = resolve(process.cwd(), 'articles');
   const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
   const distCSSPath = join(distDir, 'blog-styles.css');
   
@@ -420,7 +420,7 @@ function injectMarkdownToHtml(distDir) {
   copySharedCSS(distDir);
   
   // Find all blog posts (directories with content.md)
-  const blogDir = resolve(process.cwd(), 'blog');
+  const blogDir = resolve(process.cwd(), 'articles');
   const blogPosts = findBlogPosts(blogDir);
   const templateHTMLPath = join(blogDir, '_template', 'index.html');
   
@@ -437,7 +437,7 @@ function injectMarkdownToHtml(distDir) {
       sourceHtmlPath = htmlPath;
       // Read the dist HTML file (Vite should have copied it)
       const relPath = htmlPath.replace(blogDir + '/', '');
-      distHtmlPath = join(distDir, 'blog', relPath);
+      distHtmlPath = join(distDir, 'articles', relPath);
       
       if (!existsSync(distHtmlPath)) {
         // If dist HTML doesn't exist, copy source HTML
@@ -454,10 +454,10 @@ function injectMarkdownToHtml(distDir) {
       htmlContent = readFileSync(templateHTMLPath, 'utf-8');
       
       // Create dist HTML file from template
-      // Based on vite config, it should be at dist/blog/{name}/index.html or dist/blog/{name}.html
+      // Based on vite config, it should be at dist/articles/{name}/index.html or dist/articles/{name}.html
       // Check both possible locations
-      const distHtmlPath1 = join(distDir, 'blog', name, 'index.html');
-      const distHtmlPath2 = join(distDir, 'blog', `${name}.html`);
+      const distHtmlPath1 = join(distDir, 'articles', name, 'index.html');
+      const distHtmlPath2 = join(distDir, 'articles', `${name}.html`);
       
       if (existsSync(distHtmlPath1)) {
         distHtmlPath = distHtmlPath1;
@@ -465,7 +465,7 @@ function injectMarkdownToHtml(distDir) {
         distHtmlPath = distHtmlPath2;
       } else {
         // Create the file
-        distHtmlPath = join(distDir, 'blog', `${name}.html`);
+        distHtmlPath = join(distDir, 'articles', `${name}.html`);
         const distHtmlDir = dirname(distHtmlPath);
         if (!existsSync(distHtmlDir)) {
           mkdirSync(distHtmlDir, { recursive: true });
@@ -581,7 +581,7 @@ export function markdownPlugin() {
     enforce: 'pre',
     
     configureServer(server) {
-      const blogDir = resolve(process.cwd(), 'blog');
+      const blogDir = resolve(process.cwd(), 'articles');
       const templateHTMLPath = join(blogDir, '_template', 'index.html');
       const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
       const publicFaviconPath = resolve(process.cwd(), 'public', 'favicon.ico');
@@ -624,8 +624,8 @@ export function markdownPlugin() {
       // Serve images from blog post directories
       server.middlewares.use((req, res, next) => {
         // Check if this is a request for an image in a blog post directory
-        // Pattern: /blog/{postName}/{imageName}
-        const blogImageMatch = req.url?.match(/^\/blog\/([^/]+)\/(.+)$/);
+        // Pattern: /articles/{postName}/{imageName}
+        const blogImageMatch = req.url?.match(/^\/articles\/([^/]+)\/(.+)$/);
         if (blogImageMatch) {
           const postName = blogImageMatch[1];
           const imageName = blogImageMatch[2];
@@ -667,7 +667,7 @@ export function markdownPlugin() {
       // Handle markdown files in dev mode
       server.middlewares.use(async (req, res, next) => {
         // Only handle HTML files from blog directory
-        if (!req.url || (!req.url.endsWith('.html') && !req.url.match(/\/blog\/[^/]+\/?$/))) {
+        if (!req.url || (!req.url.endsWith('.html') && !req.url.match(/\/articles\/[^/]+\/?$/))) {
           return next();
         }
         
@@ -684,7 +684,7 @@ export function markdownPlugin() {
               resolvedPath = indexPath;
             } else {
               // Directory exists but no index.html, try to use template
-              const blogMatch = req.url.match(/\/blog\/([^/]+)/);
+              const blogMatch = req.url.match(/\/articles\/([^/]+)/);
               if (blogMatch) {
                 const postName = blogMatch[1];
                 const postDir = join(blogDir, postName);
@@ -702,7 +702,7 @@ export function markdownPlugin() {
             }
           } else if (!existsSync(resolvedPath)) {
             // File doesn't exist, try to use template
-            const blogMatch = req.url.match(/\/blog\/([^/]+)/);
+            const blogMatch = req.url.match(/\/articles\/([^/]+)/);
             if (blogMatch) {
               const postName = blogMatch[1];
               const postDir = join(blogDir, postName);
@@ -738,14 +738,14 @@ export function markdownPlugin() {
           let blogPostName = null;
           // If using template, find the actual blog post directory
           if (resolvedPath === templateHTMLPath) {
-            const blogMatch = req.url.match(/\/blog\/([^/]+)/);
+            const blogMatch = req.url.match(/\/articles\/([^/]+)/);
             if (blogMatch) {
               blogPostName = blogMatch[1];
               htmlDir = join(blogDir, blogPostName);
             }
           } else {
             // Extract blog post name from directory path
-            const blogMatch = htmlDir.match(/blog[\/\\]([^\/\\]+)$/);
+            const blogMatch = htmlDir.match(/articles[\/\\]([^\/\\]+)$/);
             if (blogMatch) {
               blogPostName = blogMatch[1];
             }

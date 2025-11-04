@@ -26,12 +26,12 @@ function findHtmlFiles(dir, baseDir = dir, files = {}) {
         
         // If file is in a subdirectory and filename matches directory name,
         // flatten to just use the directory name as the key
-        // e.g., blog/first/first.html -> blog/first.html
+        // e.g., articles/first/first.html -> articles/first.html
         const pathParts = relativePath.split(/[/\\]/) // Handle both / and \ for cross-platform
         if (pathParts.length === 2 && pathParts[0] === pathParts[1]) {
-          // Use 'blog/{directoryName}' as the key to output to blog/{name}.html
-          // This will output to blog/first.html instead of blog/first/first.html
-          files[`blog/${pathParts[0]}`] = resolve(fullPath)
+          // Use 'articles/{directoryName}' as the key to output to articles/{name}.html
+          // This will output to articles/first.html instead of articles/first/first.html
+          files[`articles/${pathParts[0]}`] = resolve(fullPath)
         } else {
           // Use full relative path for other cases
           files[relativePath] = resolve(fullPath)
@@ -84,7 +84,7 @@ function findBlogPostsAndGenerateHTML(blogDir, templateHTMLPath) {
 }
 
 // Automatically discover HTML files in entries directory
-const blogEntriesDir = resolve(__dirname, 'blog')
+const blogEntriesDir = resolve(__dirname, 'articles')
 const templateHTMLPath = join(blogEntriesDir, '_template', 'index.html')
 
 // Generate HTML files for blog posts that only have content.md
