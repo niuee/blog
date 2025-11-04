@@ -46,12 +46,17 @@ a:hover {
   color: var(--link-hover-color);
 }
 
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  padding: 0;
   min-width: 320px;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
 }
 
 h1 {
@@ -62,8 +67,142 @@ h1 {
 #app {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Intro section styles */
+.intro-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+.intro-section {
+  max-width: 600px;
+  text-align: left;
+  animation: fadeIn 0.6s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.intro-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+  letter-spacing: -0.02em;
+}
+
+.intro-title {
+  font-size: 1.25rem;
+  margin: 0 0 1.5rem 0;
+  color: var(--text-color);
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.intro-description {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin: 0 0 2rem 0;
+  color: var(--text-color);
+  opacity: 0.9;
+}
+
+.intro-link {
+  color: var(--link-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.intro-link:hover {
+  border-bottom-color: var(--link-color);
+}
+
+.intro-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid;
+  border-color: rgba(33, 53, 71, 0.15);
+}
+
+html:has(#dark-mode-toggle:checked) .intro-nav {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.intro-nav-link {
+  color: #888888;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.intro-nav-link:hover {
+  color: #666666;
+}
+
+html:has(#dark-mode-toggle:checked) .intro-nav-link {
+  color: #b3b3b3;
+}
+
+html:has(#dark-mode-toggle:checked) .intro-nav-link:hover {
+  color: #d9d9d9;
+}
+
+.intro-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: var(--link-color);
+  transition: width 0.2s ease;
+}
+
+.intro-nav-link:hover::after {
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .intro-name {
+    font-size: 2rem;
+  }
+  
+  .intro-title {
+    font-size: 1.1rem;
+  }
+  
+  .intro-description {
+    font-size: 1rem;
+  }
+  
+  .intro-nav {
+    gap: 1rem;
+  }
 }
 
 .logo {
@@ -114,6 +253,9 @@ button:focus-visible {
   width: 0;
   height: 0;
   pointer-events: none;
+  scroll-margin: 0;
+  scroll-margin-top: 0;
+  scroll-margin-bottom: 0;
 }
 
 .dark-mode-label {
@@ -124,21 +266,23 @@ button:focus-visible {
   cursor: pointer;
   padding: 0.5rem;
   background: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Switch plate (outer frame) */
 .switch-plate {
   position: relative;
   display: block;
-  width: 3.5rem;
-  height: 5rem;
+  width: 2.5rem;
+  height: 3.5rem;
   background-color: var(--switch-plate-bg);
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
   box-shadow: 
-    0 4px 8px var(--switch-shadow),
+    0 3px 6px var(--switch-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  padding: 0.5rem 0.4rem;
+  padding: 0.35rem 0.3rem;
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -153,12 +297,12 @@ button:focus-visible {
 .switch-toggle {
   position: absolute;
   left: 50%;
-  top: 0.75rem;
+  top: 0.5rem;
   transform: translateX(-50%);
-  width: 2.7rem;
-  height: 1.8rem;
+  width: 1.9rem;
+  height: 1.2rem;
   background-color: var(--switch-toggle-bg);
-  border-radius: 0.25rem;
+  border-radius: 0.2rem;
   box-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.2),
     inset 0 1px 2px rgba(255, 255, 255, 0.9),
@@ -169,7 +313,32 @@ button:focus-visible {
 
 /* When checked, move toggle down (flip switch down) */
 html:has(#dark-mode-toggle:checked) .switch-toggle {
-  top: 2.75rem;
+  top: 1.8rem;
+}
+
+/* Responsive styles for toggle switch */
+@media (max-width: 600px) {
+  .dark-mode-label {
+    top: 1rem;
+    right: 1rem;
+    padding: 0.375rem;
+  }
+
+  .switch-plate {
+    width: 2.2rem;
+    height: 3rem;
+    padding: 0.3rem 0.25rem;
+  }
+
+  .switch-toggle {
+    width: 1.7rem;
+    height: 1rem;
+    top: 0.45rem;
+  }
+
+  html:has(#dark-mode-toggle:checked) .switch-toggle {
+    top: 1.55rem;
+  }
 }
 
 /* Fallback for browsers that don't support :has() */
