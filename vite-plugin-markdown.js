@@ -398,14 +398,25 @@ function processImages(htmlContent, sourceDir, distHtmlDir, distDir) {
 function copySharedCSS(distDir) {
   const blogDir = resolve(process.cwd(), 'articles');
   const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
+  const darkModeCSSPath = join(blogDir, '_template', 'dark-mode.css');
   const distCSSPath = join(distDir, 'blog-styles.css');
+  const distDarkModeCSSPath = join(distDir, 'dark-mode.css');
   
   if (existsSync(templateCSSPath)) {
     try {
       copyFileSync(templateCSSPath, distCSSPath);
-      console.log(`✓ Copied shared CSS to dist`);
+      console.log(`✓ Copied blog-styles.css to dist`);
     } catch (err) {
-      console.warn(`Warning: Could not copy shared CSS:`, err.message);
+      console.warn(`Warning: Could not copy blog-styles.css:`, err.message);
+    }
+  }
+  
+  if (existsSync(darkModeCSSPath)) {
+    try {
+      copyFileSync(darkModeCSSPath, distDarkModeCSSPath);
+      console.log(`✓ Copied dark-mode.css to dist`);
+    } catch (err) {
+      console.warn(`Warning: Could not copy dark-mode.css:`, err.message);
     }
   }
 }
@@ -584,6 +595,7 @@ export function markdownPlugin() {
       const blogDir = resolve(process.cwd(), 'articles');
       const templateHTMLPath = join(blogDir, '_template', 'index.html');
       const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
+      const darkModeCSSPath = join(blogDir, '_template', 'dark-mode.css');
       const publicFaviconPath = resolve(process.cwd(), 'public', 'favicon.ico');
       
       // Serve favicon
@@ -611,6 +623,14 @@ export function markdownPlugin() {
         if (req.url === '/blog-styles.css') {
           if (existsSync(templateCSSPath)) {
             const cssContent = readFileSync(templateCSSPath, 'utf-8');
+            res.setHeader('Content-Type', 'text/css; charset=utf-8');
+            res.end(cssContent);
+          } else {
+            next();
+          }
+        } else if (req.url === '/dark-mode.css') {
+          if (existsSync(darkModeCSSPath)) {
+            const cssContent = readFileSync(darkModeCSSPath, 'utf-8');
             res.setHeader('Content-Type', 'text/css; charset=utf-8');
             res.end(cssContent);
           } else {

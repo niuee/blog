@@ -5,16 +5,29 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blog Post</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github.min.css" id="hljs-light-theme" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github-dark.min.css" id="hljs-dark-theme" disabled />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" />
+    <link rel="stylesheet" href="/dark-mode.css" />
     <link rel="stylesheet" href="/blog-styles.css" />
   </head>
   <body>
+    <input type="checkbox" id="dark-mode-toggle" class="dark-mode-toggle" />
+    <label for="dark-mode-toggle" class="dark-mode-label" aria-label="Toggle dark mode">
+      <span class="toggle-icon"></span>
+    </label>
     <div class="container">
       <header>
       </header>
       <div id="blog-content"></div>
     </div>
+    <script>
+      // Minimal JS to toggle highlight.js theme
+      document.getElementById('dark-mode-toggle').addEventListener('change', function(e) {
+        document.getElementById('hljs-light-theme').disabled = e.target.checked;
+        document.getElementById('hljs-dark-theme').disabled = !e.target.checked;
+      });
+    </script>
   </body>
 </html>
 
