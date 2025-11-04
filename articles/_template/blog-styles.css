@@ -87,6 +87,11 @@ pre {
   transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
+canvas {
+  border: 1px solid var(--code-border-color);
+  border-radius: 6px;
+}
+
 .code-language-label {
   position: absolute;
   top: 8px;

@@ -26,7 +26,7 @@ function greet(name) {
 }
 ```
 
-<canvas id="canvas" style="width: 100%; border: 1px solid #000;"></canvas>
+<canvas id="canvas" style="width: 100%"></canvas>
 <script>
   const canvas = document.querySelector("canvas");
   const ctx = canvas.getContext("2d");
