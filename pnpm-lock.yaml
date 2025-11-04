@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@ue-too/board':
+        specifier: ^0.7.3
+        version: 0.7.3
     devDependencies:
       '@types/glob':
         specifier: ^8.1.0
@@ -339,6 +343,15 @@ packages:
 
   '@types/node@24.10.0':
     resolution: {integrity: sha512-qzQZRBqkFsYyaSWXuEHc2WR9c0a0CXwiE5FWUvn7ZM+vdy1uZLfCunD38UzhuB7YN/J11ndbDBcTmOdxJo9Q7A==}
+
+  '@ue-too/being@0.7.3':
+    resolution: {integrity: sha512-XOyhcRBRbrWOt1rjgxllxlksyP/a3fiamwoPaSxDpLRq8vZVFJrJhLVbgmFmoKBkrMpFNtCe22xVqczTgV1AUg==}
+
+  '@ue-too/board@0.7.3':
+    resolution: {integrity: sha512-cI9nrY//mOGA9uegmVfhnHxrgPargLQLpVATHIQwmWDPfyw0jUnc0qApaPVkCcILfyMErOgTC00Iqub/CHBivA==}
+
+  '@ue-too/math@0.7.3':
+    resolution: {integrity: sha512-7FYVf6CVH3owL7a+MN98T5AF5zoQbQdDGULHU5hWlxFKR3XBbjJaCeIFYXPcJrYST/E/NAZrxUCV71tYjSh8nA==}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -752,6 +765,15 @@ snapshots:
   '@types/node@24.10.0':
     dependencies:
       undici-types: 7.16.0
+
+  '@ue-too/being@0.7.3': {}
+
+  '@ue-too/board@0.7.3':
+    dependencies:
+      '@ue-too/being': 0.7.3
+      '@ue-too/math': 0.7.3
+
+  '@ue-too/math@0.7.3': {}
 
   ansi-regex@5.0.1: {}
 

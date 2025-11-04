@@ -625,10 +625,11 @@ function injectMarkdownToHtml(distDir) {
     // Parse frontmatter
     const { frontmatter, content: bodyContent } = parseFrontmatter(content);
     
-    // Extract title and date
+    // Extract title, date, and author
     let title = frontmatter?.title || extractTitle(bodyContent) || 'Blog Post';
     const date = frontmatter?.date || frontmatter?.published || null;
     const formattedDate = formatDate(date);
+    const author = frontmatter?.author || null;
     
     // Remove first h1 if it was used as title
     let markdownToRender = bodyContent;
@@ -664,23 +665,36 @@ function injectMarkdownToHtml(distDir) {
       }
       
       // Add date/meta section
-      if (formattedDate) {
+      if (formattedDate || author) {
         const dateISO = date || new Date().toISOString().split('T')[0];
-        if (htmlContent.includes('<time')) {
-          // Replace existing time
-          htmlContent = htmlContent.replace(
-            /<time datetime="[^"]*">[^<]*<\/time>/,
-            `<time datetime="${dateISO}">${formattedDate}</time>`
-          );
-        } else if (htmlContent.includes('<div class="meta">')) {
+        let metaContent = '';
+        if (formattedDate) {
+          metaContent = `<time datetime="${dateISO}">${formattedDate}</time>`;
+        }
+        if (author) {
+          if (metaContent) {
+            metaContent += ` • ${escapeHtml(author)}`;
+          } else {
+            metaContent = escapeHtml(author);
+          }
+        }
+        
+        if (htmlContent.includes('<time') || htmlContent.includes('<div class="meta">')) {
           // Replace existing meta content
           htmlContent = htmlContent.replace(
             /<div class="meta">.*?<\/div>/,
-            `<div class="meta"><time datetime="${dateISO}">${formattedDate}</time></div>`
+            `<div class="meta">${metaContent}</div>`
           );
+          // Also replace standalone time tag if it exists
+          if (htmlContent.includes('<time') && !htmlContent.includes('<div class="meta">')) {
+            htmlContent = htmlContent.replace(
+              /<time datetime="[^"]*">[^<]*<\/time>/,
+              `<div class="meta">${metaContent}</div>`
+            );
+          }
         } else {
           // Add new meta section
-          newHeaderContent += `\n        <div class="meta">\n          <time datetime="${dateISO}">${formattedDate}</time>\n        </div>`;
+          newHeaderContent += `\n        <div class="meta">${metaContent}</div>`;
         }
       }
       
@@ -934,10 +948,11 @@ export function markdownPlugin() {
           // Parse frontmatter
           const { frontmatter, content: bodyContent } = parseFrontmatter(content);
           
-          // Extract title and date
+          // Extract title, date, and author
           let title = frontmatter?.title || extractTitle(bodyContent) || 'Blog Post';
           const date = frontmatter?.date || frontmatter?.published || null;
           const formattedDate = formatDate(date);
+          const author = frontmatter?.author || null;
           
           // Remove first h1 if it was used as title
           let markdownToRender = bodyContent;
@@ -973,23 +988,36 @@ export function markdownPlugin() {
             }
             
             // Add date/meta section
-            if (formattedDate) {
+            if (formattedDate || author) {
               const dateISO = date || new Date().toISOString().split('T')[0];
-              if (htmlContent.includes('<time')) {
-                // Replace existing time
-                htmlContent = htmlContent.replace(
-                  /<time datetime="[^"]*">[^<]*<\/time>/,
-                  `<time datetime="${dateISO}">${formattedDate}</time>`
-                );
-              } else if (htmlContent.includes('<div class="meta">')) {
+              let metaContent = '';
+              if (formattedDate) {
+                metaContent = `<time datetime="${dateISO}">${formattedDate}</time>`;
+              }
+              if (author) {
+                if (metaContent) {
+                  metaContent += ` • ${escapeHtml(author)}`;
+                } else {
+                  metaContent = escapeHtml(author);
+                }
+              }
+              
+              if (htmlContent.includes('<time') || htmlContent.includes('<div class="meta">')) {
                 // Replace existing meta content
                 htmlContent = htmlContent.replace(
                   /<div class="meta">.*?<\/div>/,
-                  `<div class="meta"><time datetime="${dateISO}">${formattedDate}</time></div>`
+                  `<div class="meta">${metaContent}</div>`
                 );
+                // Also replace standalone time tag if it exists
+                if (htmlContent.includes('<time') && !htmlContent.includes('<div class="meta">')) {
+                  htmlContent = htmlContent.replace(
+                    /<time datetime="[^"]*">[^<]*<\/time>/,
+                    `<div class="meta">${metaContent}</div>`
+                  );
+                }
               } else {
                 // Add new meta section
-                newHeaderContent += `\n        <div class="meta">\n          <time datetime="${dateISO}">${formattedDate}</time>\n        </div>`;
+                newHeaderContent += `\n        <div class="meta">${metaContent}</div>`;
               }
             }
             

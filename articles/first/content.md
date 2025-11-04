@@ -1,6 +1,7 @@
 ---
 title: First Blog
 published: 2025-01-20
+author: vee
 ---
 # First Blog
 
@@ -27,6 +28,7 @@ function greet(name) {
 ```
 
 <canvas id="canvas" style="width: 100%"></canvas>
+<canvas id="graph" style="width: 100%"></canvas>
 <script>
   const canvas = document.querySelector("canvas");
   const ctx = canvas.getContext("2d");
@@ -39,7 +41,7 @@ function greet(name) {
 Add more paragraphs, lists, and content as needed. The content will be automatically centered and constrained to a readable width.
 
 <p align="center">
-  <img src="test.png" alt="Test Image" style="object-fit: contain; width: 100%; height: 100%;"/>
+  <img src="test.png" alt="Test Image" class="image-shadow image-rounded" style="object-fit: contain; width: 100%; height: 100%;"/>
 </p>
 
 The quadratic formula is:

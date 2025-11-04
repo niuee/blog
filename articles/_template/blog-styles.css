@@ -113,11 +113,31 @@ code {
   font-size: 85%;
 }
 
+/* Inline code (single backtick) styling */
+code:not(pre code) {
+  background-color: var(--inline-code-bg);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  transition: background-color 0.3s ease;
+}
+
 pre code {
   background: transparent;
   padding: 0;
   border: none;
   display: block;
+}
+
+/* Image shadow class */
+.image-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Image rounded corners class */
+.image-rounded {
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 @media (max-width: 600px) {
