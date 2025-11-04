@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join, dirname, resolve } from 'path';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, copyFileSync, mkdirSync } from 'fs';
+import { join, dirname, resolve, extname, basename } from 'path';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import katex from 'katex';
@@ -205,9 +205,222 @@ function processMathInMarkdown(markdown) {
 }
 
 /**
+ * Find all HTML files recursively in a directory
+ */
+function findHtmlFiles(dir, files = []) {
+  try {
+    const entries = readdirSync(dir);
+    
+    for (const entry of entries) {
+      const fullPath = join(dir, entry);
+      const stat = statSync(fullPath);
+      
+      if (stat.isDirectory()) {
+        findHtmlFiles(fullPath, files);
+      } else if (entry.endsWith('.html')) {
+        files.push(fullPath);
+      }
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.warn(`Warning: Could not read directory ${dir}:`, err.message);
+    }
+  }
+  
+  return files;
+}
+
+/**
+ * Process and copy images referenced in HTML content
+ */
+function processImages(htmlContent, sourceDir, distHtmlDir, distDir) {
+  // Find all img tags with src attributes
+  const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+  const matches = [];
+  let match;
+  
+  // Collect all unique image paths
+  const processedImages = new Set();
+  
+  while ((match = imgRegex.exec(htmlContent)) !== null) {
+    const imgSrc = match[1];
+    
+    // Only process relative paths (not absolute URLs or data URIs)
+    if (!imgSrc.startsWith('http') && !imgSrc.startsWith('//') && !imgSrc.startsWith('data:') && !imgSrc.startsWith('/')) {
+      if (!processedImages.has(imgSrc)) {
+        processedImages.add(imgSrc);
+        matches.push(imgSrc);
+      }
+    }
+  }
+  
+  let processedHtml = htmlContent;
+  
+  // Process each unique image
+  for (const imgSrc of matches) {
+    const sourceImgPath = resolve(sourceDir, imgSrc);
+    const imgFileName = basename(imgSrc);
+    
+    // Check if image exists in source
+    if (existsSync(sourceImgPath)) {
+      // Ensure dist directory exists
+      const distImgDir = dirname(distHtmlDir);
+      if (!existsSync(distImgDir)) {
+        mkdirSync(distImgDir, { recursive: true });
+      }
+      
+      // Copy image to dist directory (same directory as HTML)
+      const distImgPath = join(distImgDir, imgFileName);
+      try {
+        copyFileSync(sourceImgPath, distImgPath);
+        console.log(`✓ Copied image: ${imgFileName}`);
+        
+        // Update image path in HTML to be relative to HTML file location
+        // Since HTML and images are in the same directory, just use the filename
+        const newImgSrc = imgFileName;
+        // Escape special regex characters in the source path
+        const escapedSrc = imgSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Replace all occurrences of this image path
+        processedHtml = processedHtml.replace(
+          new RegExp(`src=["']${escapedSrc}["']`, 'gi'),
+          `src="${newImgSrc}"`
+        );
+      } catch (err) {
+        console.warn(`Warning: Could not copy image ${imgSrc}:`, err.message);
+      }
+    } else {
+      console.warn(`Warning: Image not found: ${sourceImgPath}`);
+    }
+  }
+  
+  return processedHtml;
+}
+
+/**
+ * Inject markdown content into HTML files during build
+ */
+function injectMarkdownToHtml(distDir) {
+  configureMarked();
+  
+  // Find all HTML files in blog directory
+  const blogDir = resolve(process.cwd(), 'blog');
+  const htmlFiles = findHtmlFiles(blogDir);
+  
+  for (const htmlPath of htmlFiles) {
+    const htmlDir = dirname(htmlPath);
+    const mdPath = join(htmlDir, 'content.md');
+    
+    // Check if this HTML uses markdown
+    if (!existsSync(mdPath)) continue;
+    
+    // Read the dist HTML file
+    const relPath = htmlPath.replace(blogDir + '/', '');
+    const distHtmlPath = join(distDir, 'blog', relPath);
+    
+    if (!existsSync(distHtmlPath)) continue;
+    
+    let htmlContent = readFileSync(distHtmlPath, 'utf-8');
+    
+    if (!htmlContent.includes('<div id="blog-content"></div>')) {
+      continue; // Not using markdown
+    }
+    
+    // Read and parse markdown
+    const markdownContent = readFileSync(mdPath, 'utf-8');
+    const content = typeof markdownContent === 'string' ? markdownContent : String(markdownContent || '');
+    
+    // Parse frontmatter
+    const { frontmatter, content: bodyContent } = parseFrontmatter(content);
+    
+    // Extract title and date
+    let title = frontmatter?.title || extractTitle(bodyContent) || 'Blog Post';
+    const date = frontmatter?.date || frontmatter?.published || null;
+    const formattedDate = formatDate(date);
+    
+    // Remove first h1 if it was used as title
+    let markdownToRender = bodyContent;
+    if (!frontmatter?.title && extractTitle(bodyContent)) {
+      markdownToRender = removeFirstH1(bodyContent);
+    }
+    
+    // Process math equations in markdown BEFORE converting to HTML
+    markdownToRender = processMathInMarkdown(markdownToRender);
+    
+    // Convert markdown to HTML
+    const htmlFromMd = marked.parse(markdownToRender);
+    
+    // Inject title and date into header if present
+    if (htmlContent.includes('<header>')) {
+      // Check if header is empty or just has whitespace
+      const headerMatch = htmlContent.match(/<header>([\s\S]*?)<\/header>/);
+      const headerContent = headerMatch ? headerMatch[1].trim() : '';
+      
+      let newHeaderContent = '';
+      
+      // Add title (h1)
+      if (htmlContent.includes('<h1>')) {
+        // Replace existing h1
+        htmlContent = htmlContent.replace(
+          /<h1>.*?<\/h1>/,
+          `<h1>${escapeHtml(title)}</h1>`
+        );
+        newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
+      } else {
+        // Add new h1
+        newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
+      }
+      
+      // Add date/meta section
+      if (formattedDate) {
+        const dateISO = date || new Date().toISOString().split('T')[0];
+        if (htmlContent.includes('<time')) {
+          // Replace existing time
+          htmlContent = htmlContent.replace(
+            /<time datetime="[^"]*">[^<]*<\/time>/,
+            `<time datetime="${dateISO}">${formattedDate}</time>`
+          );
+        } else if (htmlContent.includes('<div class="meta">')) {
+          // Replace existing meta content
+          htmlContent = htmlContent.replace(
+            /<div class="meta">.*?<\/div>/,
+            `<div class="meta"><time datetime="${dateISO}">${formattedDate}</time></div>`
+          );
+        } else {
+          // Add new meta section
+          newHeaderContent += `\n        <div class="meta">\n          <time datetime="${dateISO}">${formattedDate}</time>\n        </div>`;
+        }
+      }
+      
+      // If header was empty, replace it with the new content
+      if (!headerContent && newHeaderContent) {
+        htmlContent = htmlContent.replace(
+          /<header>\s*<\/header>/,
+          `<header>\n        ${newHeaderContent}\n      </header>`
+        );
+      }
+    }
+    
+    // Inject into HTML
+    htmlContent = htmlContent.replace(
+      '<div id="blog-content"></div>',
+      `<div id="blog-content" class="container">${htmlFromMd}</div>`
+    );
+    
+    // Process and copy images
+    htmlContent = processImages(htmlContent, htmlDir, distHtmlPath, distDir);
+    
+    // Write back
+    writeFileSync(distHtmlPath, htmlContent, 'utf-8');
+    console.log(`✓ Injected markdown to HTML: ${relPath}`);
+  }
+}
+
+/**
  * Vite plugin that converts markdown to HTML and injects it into HTML files
  */
 export function markdownPlugin() {
+  let distDir = 'dist';
+  
   return {
     name: 'markdown-plugin',
     enforce: 'pre',
@@ -342,149 +555,13 @@ export function markdownPlugin() {
     
     generateBundle(options) {
       // Store the output directory for build
-      this.distDir = options.dir || 'dist';
+      distDir = options.dir || 'dist';
     },
     
     writeBundle() {
       // This runs after all files are written to disk
       // Convert markdown to HTML for all blog entries
-      this.injectMarkdownToHtml(this.distDir);
-    },
-    
-    injectMarkdownToHtml(distDir) {
-      configureMarked();
-      
-      // Find all HTML files in blog directory
-      const blogDir = resolve(process.cwd(), 'blog');
-      const htmlFiles = this.findHtmlFiles(blogDir);
-      
-      for (const htmlPath of htmlFiles) {
-        const htmlDir = dirname(htmlPath);
-        const mdPath = join(htmlDir, 'content.md');
-        
-        // Check if this HTML uses markdown
-        if (!existsSync(mdPath)) continue;
-        
-        // Read the dist HTML file
-        const relPath = htmlPath.replace(blogDir + '/', '');
-        const distHtmlPath = join(distDir, 'blog', relPath);
-        
-        if (!existsSync(distHtmlPath)) continue;
-        
-        let htmlContent = readFileSync(distHtmlPath, 'utf-8');
-        
-        if (!htmlContent.includes('<div id="blog-content"></div>')) {
-          continue; // Not using markdown
-        }
-        
-        // Read and parse markdown
-        const markdownContent = readFileSync(mdPath, 'utf-8');
-        const content = typeof markdownContent === 'string' ? markdownContent : String(markdownContent || '');
-        
-        // Parse frontmatter
-        const { frontmatter, content: bodyContent } = parseFrontmatter(content);
-        
-        // Extract title and date
-        let title = frontmatter?.title || extractTitle(bodyContent) || 'Blog Post';
-        const date = frontmatter?.date || frontmatter?.published || null;
-        const formattedDate = formatDate(date);
-        
-        // Remove first h1 if it was used as title
-        let markdownToRender = bodyContent;
-        if (!frontmatter?.title && extractTitle(bodyContent)) {
-          markdownToRender = removeFirstH1(bodyContent);
-        }
-        
-        // Process math equations in markdown BEFORE converting to HTML
-        markdownToRender = processMathInMarkdown(markdownToRender);
-        
-        // Convert markdown to HTML
-        const htmlFromMd = marked.parse(markdownToRender);
-        
-        // Inject title and date into header if present
-        if (htmlContent.includes('<header>')) {
-          // Check if header is empty or just has whitespace
-          const headerMatch = htmlContent.match(/<header>([\s\S]*?)<\/header>/);
-          const headerContent = headerMatch ? headerMatch[1].trim() : '';
-          
-          let newHeaderContent = '';
-          
-          // Add title (h1)
-          if (htmlContent.includes('<h1>')) {
-            // Replace existing h1
-            htmlContent = htmlContent.replace(
-              /<h1>.*?<\/h1>/,
-              `<h1>${escapeHtml(title)}</h1>`
-            );
-            newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
-          } else {
-            // Add new h1
-            newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
-          }
-          
-          // Add date/meta section
-          if (formattedDate) {
-            const dateISO = date || new Date().toISOString().split('T')[0];
-            if (htmlContent.includes('<time')) {
-              // Replace existing time
-              htmlContent = htmlContent.replace(
-                /<time datetime="[^"]*">[^<]*<\/time>/,
-                `<time datetime="${dateISO}">${formattedDate}</time>`
-              );
-            } else if (htmlContent.includes('<div class="meta">')) {
-              // Replace existing meta content
-              htmlContent = htmlContent.replace(
-                /<div class="meta">.*?<\/div>/,
-                `<div class="meta"><time datetime="${dateISO}">${formattedDate}</time></div>`
-              );
-            } else {
-              // Add new meta section
-              newHeaderContent += `\n        <div class="meta">\n          <time datetime="${dateISO}">${formattedDate}</time>\n        </div>`;
-            }
-          }
-          
-          // If header was empty, replace it with the new content
-          if (!headerContent && newHeaderContent) {
-            htmlContent = htmlContent.replace(
-              /<header>\s*<\/header>/,
-              `<header>\n        ${newHeaderContent}\n      </header>`
-            );
-          }
-        }
-        
-        // Inject into HTML
-        htmlContent = htmlContent.replace(
-          '<div id="blog-content"></div>',
-          `<div id="blog-content" class="container">${htmlFromMd}</div>`
-        );
-        
-        // Write back
-        writeFileSync(distHtmlPath, htmlContent, 'utf-8');
-        console.log(`✓ Injected markdown to HTML: ${relPath}`);
-      }
-    },
-    
-    findHtmlFiles(dir, files = []) {
-      try {
-        const entries = readdirSync(dir);
-        
-        for (const entry of entries) {
-          const fullPath = join(dir, entry);
-          const stat = statSync(fullPath);
-          
-          if (stat.isDirectory()) {
-            this.findHtmlFiles(fullPath, files);
-          } else if (entry.endsWith('.html')) {
-            files.push(fullPath);
-          }
-        }
-      } catch (err) {
-        if (err.code !== 'ENOENT') {
-          console.warn(`Warning: Could not read directory ${dir}:`, err.message);
-        }
-      }
-      
-      return files;
+      injectMarkdownToHtml(distDir);
     }
   };
 }
