@@ -9,6 +9,10 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/highlight.js": "^9.12.4",
+    "@types/katex": "^0.16.7",
+    "@types/marked": "^5.0.2",
     "glob": "^11.0.3",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.25",

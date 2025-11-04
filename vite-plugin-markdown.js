@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, copyFileSync, mkdirSync } from 'fs';
-import { join, dirname, resolve, extname, basename } from 'path';
+import { join, dirname, resolve, extname, basename, relative } from 'path';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import katex from 'katex';
@@ -362,9 +362,18 @@ function processImages(htmlContent, sourceDir, distHtmlDir, distDir) {
         copyFileSync(sourceImgPath, distImgPath);
         console.log(`✓ Copied image: ${imgFileName}`);
         
-        // Update image path in HTML to be relative to HTML file location
-        // Since HTML and images are in the same directory, just use the filename
-        const newImgSrc = imgFileName;
+        // Update image path in HTML to be absolute from root (for Vercel compatibility)
+        // Calculate the path relative to dist directory root
+        const distHtmlDirRelative = relative(distDir, dirname(distHtmlDir));
+        // Convert to absolute path starting with / (e.g., /blog/first/test.png)
+        // Handle case where HTML is at dist root (relative path is empty or '.')
+        let absoluteImgPath;
+        if (!distHtmlDirRelative || distHtmlDirRelative === '.' || distHtmlDirRelative === './') {
+          absoluteImgPath = `/${imgFileName}`;
+        } else {
+          absoluteImgPath = join('/', distHtmlDirRelative, imgFileName).replace(/\\/g, '/');
+        }
+        const newImgSrc = absoluteImgPath;
         // Escape special regex characters in the source path
         const escapedSrc = imgSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         // Replace all occurrences of this image path
