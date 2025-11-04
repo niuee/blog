@@ -38,7 +38,9 @@ function greet(name) {
 
 Add more paragraphs, lists, and content as needed. The content will be automatically centered and constrained to a readable width.
 
-![Test Image](test.png)
+<p align="center">
+  <img src="test.png" alt="Test Image" style="object-fit: contain; width: 100%; height: 100%;"/>
+</p>
 
 The quadratic formula is:
 

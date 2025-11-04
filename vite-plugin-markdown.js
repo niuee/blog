@@ -575,6 +575,27 @@ export function markdownPlugin() {
       const blogDir = resolve(process.cwd(), 'blog');
       const templateHTMLPath = join(blogDir, '_template', 'index.html');
       const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
+      const publicFaviconPath = resolve(process.cwd(), 'public', 'favicon.ico');
+      
+      // Serve favicon
+      server.middlewares.use((req, res, next) => {
+        if (req.url === '/favicon.ico') {
+          if (existsSync(publicFaviconPath)) {
+            try {
+              const faviconContent = readFileSync(publicFaviconPath);
+              res.setHeader('Content-Type', 'image/x-icon');
+              res.setHeader('Content-Length', faviconContent.length);
+              res.end(faviconContent);
+              return;
+            } catch (err) {
+              console.warn(`Warning: Could not serve favicon:`, err.message);
+            }
+          }
+          next();
+        } else {
+          next();
+        }
+      });
       
       // Serve shared CSS
       server.middlewares.use((req, res, next) => {
