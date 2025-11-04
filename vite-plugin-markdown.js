@@ -216,7 +216,10 @@ function findHtmlFiles(dir, files = []) {
       const stat = statSync(fullPath);
       
       if (stat.isDirectory()) {
-        findHtmlFiles(fullPath, files);
+        // Skip template directory
+        if (entry !== '_template') {
+          findHtmlFiles(fullPath, files);
+        }
       } else if (entry.endsWith('.html')) {
         files.push(fullPath);
       }
@@ -228,6 +231,40 @@ function findHtmlFiles(dir, files = []) {
   }
   
   return files;
+}
+
+/**
+ * Find all blog post directories that contain content.md
+ */
+function findBlogPosts(blogDir) {
+  const posts = [];
+  
+  try {
+    const entries = readdirSync(blogDir);
+    
+    for (const entry of entries) {
+      const fullPath = join(blogDir, entry);
+      const stat = statSync(fullPath);
+      
+      if (stat.isDirectory() && entry !== '_template') {
+        const mdPath = join(fullPath, 'content.md');
+        if (existsSync(mdPath)) {
+          posts.push({
+            dir: fullPath,
+            name: entry,
+            htmlPath: join(fullPath, 'index.html'),
+            mdPath: mdPath
+          });
+        }
+      }
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.warn(`Warning: Could not read directory ${blogDir}:`, err.message);
+    }
+  }
+  
+  return posts;
 }
 
 /**
@@ -297,29 +334,88 @@ function processImages(htmlContent, sourceDir, distHtmlDir, distDir) {
 }
 
 /**
+ * Copy shared CSS to dist
+ */
+function copySharedCSS(distDir) {
+  const blogDir = resolve(process.cwd(), 'blog');
+  const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
+  const distCSSPath = join(distDir, 'blog-styles.css');
+  
+  if (existsSync(templateCSSPath)) {
+    try {
+      copyFileSync(templateCSSPath, distCSSPath);
+      console.log(`✓ Copied shared CSS to dist`);
+    } catch (err) {
+      console.warn(`Warning: Could not copy shared CSS:`, err.message);
+    }
+  }
+}
+
+/**
  * Inject markdown content into HTML files during build
  */
 function injectMarkdownToHtml(distDir) {
   configureMarked();
   
-  // Find all HTML files in blog directory
-  const blogDir = resolve(process.cwd(), 'blog');
-  const htmlFiles = findHtmlFiles(blogDir);
+  // Copy shared CSS first
+  copySharedCSS(distDir);
   
-  for (const htmlPath of htmlFiles) {
-    const htmlDir = dirname(htmlPath);
-    const mdPath = join(htmlDir, 'content.md');
+  // Find all blog posts (directories with content.md)
+  const blogDir = resolve(process.cwd(), 'blog');
+  const blogPosts = findBlogPosts(blogDir);
+  const templateHTMLPath = join(blogDir, '_template', 'index.html');
+  
+  for (const post of blogPosts) {
+    const { dir, name, htmlPath, mdPath } = post;
     
-    // Check if this HTML uses markdown
-    if (!existsSync(mdPath)) continue;
+    // Check if HTML exists, if not use template
+    let htmlContent;
+    let sourceHtmlPath;
+    let distHtmlPath;
     
-    // Read the dist HTML file
-    const relPath = htmlPath.replace(blogDir + '/', '');
-    const distHtmlPath = join(distDir, 'blog', relPath);
-    
-    if (!existsSync(distHtmlPath)) continue;
-    
-    let htmlContent = readFileSync(distHtmlPath, 'utf-8');
+    if (existsSync(htmlPath)) {
+      // Use existing HTML file
+      sourceHtmlPath = htmlPath;
+      // Read the dist HTML file (Vite should have copied it)
+      const relPath = htmlPath.replace(blogDir + '/', '');
+      distHtmlPath = join(distDir, 'blog', relPath);
+      
+      if (!existsSync(distHtmlPath)) {
+        // If dist HTML doesn't exist, copy source HTML
+        const distHtmlDir = dirname(distHtmlPath);
+        if (!existsSync(distHtmlDir)) {
+          mkdirSync(distHtmlDir, { recursive: true });
+        }
+        copyFileSync(htmlPath, distHtmlPath);
+      }
+      htmlContent = readFileSync(distHtmlPath, 'utf-8');
+    } else if (existsSync(templateHTMLPath)) {
+      // Use template HTML
+      sourceHtmlPath = templateHTMLPath;
+      htmlContent = readFileSync(templateHTMLPath, 'utf-8');
+      
+      // Create dist HTML file from template
+      // Based on vite config, it should be at dist/blog/{name}/index.html or dist/blog/{name}.html
+      // Check both possible locations
+      const distHtmlPath1 = join(distDir, 'blog', name, 'index.html');
+      const distHtmlPath2 = join(distDir, 'blog', `${name}.html`);
+      
+      if (existsSync(distHtmlPath1)) {
+        distHtmlPath = distHtmlPath1;
+      } else if (existsSync(distHtmlPath2)) {
+        distHtmlPath = distHtmlPath2;
+      } else {
+        // Create the file
+        distHtmlPath = join(distDir, 'blog', `${name}.html`);
+        const distHtmlDir = dirname(distHtmlPath);
+        if (!existsSync(distHtmlDir)) {
+          mkdirSync(distHtmlDir, { recursive: true });
+        }
+      }
+    } else {
+      console.warn(`Warning: No HTML template found for blog post: ${name}`);
+      continue;
+    }
     
     if (!htmlContent.includes('<div id="blog-content"></div>')) {
       continue; // Not using markdown
@@ -407,11 +503,11 @@ function injectMarkdownToHtml(distDir) {
     );
     
     // Process and copy images
-    htmlContent = processImages(htmlContent, htmlDir, distHtmlPath, distDir);
+    htmlContent = processImages(htmlContent, dir, distHtmlPath, distDir);
     
     // Write back
     writeFileSync(distHtmlPath, htmlContent, 'utf-8');
-    console.log(`✓ Injected markdown to HTML: ${relPath}`);
+    console.log(`✓ Injected markdown to HTML: ${name}`);
   }
 }
 
@@ -426,6 +522,25 @@ export function markdownPlugin() {
     enforce: 'pre',
     
     configureServer(server) {
+      const blogDir = resolve(process.cwd(), 'blog');
+      const templateHTMLPath = join(blogDir, '_template', 'index.html');
+      const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
+      
+      // Serve shared CSS
+      server.middlewares.use((req, res, next) => {
+        if (req.url === '/blog-styles.css') {
+          if (existsSync(templateCSSPath)) {
+            const cssContent = readFileSync(templateCSSPath, 'utf-8');
+            res.setHeader('Content-Type', 'text/css; charset=utf-8');
+            res.end(cssContent);
+          } else {
+            next();
+          }
+        } else {
+          next();
+        }
+      });
+      
       // Handle markdown files in dev mode
       server.middlewares.use(async (req, res, next) => {
         // Only handle HTML files from blog directory
@@ -435,11 +550,55 @@ export function markdownPlugin() {
         
         try {
           // Resolve the HTML file path
-          const htmlPath = req.url.replace(/^\//, '');
-          const resolvedPath = resolve(process.cwd(), htmlPath);
+          let htmlPath = req.url.replace(/^\//, '');
+          let resolvedPath = resolve(process.cwd(), htmlPath);
           
-          // Check if HTML file exists
-          if (!existsSync(resolvedPath)) {
+          // Check if path is a directory, if so look for index.html
+          const pathStat = existsSync(resolvedPath) ? statSync(resolvedPath) : null;
+          if (pathStat && pathStat.isDirectory()) {
+            const indexPath = join(resolvedPath, 'index.html');
+            if (existsSync(indexPath)) {
+              resolvedPath = indexPath;
+            } else {
+              // Directory exists but no index.html, try to use template
+              const blogMatch = req.url.match(/\/blog\/([^/]+)/);
+              if (blogMatch) {
+                const postName = blogMatch[1];
+                const postDir = join(blogDir, postName);
+                const mdPath = join(postDir, 'content.md');
+                
+                // If markdown exists, use template
+                if (existsSync(mdPath) && existsSync(templateHTMLPath)) {
+                  resolvedPath = templateHTMLPath;
+                } else {
+                  return next();
+                }
+              } else {
+                return next();
+              }
+            }
+          } else if (!existsSync(resolvedPath)) {
+            // File doesn't exist, try to use template
+            const blogMatch = req.url.match(/\/blog\/([^/]+)/);
+            if (blogMatch) {
+              const postName = blogMatch[1];
+              const postDir = join(blogDir, postName);
+              const mdPath = join(postDir, 'content.md');
+              
+              // If markdown exists but HTML doesn't, use template
+              if (existsSync(mdPath) && existsSync(templateHTMLPath)) {
+                resolvedPath = templateHTMLPath;
+              } else {
+                return next();
+              }
+            } else {
+              return next();
+            }
+          }
+          
+          // Double-check that resolvedPath is a file, not a directory
+          const finalStat = existsSync(resolvedPath) ? statSync(resolvedPath) : null;
+          if (!finalStat || finalStat.isDirectory()) {
             return next();
           }
           
@@ -452,7 +611,14 @@ export function markdownPlugin() {
           }
           
           // Find the markdown file
-          const htmlDir = dirname(resolvedPath);
+          let htmlDir = dirname(resolvedPath);
+          // If using template, find the actual blog post directory
+          if (resolvedPath === templateHTMLPath) {
+            const blogMatch = req.url.match(/\/blog\/([^/]+)/);
+            if (blogMatch) {
+              htmlDir = join(blogDir, blogMatch[1]);
+            }
+          }
           const mdPath = join(htmlDir, 'content.md');
           
           if (!existsSync(mdPath)) {

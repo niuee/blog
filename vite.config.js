@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import { resolve, join, relative } from 'path'
 import { fileURLToPath } from 'url'
-import { readdirSync, statSync } from 'fs'
+import { readdirSync, statSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { markdownPlugin } from './vite-plugin-markdown.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -16,7 +16,10 @@ function findHtmlFiles(dir, baseDir = dir, files = {}) {
       const stat = statSync(fullPath)
       
       if (stat.isDirectory()) {
-        findHtmlFiles(fullPath, baseDir, files)
+        // Skip template directory
+        if (entry !== '_template') {
+          findHtmlFiles(fullPath, baseDir, files)
+        }
       } else if (entry.endsWith('.html')) {
         // Get relative path from baseDir
         const relativePath = relative(baseDir, fullPath).replace(/\.html$/, '')
@@ -45,8 +48,48 @@ function findHtmlFiles(dir, baseDir = dir, files = {}) {
   return files
 }
 
+// Find blog posts and generate HTML from template if needed
+function findBlogPostsAndGenerateHTML(blogDir, templateHTMLPath) {
+  const posts = []
+  
+  try {
+    const entries = readdirSync(blogDir)
+    
+    for (const entry of entries) {
+      const fullPath = join(blogDir, entry)
+      const stat = statSync(fullPath)
+      
+      if (stat.isDirectory() && entry !== '_template') {
+        const mdPath = join(fullPath, 'content.md')
+        const htmlPath = join(fullPath, 'index.html')
+        
+        if (existsSync(mdPath)) {
+          // If HTML doesn't exist, generate from template
+          if (!existsSync(htmlPath) && existsSync(templateHTMLPath)) {
+            const htmlContent = readFileSync(templateHTMLPath, 'utf-8')
+            writeFileSync(htmlPath, htmlContent, 'utf-8')
+            console.log(`✓ Generated HTML from template: ${entry}/index.html`)
+          }
+          posts.push({ dir: fullPath, name: entry })
+        }
+      }
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.warn(`Warning: Could not read directory ${blogDir}:`, err.message)
+    }
+  }
+  
+  return posts
+}
+
 // Automatically discover HTML files in entries directory
 const blogEntriesDir = resolve(__dirname, 'blog')
+const templateHTMLPath = join(blogEntriesDir, '_template', 'index.html')
+
+// Generate HTML files for blog posts that only have content.md
+findBlogPostsAndGenerateHTML(blogEntriesDir, templateHTMLPath)
+
 const blogEntries = findHtmlFiles(blogEntriesDir)
 
 // https://vite.dev/config/
