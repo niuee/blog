@@ -1,51 +1,96 @@
 ---
-title: First Blog
-published: 2025-01-20
+title: First Post
+published: 2025-11-04
 author: vee
 ---
-# First Blog
 
-## Why?
+# First Post
 
-To answer the how, I first want to preface with why. If you have worked with the HTML canvas element, you'll know that its no more than an image. You can draw a lot of cool stuff with it, but in it's vanilla state, there's no way for the user to interact with it. You can't pan, zoom, or rotate. What's drawn is static. Let's look at the example from the [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/canvas) for the canvas element.
+This is the first post! Just to test out the system. 
 
-`test`.
+# Headers
+
+# Header 1
+
+## Header 2
+
+### Header 3
+
+#### Header 4
+
+##### Header 5
+
+###### Header 6
+
+# Lists
+
+1. Ordered Item 1
+2. Ordered Item 2
+
+- Unordered Item 1
+- Unordered Item 2
+- Unordered Item 3
+
+# Code
+
+With proper syntax highlighting:
 
 ```html
-<canvas id="canvas" width="200" height="200"></canvas>
-<script>
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = 'green';
-  ctx.fillRect(10, 10, 100, 100);
-</script>
+<h1>Hello, World!</h1>
 ```
 
-```typescript
-function greet(name) {
-  return "Hello, " + name;
+```css
+body {
+  background-color: red;
 }
 ```
 
-<canvas id="canvas" style="width: 100%"></canvas>
-<canvas id="graph" style="width: 100%"></canvas>
-<script>
-  const canvas = document.querySelector("canvas");
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "green";
-  ctx.fillRect(10, 10, 100, 100);
-</script>
+```typescript
+const a = 1;
+const b = 2;
+const c = a + b;
+console.log(c);
+```
 
-## Subheading
+# Images
 
-Add more paragraphs, lists, and content as needed. The content will be automatically centered and constrained to a readable width.
+<img src="test.png" alt="Test Image" class="image-shadow image-rounded" style="object-fit: contain; width: 100%; height: 100%;"/>
 
-<p align="center">
-  <img src="test.png" alt="Test Image" class="image-shadow image-rounded" style="object-fit: contain; width: 100%; height: 100%;"/>
-</p>
+# Links
 
-The quadratic formula is:
+[Google](https://www.google.com)
+
+# Tables
+
+| Name | Age | City |
+|------|-----|------|
+| John | 25  | New York |
+| Jane | 30  | Los Angeles |
+| Jim  | 35  | Chicago |
+
+# Blockquotes
+
+> Live, Love, Learn
+
+# Inline Code
+
+You are about to see an inline code example: `const a = 1;`.
+
+# Bold
+
+**Bold Text**
+
+# Italic
+
+_Italic Text_
+
+# Math
+
+## Inline Math
+$\int_0^\infty x^2 dx$
+
+## Block Math
 
 $$
-x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}
+\int_0^\infty x^2 dx
 $$

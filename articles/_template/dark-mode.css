@@ -12,6 +12,12 @@
   --code-label-color: #666;
   --code-label-bg: rgba(255, 255, 255, 0.9);
   --inline-code-bg: #f5f5f5;
+  --table-header-bg: #f5f5f5;
+  --table-border-color: rgba(0, 0, 0, 0.1);
+  --table-row-hover-bg: #f9f9f9;
+  --blockquote-border-color: #999;
+  --blockquote-bg: #f5f5f5;
+  --blockquote-text-color: #333;
   --toggle-button-bg: #f9f9f9;
   --toggle-button-border: #646cff;
   --switch-plate-bg: #ffffff;
@@ -33,6 +39,12 @@ html:has(#dark-mode-toggle:checked) {
   --code-label-color: #ccc;
   --code-label-bg: rgba(26, 26, 26, 0.9);
   --inline-code-bg: #4a4a4a;
+  --table-header-bg: #2a2a2a;
+  --table-border-color: rgba(255, 255, 255, 0.1);
+  --table-row-hover-bg: #2a2a2a;
+  --blockquote-border-color: #666;
+  --blockquote-bg: #2a2a2a;
+  --blockquote-text-color: #e0e0e0;
   --toggle-button-bg: #2a2a2a;
   --toggle-button-border: #4a9eff;
   --switch-plate-bg: #f5f5f5;

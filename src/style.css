@@ -313,7 +313,7 @@ button:focus-visible {
 
 /* When checked, move toggle down (flip switch down) */
 html:has(#dark-mode-toggle:checked) .switch-toggle {
-  top: 1.8rem;
+  top: 1.85rem;
 }
 
 /* Responsive styles for toggle switch */
@@ -337,7 +337,7 @@ html:has(#dark-mode-toggle:checked) .switch-toggle {
   }
 
   html:has(#dark-mode-toggle:checked) .switch-toggle {
-    top: 1.55rem;
+    top: 1.85rem;
   }
 }
 

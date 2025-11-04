@@ -631,9 +631,9 @@ function injectMarkdownToHtml(distDir) {
     const formattedDate = formatDate(date);
     const author = frontmatter?.author || null;
     
-    // Remove first h1 if it was used as title
+    // Remove first h1 if there's a title (from frontmatter or extracted)
     let markdownToRender = bodyContent;
-    if (!frontmatter?.title && extractTitle(bodyContent)) {
+    if (title && extractTitle(bodyContent)) {
       markdownToRender = removeFirstH1(bodyContent);
     }
     
@@ -710,7 +710,7 @@ function injectMarkdownToHtml(distDir) {
     // Inject into HTML
     htmlContent = htmlContent.replace(
       '<div id="blog-content"></div>',
-      `<div id="blog-content" class="container">${htmlFromMd}</div>`
+      `<div id="blog-content"><article>${htmlFromMd}</article></div>`
     );
     
     // Process and copy images
@@ -954,9 +954,9 @@ export function markdownPlugin() {
           const formattedDate = formatDate(date);
           const author = frontmatter?.author || null;
           
-          // Remove first h1 if it was used as title
+          // Remove first h1 if there's a title (from frontmatter or extracted)
           let markdownToRender = bodyContent;
-          if (!frontmatter?.title && extractTitle(bodyContent)) {
+          if (title && extractTitle(bodyContent)) {
             markdownToRender = removeFirstH1(bodyContent);
           }
           
@@ -1033,7 +1033,7 @@ export function markdownPlugin() {
           // Inject into HTML
           htmlContent = htmlContent.replace(
             '<div id="blog-content"></div>',
-            `<div id="blog-content" class="container">${htmlFromMd}</div>`
+            `<div id="blog-content"><article>${htmlFromMd}</article></div>`
           );
           
           // Process images for dev mode (update paths to absolute)
