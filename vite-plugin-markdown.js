@@ -268,6 +268,56 @@ function findBlogPosts(blogDir) {
 }
 
 /**
+ * Process image paths in HTML content for dev mode
+ * Updates relative image paths to absolute paths based on blog post location
+ */
+function processImagesForDev(htmlContent, blogPostDir, blogPostName) {
+  // Find all img tags with src attributes
+  const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+  const matches = [];
+  let match;
+  
+  // Collect all unique image paths
+  const processedImages = new Set();
+  
+  while ((match = imgRegex.exec(htmlContent)) !== null) {
+    const imgSrc = match[1];
+    
+    // Only process relative paths (not absolute URLs or data URIs)
+    if (!imgSrc.startsWith('http') && !imgSrc.startsWith('//') && !imgSrc.startsWith('data:') && !imgSrc.startsWith('/')) {
+      if (!processedImages.has(imgSrc)) {
+        processedImages.add(imgSrc);
+        matches.push(imgSrc);
+      }
+    }
+  }
+  
+  let processedHtml = htmlContent;
+  
+  // Process each unique image
+  for (const imgSrc of matches) {
+    const sourceImgPath = resolve(blogPostDir, imgSrc);
+    
+    // Check if image exists in source
+    if (existsSync(sourceImgPath)) {
+      // Update image path to be absolute from root (e.g., /blog/first/test.png)
+      const newImgSrc = `/blog/${blogPostName}/${imgSrc}`;
+      // Escape special regex characters in the source path
+      const escapedSrc = imgSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Replace all occurrences of this image path
+      processedHtml = processedHtml.replace(
+        new RegExp(`src=["']${escapedSrc}["']`, 'gi'),
+        `src="${newImgSrc}"`
+      );
+    } else {
+      console.warn(`Warning: Image not found: ${sourceImgPath}`);
+    }
+  }
+  
+  return processedHtml;
+}
+
+/**
  * Process and copy images referenced in HTML content
  */
 function processImages(htmlContent, sourceDir, distHtmlDir, distDir) {
@@ -541,6 +591,49 @@ export function markdownPlugin() {
         }
       });
       
+      // Serve images from blog post directories
+      server.middlewares.use((req, res, next) => {
+        // Check if this is a request for an image in a blog post directory
+        // Pattern: /blog/{postName}/{imageName}
+        const blogImageMatch = req.url?.match(/^\/blog\/([^/]+)\/(.+)$/);
+        if (blogImageMatch) {
+          const postName = blogImageMatch[1];
+          const imageName = blogImageMatch[2];
+          const imagePath = join(blogDir, postName, imageName);
+          
+          // Check if it's an image file (common extensions)
+          const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp', '.ico'];
+          const isImage = imageExtensions.some(ext => imageName.toLowerCase().endsWith(ext));
+          
+          if (isImage && existsSync(imagePath)) {
+            try {
+              const imageContent = readFileSync(imagePath);
+              // Determine content type based on extension
+              const ext = imageName.toLowerCase().split('.').pop();
+              const contentTypeMap = {
+                'png': 'image/png',
+                'jpg': 'image/jpeg',
+                'jpeg': 'image/jpeg',
+                'gif': 'image/gif',
+                'svg': 'image/svg+xml',
+                'webp': 'image/webp',
+                'bmp': 'image/bmp',
+                'ico': 'image/x-icon'
+              };
+              const contentType = contentTypeMap[ext] || 'application/octet-stream';
+              
+              res.setHeader('Content-Type', contentType);
+              res.setHeader('Content-Length', imageContent.length);
+              res.end(imageContent);
+              return;
+            } catch (err) {
+              console.warn(`Warning: Could not serve image ${req.url}:`, err.message);
+            }
+          }
+        }
+        next();
+      });
+      
       // Handle markdown files in dev mode
       server.middlewares.use(async (req, res, next) => {
         // Only handle HTML files from blog directory
@@ -612,11 +705,19 @@ export function markdownPlugin() {
           
           // Find the markdown file
           let htmlDir = dirname(resolvedPath);
+          let blogPostName = null;
           // If using template, find the actual blog post directory
           if (resolvedPath === templateHTMLPath) {
             const blogMatch = req.url.match(/\/blog\/([^/]+)/);
             if (blogMatch) {
-              htmlDir = join(blogDir, blogMatch[1]);
+              blogPostName = blogMatch[1];
+              htmlDir = join(blogDir, blogPostName);
+            }
+          } else {
+            // Extract blog post name from directory path
+            const blogMatch = htmlDir.match(/blog[\/\\]([^\/\\]+)$/);
+            if (blogMatch) {
+              blogPostName = blogMatch[1];
             }
           }
           const mdPath = join(htmlDir, 'content.md');
@@ -706,6 +807,11 @@ export function markdownPlugin() {
             '<div id="blog-content"></div>',
             `<div id="blog-content" class="container">${htmlFromMd}</div>`
           );
+          
+          // Process images for dev mode (update paths to absolute)
+          if (blogPostName) {
+            htmlContent = processImagesForDev(htmlContent, htmlDir, blogPostName);
+          }
           
           // Send the modified HTML
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
