@@ -51,7 +51,10 @@ function configureMarked() {
       highlighted = escapeHtml(codeStr);
     }
     
-    return `<pre><code${langClass}>${highlighted}</code></pre>`;
+    // Add language label if language is specified
+    const langLabel = language ? `<span class="code-language-label">${escapeHtml(language)}</span>` : '';
+    
+    return `<pre>${langLabel}<code${langClass}>${highlighted}</code></pre>`;
   };
   
   // Configure marked with the extended renderer
