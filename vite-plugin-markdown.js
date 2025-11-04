@@ -268,6 +268,56 @@ function findBlogPosts(blogDir) {
 }
 
 /**
+ * Process TypeScript script tags in HTML content for dev mode
+ * Updates relative script paths to absolute paths based on blog post location
+ */
+function processTypeScriptForDev(htmlContent, blogPostDir, blogPostName) {
+  // Find all script tags with src attributes pointing to .ts files
+  const scriptRegex = /<script([^>]*)src=["']([^"']+\.ts)["']([^>]*)>/gi;
+  let processedHtml = htmlContent;
+  let match;
+  
+  while ((match = scriptRegex.exec(htmlContent)) !== null) {
+    const fullMatch = match[0];
+    const beforeSrc = match[1];
+    const scriptSrc = match[2];
+    const afterSrc = match[3];
+    
+    // Only process relative paths (not absolute URLs or absolute paths)
+    if (!scriptSrc.startsWith('http') && !scriptSrc.startsWith('//') && !scriptSrc.startsWith('/')) {
+      const sourceTsPath = resolve(blogPostDir, scriptSrc);
+      
+      // Check if TypeScript file exists
+      if (existsSync(sourceTsPath)) {
+        // Update script path to be absolute from root (e.g., /articles/first/test.ts)
+        const newScriptSrc = `/articles/${blogPostName}/${scriptSrc}`;
+        
+        // Ensure script tag has type="module"
+        let newAttributes = beforeSrc + afterSrc;
+        if (!newAttributes.includes('type=')) {
+          newAttributes = ` type="module"${newAttributes}`;
+        } else if (!newAttributes.includes('type="module"') && !newAttributes.includes("type='module'")) {
+          // Replace existing type attribute with module
+          newAttributes = newAttributes.replace(/type=["'][^"']*["']/i, 'type="module"');
+        }
+        
+        // Escape special regex characters in the source path
+        const escapedSrc = scriptSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Replace the script tag
+        processedHtml = processedHtml.replace(
+          new RegExp(`<script([^>]*)src=["']${escapedSrc}["']([^>]*)>`, 'gi'),
+          `<script${newAttributes}src="${newScriptSrc}">`
+        );
+      } else {
+        console.warn(`Warning: TypeScript file not found: ${sourceTsPath}`);
+      }
+    }
+  }
+  
+  return processedHtml;
+}
+
+/**
  * Process image paths in HTML content for dev mode
  * Updates relative image paths to absolute paths based on blog post location
  */
@@ -311,6 +361,83 @@ function processImagesForDev(htmlContent, blogPostDir, blogPostName) {
       );
     } else {
       console.warn(`Warning: Image not found: ${sourceImgPath}`);
+    }
+  }
+  
+  return processedHtml;
+}
+
+/**
+ * Process and copy TypeScript files referenced in HTML content
+ */
+function processTypeScript(htmlContent, sourceDir, distHtmlDir, distDir) {
+  // Find all script tags with src attributes pointing to .ts files
+  const scriptRegex = /<script([^>]*)src=["']([^"']+\.ts)["']([^>]*)>/gi;
+  let processedHtml = htmlContent;
+  let match;
+  const processedScripts = new Set();
+  
+  while ((match = scriptRegex.exec(htmlContent)) !== null) {
+    const beforeSrc = match[1];
+    const scriptSrc = match[2];
+    const afterSrc = match[3];
+    
+    // Only process relative paths (not absolute URLs or absolute paths)
+    if (!scriptSrc.startsWith('http') && !scriptSrc.startsWith('//') && !scriptSrc.startsWith('/')) {
+      if (!processedScripts.has(scriptSrc)) {
+        processedScripts.add(scriptSrc);
+        
+        const sourceTsPath = resolve(sourceDir, scriptSrc);
+        const tsFileName = basename(scriptSrc);
+        
+        // Check if TypeScript file exists
+        if (existsSync(sourceTsPath)) {
+          // Ensure dist directory exists
+          const distTsDir = dirname(distHtmlDir);
+          if (!existsSync(distTsDir)) {
+            mkdirSync(distTsDir, { recursive: true });
+          }
+          
+          // Copy TypeScript file to dist directory (same directory as HTML)
+          // Note: Vite will process this during build, but we copy it for reference
+          const distTsPath = join(distTsDir, tsFileName);
+          try {
+            copyFileSync(sourceTsPath, distTsPath);
+            console.log(`✓ Copied TypeScript file: ${tsFileName}`);
+            
+            // Update script path in HTML to be absolute from root
+            const distHtmlDirRelative = relative(distDir, dirname(distHtmlDir));
+            let absoluteTsPath;
+            if (!distHtmlDirRelative || distHtmlDirRelative === '.' || distHtmlDirRelative === './') {
+              absoluteTsPath = `/${tsFileName}`;
+            } else {
+              absoluteTsPath = join('/', distHtmlDirRelative, tsFileName).replace(/\\/g, '/');
+            }
+            const newScriptSrc = absoluteTsPath;
+            
+            // Ensure script tag has type="module"
+            let newAttributes = beforeSrc + afterSrc;
+            if (!newAttributes.includes('type=')) {
+              newAttributes = ` type="module"${newAttributes}`;
+            } else if (!newAttributes.includes('type="module"') && !newAttributes.includes("type='module'")) {
+              // Replace existing type attribute with module
+              newAttributes = newAttributes.replace(/type=["'][^"']*["']/i, 'type="module"');
+            }
+            
+            // Escape special regex characters in the source path
+            const escapedSrc = scriptSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // Replace all occurrences of this script path
+            processedHtml = processedHtml.replace(
+              new RegExp(`<script([^>]*)src=["']${escapedSrc}["']([^>]*)>`, 'gi'),
+              `<script${newAttributes}src="${newScriptSrc}">`
+            );
+          } catch (err) {
+            console.warn(`Warning: Could not copy TypeScript file ${scriptSrc}:`, err.message);
+          }
+        } else {
+          console.warn(`Warning: TypeScript file not found: ${sourceTsPath}`);
+        }
+      }
     }
   }
   
@@ -575,6 +702,9 @@ function injectMarkdownToHtml(distDir) {
     // Process and copy images
     htmlContent = processImages(htmlContent, dir, distHtmlPath, distDir);
     
+    // Process and copy TypeScript files
+    htmlContent = processTypeScript(htmlContent, dir, distHtmlPath, distDir);
+    
     // Write back
     writeFileSync(distHtmlPath, htmlContent, 'utf-8');
     console.log(`✓ Injected markdown to HTML: ${name}`);
@@ -679,6 +809,26 @@ export function markdownPlugin() {
             } catch (err) {
               console.warn(`Warning: Could not serve image ${req.url}:`, err.message);
             }
+          }
+        }
+        next();
+      });
+      
+      // Serve TypeScript files from blog post directories (Vite will process them)
+      // This middleware ensures TypeScript files are accessible before Vite processes them
+      server.middlewares.use((req, res, next) => {
+        // Check if this is a request for a TypeScript file in a blog post directory
+        // Pattern: /articles/{postName}/{fileName}.ts
+        const blogTsMatch = req.url?.match(/^\/articles\/([^/]+)\/(.+\.ts)$/);
+        if (blogTsMatch) {
+          const postName = blogTsMatch[1];
+          const fileName = blogTsMatch[2];
+          const tsPath = join(blogDir, postName, fileName);
+          
+          if (existsSync(tsPath)) {
+            // Let Vite handle the TypeScript transformation
+            // Just pass through - Vite's plugin system will process it
+            return next();
           }
         }
         next();
@@ -861,6 +1011,8 @@ export function markdownPlugin() {
           // Process images for dev mode (update paths to absolute)
           if (blogPostName) {
             htmlContent = processImagesForDev(htmlContent, htmlDir, blogPostName);
+            // Process TypeScript files for dev mode (update paths to absolute and add type="module")
+            htmlContent = processTypeScriptForDev(htmlContent, htmlDir, blogPostName);
           }
           
           // Send the modified HTML
