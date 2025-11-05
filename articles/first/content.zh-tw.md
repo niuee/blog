@@ -6,37 +6,37 @@ author: vee
 
 # First Post
 
-This is the first post! Just to test out the system. 
+這是這個部落格的第一篇文章，只是要測試看看現在的架構是不是可行的！
 
-# Headers
+# 標題
 
-# Header 1
+# 大大標題
 
-## Header 2
+## 大標題
 
-### Header 3
+### 中標題
 
-#### Header 4
+#### 普通標題
 
-##### Header 5
+##### 小標題
 
-###### Header 6
+###### 小小標題
 
-# Lists
+# 列表
 
-1. Ordered Item 1
-2. Ordered Item 2
+1. 有序項目 1
+2. 有序項目 ２
 
-- Unordered Item 1
-- Unordered Item 2
-- Unordered Item 3
+- 無序項目 1
+- 無序項目 2
+- 無序項目 3
 
-# Code
+# 程式碼
 
-With proper syntax highlighting:
+會根據不同語言上色：
 
 ```html
-<h1>Hello, World!</h1>
+<h1>你好，世界！</h1>
 ```
 
 ```css
@@ -52,17 +52,17 @@ const c = a + b;
 console.log(c);
 ```
 
-# Images
+# 圖片
 
 <img src="test.png" alt="Test Image" class="image-shadow image-rounded" style="object-fit: contain; width: 100%; height: 100%;"/>
 
-# Links
+# 連結
 
 [Google](https://www.google.com)
 
-This is a link that opens a new tab to <a target="_blank" href="https://www.google.com">Google</a>.
+這是一個會在新分頁開啟的 <a target="_blank" href="https://www.google.com">Google</a> 連結。
 
-# Tables
+# 表格
 
 | Name | Age | City |
 |------|-----|------|
@@ -70,28 +70,28 @@ This is a link that opens a new tab to <a target="_blank" href="https://www.goog
 | Jane | 30  | Los Angeles |
 | Jim  | 35  | Chicago |
 
-# Blockquotes
+# 引用
 
 > Live, Love, Learn
 
-# Inline Code
+# 字裡行間的程式碼
 
-You are about to see an inline code example: `const a = 1;`.
+在句子裡面的 `const a = 1;`.
 
-# Bold
+# 粗體
 
-**Bold Text**
+**粗體文字**
 
-# Italic
+# 斜體
 
-_Italic Text_
+_斜體文字_
 
-# Math
+# 數學式
 
-## Inline Math
+## 字裡行間的數學式
 $\int_0^\infty x^2 dx$
 
-## Block Math
+## 佔據一個區塊的數學式
 
 $$
 \int_0^\infty x^2 dx

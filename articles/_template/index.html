@@ -10,9 +10,41 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" />
     <link rel="stylesheet" href="/dark-mode.css" />
     <link rel="stylesheet" href="/blog-styles.css" />
+    <script>
+      // Set font size attribute immediately before body renders to prevent animation
+      (function() {
+        const savedFontSize = localStorage.getItem('blog-font-size') || 'large';
+        document.documentElement.setAttribute('data-font-size', savedFontSize);
+      })();
+      
+    </script>
   </head>
   <body>
+    <div class="font-size-controls">
+      <button class="font-size-btn" id="font-size-small" aria-label="Small font size" title="Small">A</button>
+      <button class="font-size-btn" id="font-size-medium" aria-label="Medium font size" title="Medium">A</button>
+      <button class="font-size-btn" id="font-size-large" aria-label="Large font size" title="Large">A</button>
+    </div>
     <input type="checkbox" id="dark-mode-toggle" class="dark-mode-toggle" />
+    <script>
+      // Set dark mode state immediately to prevent flash
+      (function() {
+        const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
+        if (savedDarkMode) {
+          const darkModeToggle = document.getElementById('dark-mode-toggle');
+          if (darkModeToggle) {
+            darkModeToggle.checked = true;
+          }
+          // Also toggle highlight.js theme immediately
+          const hljsLightTheme = document.getElementById('hljs-light-theme');
+          const hljsDarkTheme = document.getElementById('hljs-dark-theme');
+          if (hljsLightTheme && hljsDarkTheme) {
+            hljsLightTheme.disabled = true;
+            hljsDarkTheme.disabled = false;
+          }
+        }
+      })();
+    </script>
     <label for="dark-mode-toggle" class="dark-mode-label" aria-label="Toggle dark mode">
       <span class="switch-plate">
         <span class="switch-toggle"></span>
@@ -37,6 +69,16 @@
       const darkModeLabel = document.querySelector('.dark-mode-label');
       const hljsLightTheme = document.getElementById('hljs-light-theme');
       const hljsDarkTheme = document.getElementById('hljs-dark-theme');
+      
+      // Load saved dark mode preference on page load
+      const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
+      if (savedDarkMode && darkModeToggle) {
+        darkModeToggle.checked = true;
+        if (hljsLightTheme && hljsDarkTheme) {
+          hljsLightTheme.disabled = true;
+          hljsDarkTheme.disabled = false;
+        }
+      }
 
       if (darkModeToggle && darkModeLabel) {
         // Store scroll position before toggle
@@ -52,6 +94,9 @@
           
           // Toggle the checkbox manually
           darkModeToggle.checked = !darkModeToggle.checked;
+          
+          // Save preference to localStorage
+          localStorage.setItem('blog-dark-mode', darkModeToggle.checked ? 'true' : 'false');
           
           // Toggle highlight.js theme
           if (hljsLightTheme && hljsDarkTheme) {
@@ -79,12 +124,57 @@
         
         // Also handle the change event for highlight.js (in case checkbox is toggled another way)
         darkModeToggle.addEventListener('change', function(e) {
+          // Save preference to localStorage
+          localStorage.setItem('blog-dark-mode', e.target.checked ? 'true' : 'false');
+          
           if (hljsLightTheme && hljsDarkTheme) {
             hljsLightTheme.disabled = e.target.checked;
             hljsDarkTheme.disabled = !e.target.checked;
           }
         });
       }
+
+      // Font size controls
+      const fontSizeButtons = {
+        small: document.getElementById('font-size-small'),
+        medium: document.getElementById('font-size-medium'),
+        large: document.getElementById('font-size-large')
+      };
+
+      // Load saved font size preference (already set in head, but ensure consistency)
+      const savedFontSize = localStorage.getItem('blog-font-size') || 'large';
+      // Don't set attribute again if it's already set to prevent animation
+      if (!document.documentElement.hasAttribute('data-font-size')) {
+        document.documentElement.setAttribute('data-font-size', savedFontSize);
+      }
+
+      // Enable font-size transition after initial load
+      document.body.classList.add('font-size-transition-enabled');
+
+      // Function to update font size
+      function updateFontSize(size) {
+        document.documentElement.setAttribute('data-font-size', size);
+        localStorage.setItem('blog-font-size', size);
+        
+        // Update button states
+        Object.keys(fontSizeButtons).forEach(key => {
+          if (fontSizeButtons[key]) {
+            fontSizeButtons[key].classList.toggle('active', key === size);
+          }
+        });
+      }
+
+      // Set initial active button based on saved preference
+      updateFontSize(savedFontSize);
+
+      // Add click handlers
+      Object.keys(fontSizeButtons).forEach(size => {
+        if (fontSizeButtons[size]) {
+          fontSizeButtons[size].addEventListener('click', () => {
+            updateFontSize(size);
+          });
+        }
+      });
     </script>
   </body>
 </html>
