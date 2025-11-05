@@ -7,10 +7,8 @@ author: vee
 # How I Built an Infinite Canvas
 
 
-# What is an infinite canvas?
+## What is an infinite canvas?
+If you've used tools like <a target="_blank" href="https://miro.com/">Miro</a>, <a target="_blank" href="https://whimsical.com/">Whimsical</a>, <a target="r_blank" href="https://www.figma.com/">Figma</a>, or <a target="_blank" href="https://excalidraw.com/">excalidraw</a> before, you have probably seen an infinite canvas. 
 
-I don't know the exact definition of an infinite canvas, so I am going to borrow from the site [Infinite Canvas](https://infinitecanvas.tools/).
-fewfe
+It is a canvas that you can scroll and zoom in and out of. 
 
-test
-test2

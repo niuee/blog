@@ -78,6 +78,26 @@ article a:hover {
   border-bottom-color: var(--link-decoration-hover-color);
 }
 
+/* External link indicator for links that open in a new tab */
+article a[target="_blank"] {
+  position: relative;
+}
+
+article a[target="_blank"]::after {
+  content: "↗";
+  display: inline-block;
+  font-size: 0.65em;
+  opacity: 0.4;
+  margin-left: 0.15em;
+  vertical-align: super;
+  line-height: 0;
+  transition: opacity 0.2s;
+}
+
+article a[target="_blank"]:hover::after {
+  opacity: 0.6;
+}
+
 /* Blockquote styles */
 article blockquote {
   border-left: 4px solid var(--blockquote-border-color);

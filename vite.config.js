@@ -48,6 +48,36 @@ function findHtmlFiles(dir, baseDir = dir, files = {}) {
   return files
 }
 
+// Find all language variants for a blog post directory
+function findLanguageVariants(postDir) {
+  const variants = []
+  
+  // Check for default content.md (no language specified)
+  const defaultMdPath = join(postDir, 'content.md')
+  if (existsSync(defaultMdPath)) {
+    variants.push({ lang: null, mdPath: defaultMdPath })
+  }
+  
+  // Check for language-specific files (content.en.md, content.zh.md, etc.)
+  try {
+    const entries = readdirSync(postDir)
+    const langPattern = /^content\.([a-z]{2}(-[a-z]{2})?)\.md$/i
+    
+    for (const entry of entries) {
+      const match = entry.match(langPattern)
+      if (match) {
+        const lang = match[1].toLowerCase()
+        const mdPath = join(postDir, entry)
+        variants.push({ lang, mdPath })
+      }
+    }
+  } catch (err) {
+    // Ignore errors
+  }
+  
+  return variants
+}
+
 // Find blog posts and generate HTML from template if needed
 function findBlogPostsAndGenerateHTML(blogDir, templateHTMLPath) {
   const posts = []
@@ -60,17 +90,34 @@ function findBlogPostsAndGenerateHTML(blogDir, templateHTMLPath) {
       const stat = statSync(fullPath)
       
       if (stat.isDirectory() && entry !== '_template') {
-        const mdPath = join(fullPath, 'content.md')
-        const htmlPath = join(fullPath, 'index.html')
+        const variants = findLanguageVariants(fullPath)
         
-        if (existsSync(mdPath)) {
-          // If HTML doesn't exist, generate from template
-          if (!existsSync(htmlPath) && existsSync(templateHTMLPath)) {
-            const htmlContent = readFileSync(templateHTMLPath, 'utf-8')
-            writeFileSync(htmlPath, htmlContent, 'utf-8')
-            console.log(`✓ Generated HTML from template: ${entry}/index.html`)
+        if (variants.length > 0) {
+          // For backward compatibility, if only default content.md exists, treat it as a single post
+          if (variants.length === 1 && variants[0].lang === null) {
+            // Single default content.md
+            const htmlPath = join(fullPath, 'index.html')
+            if (!existsSync(htmlPath) && existsSync(templateHTMLPath)) {
+              const htmlContent = readFileSync(templateHTMLPath, 'utf-8')
+              writeFileSync(htmlPath, htmlContent, 'utf-8')
+              console.log(`✓ Generated HTML from template: ${entry}/index.html`)
+            }
+            posts.push({ dir: fullPath, name: entry })
+          } else {
+            // Multiple language variants - generate HTML for each
+            for (const variant of variants) {
+              const langSuffix = variant.lang ? `.${variant.lang}` : ''
+              const htmlPath = join(fullPath, `index${langSuffix}.html`)
+              
+              if (!existsSync(htmlPath) && existsSync(templateHTMLPath)) {
+                const htmlContent = readFileSync(templateHTMLPath, 'utf-8')
+                writeFileSync(htmlPath, htmlContent, 'utf-8')
+                const langLabel = variant.lang ? ` (${variant.lang})` : ''
+                console.log(`✓ Generated HTML from template: ${entry}/index${langSuffix}.html${langLabel}`)
+              }
+              posts.push({ dir: fullPath, name: entry, lang: variant.lang })
+            }
           }
-          posts.push({ dir: fullPath, name: entry })
         }
       }
     }
