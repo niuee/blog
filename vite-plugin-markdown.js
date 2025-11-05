@@ -601,6 +601,23 @@ function copySharedCSS(distDir) {
 }
 
 /**
+ * Copy 404.html to dist
+ */
+function copy404Page(distDir) {
+  const notFoundPath = resolve(process.cwd(), '404.html');
+  const distNotFoundPath = join(distDir, '404.html');
+  
+  if (existsSync(notFoundPath)) {
+    try {
+      copyFileSync(notFoundPath, distNotFoundPath);
+      console.log(`✓ Copied 404.html to dist`);
+    } catch (err) {
+      console.warn(`Warning: Could not copy 404.html:`, err.message);
+    }
+  }
+}
+
+/**
  * Inject markdown content into HTML files during build
  */
 function injectMarkdownToHtml(distDir) {
@@ -608,6 +625,9 @@ function injectMarkdownToHtml(distDir) {
   
   // Copy shared CSS first
   copySharedCSS(distDir);
+  
+  // Copy 404 page
+  copy404Page(distDir);
   
   // Find all blog posts (directories with content.md)
   const blogDir = resolve(process.cwd(), 'articles');
@@ -1178,6 +1198,7 @@ export function markdownPlugin() {
         }
       });
       
+      
       // Serve shared CSS
       server.middlewares.use((req, res, next) => {
         if (req.url === '/blog-styles.css') {
@@ -1300,6 +1321,20 @@ export function markdownPlugin() {
           
           const postDir = join(blogDir, postName);
           if (!existsSync(postDir)) {
+            // Article doesn't exist - serve 404 page
+            const notFoundPath = resolve(process.cwd(), '404.html');
+            if (existsSync(notFoundPath)) {
+              try {
+                const notFoundContent = readFileSync(notFoundPath, 'utf-8');
+                res.statusCode = 404;
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                res.setHeader('Content-Length', Buffer.byteLength(notFoundContent));
+                res.end(notFoundContent);
+                return;
+              } catch (err) {
+                console.warn(`Error serving 404 page:`, err.message);
+              }
+            }
             return next();
           }
           
@@ -1311,6 +1346,20 @@ export function markdownPlugin() {
               // If language-specific file doesn't exist, try default
               mdPath = join(postDir, 'content.md');
               if (!existsSync(mdPath)) {
+                // Language variant doesn't exist - serve 404 page
+                const notFoundPath = resolve(process.cwd(), '404.html');
+                if (existsSync(notFoundPath)) {
+                  try {
+                    const notFoundContent = readFileSync(notFoundPath, 'utf-8');
+                    res.statusCode = 404;
+                    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                    res.setHeader('Content-Length', Buffer.byteLength(notFoundContent));
+                    res.end(notFoundContent);
+                    return;
+                  } catch (err) {
+                    console.warn(`Error serving 404 page:`, err.message);
+                  }
+                }
                 return next();
               }
               lang = null; // Use default
@@ -1327,6 +1376,20 @@ export function markdownPlugin() {
             }
             
             if (!existsSync(mdPath)) {
+              // Content file doesn't exist - serve 404 page
+              const notFoundPath = resolve(process.cwd(), '404.html');
+              if (existsSync(notFoundPath)) {
+                try {
+                  const notFoundContent = readFileSync(notFoundPath, 'utf-8');
+                  res.statusCode = 404;
+                  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                  res.setHeader('Content-Length', Buffer.byteLength(notFoundContent));
+                  res.end(notFoundContent);
+                  return;
+                } catch (err) {
+                  console.warn(`Error serving 404 page:`, err.message);
+                }
+              }
               return next();
             }
           }
@@ -1503,6 +1566,90 @@ export function markdownPlugin() {
           console.warn(`Error in markdown plugin for ${req.url}:`, error.message);
           return next();
         }
+      });
+      
+      // Universal 404 handler - catch all unmatched routes
+      // Wrap response methods early to intercept all 404 responses
+      server.middlewares.use((req, res, next) => {
+        // Skip if it's a static asset request (let Vite handle these)
+        if (req.url?.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map|ts|json)$/)) {
+          return next();
+        }
+        
+        // Skip Vite internal routes
+        if (req.url?.startsWith('/@') || req.url?.startsWith('/node_modules') || req.url?.startsWith('/src')) {
+          return next();
+        }
+        
+        // Skip root and known valid routes
+        if (req.url === '/' || req.url === '/index.html' || req.url === '/404.html') {
+          return next();
+        }
+        
+        // Only handle GET requests for HTML pages
+        if (req.method !== 'GET') {
+          return next();
+        }
+        
+        // Store original methods
+        const originalWriteHead = res.writeHead;
+        const originalEnd = res.end;
+        let statusCode = 200;
+        let headersSent = false;
+        
+        // Wrap writeHead to capture status code
+        res.writeHead = function(code, headers) {
+          statusCode = code;
+          headersSent = true;
+          return originalWriteHead.apply(this, arguments);
+        };
+        
+        // Wrap end to intercept 404 responses
+        res.end = function(chunk, encoding) {
+          // Check if this is a 404 response
+          if (statusCode === 404 || res.statusCode === 404) {
+            const notFoundPath = resolve(process.cwd(), '404.html');
+            if (existsSync(notFoundPath)) {
+              try {
+                const notFoundContent = readFileSync(notFoundPath, 'utf-8');
+                if (!headersSent) {
+                  res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+                } else {
+                  res.statusCode = 404;
+                  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                }
+                res.setHeader('Content-Length', Buffer.byteLength(notFoundContent));
+                return originalEnd.call(this, notFoundContent, encoding);
+              } catch (err) {
+                console.warn(`Error serving 404 page:`, err.message);
+              }
+            }
+          }
+          
+          // Check for Vite's "Cannot GET" error message
+          if (chunk && typeof chunk === 'string' && chunk.includes('Cannot GET')) {
+            const notFoundPath = resolve(process.cwd(), '404.html');
+            if (existsSync(notFoundPath)) {
+              try {
+                const notFoundContent = readFileSync(notFoundPath, 'utf-8');
+                if (!headersSent) {
+                  res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+                } else {
+                  res.statusCode = 404;
+                  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                }
+                res.setHeader('Content-Length', Buffer.byteLength(notFoundContent));
+                return originalEnd.call(this, notFoundContent, encoding);
+              } catch (err) {
+                console.warn(`Error serving 404 page:`, err.message);
+              }
+            }
+          }
+          
+          return originalEnd.call(this, chunk, encoding);
+        };
+        
+        next();
       });
     },
     

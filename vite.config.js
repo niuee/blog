@@ -164,13 +164,15 @@ export default defineConfig({
     target: 'esnext',
     emptyOutDir: true,
     // Multiple entry points for blog entries
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-        // Automatically include all HTML files from entries directory
-        ...blogEntries,
-      },
-    }
+      rollupOptions: {
+        input: {
+          main: resolve(__dirname, 'index.html'),
+          // Automatically include all HTML files from entries directory
+          ...blogEntries,
+          // Include 404 page
+          '404': resolve(__dirname, '404.html'),
+        },
+      }
   },
   
   // Preview server options
