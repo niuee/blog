@@ -19,7 +19,7 @@ function configureMarked() {
   // Save the original code method (if needed)
   const originalCode = renderer.code.bind(renderer);
   
-  // Override only the code method
+  // Override the code method
   // In marked v16+, code receives an object: {text, lang, escaped}
   renderer.code = function({text, lang, escaped}) {
     // text is the code content, lang is the language
@@ -55,6 +55,34 @@ function configureMarked() {
     const langLabel = language ? `<span class="code-language-label">${escapeHtml(language)}</span>` : '';
     
     return `<pre>${langLabel}<code${langClass}>${highlighted}</code></pre>`;
+  };
+  
+  // Override the link method to add target="_blank" for external links
+  // In marked v16+, link receives an object: {href, title, text}
+  // Note: text is already rendered HTML (may contain other markdown elements)
+  renderer.link = function({href, title, text}) {
+    const hrefStr = typeof href === 'string' ? href : String(href || '');
+    const titleStr = typeof title === 'string' ? title : String(title || '');
+    // text is already HTML, so use it as-is
+    const textHtml = text || '';
+    
+    // Check if it's an external link (starts with http:// or https://)
+    const isExternal = hrefStr.startsWith('http://') || hrefStr.startsWith('https://');
+    
+    // Build the link attributes
+    let attrs = `href="${escapeHtml(hrefStr)}"`;
+    
+    // Add target="_blank" and rel="noopener noreferrer" for external links
+    if (isExternal) {
+      attrs += ' target="_blank" rel="noopener noreferrer"';
+    }
+    
+    // Add title attribute if present
+    if (titleStr) {
+      attrs += ` title="${escapeHtml(titleStr)}"`;
+    }
+    
+    return `<a ${attrs}>${textHtml}</a>`;
   };
   
   // Configure marked with the extended renderer
@@ -325,48 +353,35 @@ function findBlogPosts(blogDir) {
  */
 function processTypeScriptForDev(htmlContent, blogPostDir, blogPostName) {
   // Find all script tags with src attributes pointing to .ts files
-  const scriptRegex = /<script([^>]*)src=["']([^"']+\.ts)["']([^>]*)>/gi;
-  let processedHtml = htmlContent;
-  let match;
-  
-  while ((match = scriptRegex.exec(htmlContent)) !== null) {
-    const fullMatch = match[0];
-    const beforeSrc = match[1];
-    const scriptSrc = match[2];
-    const afterSrc = match[3];
-    
-    // Only process relative paths (not absolute URLs or absolute paths)
-    if (!scriptSrc.startsWith('http') && !scriptSrc.startsWith('//') && !scriptSrc.startsWith('/')) {
-      const sourceTsPath = resolve(blogPostDir, scriptSrc);
-      
-      // Check if TypeScript file exists
-      if (existsSync(sourceTsPath)) {
-        // Update script path to be absolute from root (e.g., /articles/first/test.ts)
-        const newScriptSrc = `/articles/${blogPostName}/${scriptSrc}`;
-        
-        // Ensure script tag has type="module"
-        let newAttributes = beforeSrc + afterSrc;
-        if (!newAttributes.includes('type=')) {
-          newAttributes = ` type="module"${newAttributes}`;
-        } else if (!newAttributes.includes('type="module"') && !newAttributes.includes("type='module'")) {
-          // Replace existing type attribute with module
-          newAttributes = newAttributes.replace(/type=["'][^"']*["']/i, 'type="module"');
-        }
-        
-        // Escape special regex characters in the source path
-        const escapedSrc = scriptSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Replace the script tag
-        processedHtml = processedHtml.replace(
-          new RegExp(`<script([^>]*)src=["']${escapedSrc}["']([^>]*)>`, 'gi'),
-          `<script${newAttributes}src="${newScriptSrc}">`
-        );
+  const scriptRegex = /<script([^>]*)src=["']([^"']+\.ts)["']([^>]*)>(?:<\/script>)?/gi;
+  return htmlContent.replace(scriptRegex, (match, beforeSrc = '', scriptSrc = '', afterSrc = '') => {
+    if (!scriptSrc || scriptSrc.startsWith('http') || scriptSrc.startsWith('//') || scriptSrc.startsWith('/')) {
+      return match;
+    }
+
+    const sourceTsPath = resolve(blogPostDir, scriptSrc);
+    if (!existsSync(sourceTsPath)) {
+      console.warn(`Warning: TypeScript file not found: ${sourceTsPath}`);
+      return match;
+    }
+
+    // Update script path to be absolute from root (e.g., /articles/first/test.ts)
+    const newScriptSrc = `/articles/${blogPostName}/${scriptSrc}`;
+
+    // Ensure script tag has type="module"
+    let rawAttributes = `${beforeSrc}${afterSrc}`;
+    rawAttributes = rawAttributes.replace(/\s+/g, ' ').trim();
+    if (!/type\s*=\s*['"]module['"]/i.test(rawAttributes)) {
+      if (/type\s*=/i.test(rawAttributes)) {
+        rawAttributes = rawAttributes.replace(/type\s*=['"][^'"]*['"]/i, 'type="module"');
       } else {
-        console.warn(`Warning: TypeScript file not found: ${sourceTsPath}`);
+        rawAttributes = rawAttributes ? `${rawAttributes} type="module"` : 'type="module"';
       }
     }
-  }
-  
-  return processedHtml;
+
+    const attributesString = rawAttributes ? ` ${rawAttributes}` : '';
+    return `<script${attributesString} src="${newScriptSrc}"></script>`;
+  });
 }
 
 /**
@@ -424,76 +439,65 @@ function processImagesForDev(htmlContent, blogPostDir, blogPostName) {
  */
 function processTypeScript(htmlContent, sourceDir, distHtmlDir, distDir) {
   // Find all script tags with src attributes pointing to .ts files
-  const scriptRegex = /<script([^>]*)src=["']([^"']+\.ts)["']([^>]*)>/gi;
-  let processedHtml = htmlContent;
-  let match;
+  const scriptRegex = /<script([^>]*)src=["']([^"']+\.ts)["']([^>]*)>(?:<\/script>)?/gi;
   const processedScripts = new Set();
   
-  while ((match = scriptRegex.exec(htmlContent)) !== null) {
-    const beforeSrc = match[1];
-    const scriptSrc = match[2];
-    const afterSrc = match[3];
+  return htmlContent.replace(scriptRegex, (match, beforeSrc = '', scriptSrc = '', afterSrc = '') => {
+    if (!scriptSrc || scriptSrc.startsWith('http') || scriptSrc.startsWith('//') || scriptSrc.startsWith('/')) {
+      return match;
+    }
     
-    // Only process relative paths (not absolute URLs or absolute paths)
-    if (!scriptSrc.startsWith('http') && !scriptSrc.startsWith('//') && !scriptSrc.startsWith('/')) {
-      if (!processedScripts.has(scriptSrc)) {
-        processedScripts.add(scriptSrc);
-        
-        const sourceTsPath = resolve(sourceDir, scriptSrc);
-        const tsFileName = basename(scriptSrc);
-        
-        // Check if TypeScript file exists
-        if (existsSync(sourceTsPath)) {
-          // Ensure dist directory exists
-          const distTsDir = dirname(distHtmlDir);
-          if (!existsSync(distTsDir)) {
-            mkdirSync(distTsDir, { recursive: true });
-          }
-          
-          // Copy TypeScript file to dist directory (same directory as HTML)
-          // Note: Vite will process this during build, but we copy it for reference
-          const distTsPath = join(distTsDir, tsFileName);
-          try {
-            copyFileSync(sourceTsPath, distTsPath);
-            console.log(`✓ Copied TypeScript file: ${tsFileName}`);
-            
-            // Update script path in HTML to be absolute from root
-            const distHtmlDirRelative = relative(distDir, dirname(distHtmlDir));
-            let absoluteTsPath;
-            if (!distHtmlDirRelative || distHtmlDirRelative === '.' || distHtmlDirRelative === './') {
-              absoluteTsPath = `/${tsFileName}`;
-            } else {
-              absoluteTsPath = join('/', distHtmlDirRelative, tsFileName).replace(/\\/g, '/');
-            }
-            const newScriptSrc = absoluteTsPath;
-            
-            // Ensure script tag has type="module"
-            let newAttributes = beforeSrc + afterSrc;
-            if (!newAttributes.includes('type=')) {
-              newAttributes = ` type="module"${newAttributes}`;
-            } else if (!newAttributes.includes('type="module"') && !newAttributes.includes("type='module'")) {
-              // Replace existing type attribute with module
-              newAttributes = newAttributes.replace(/type=["'][^"']*["']/i, 'type="module"');
-            }
-            
-            // Escape special regex characters in the source path
-            const escapedSrc = scriptSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            // Replace all occurrences of this script path
-            processedHtml = processedHtml.replace(
-              new RegExp(`<script([^>]*)src=["']${escapedSrc}["']([^>]*)>`, 'gi'),
-              `<script${newAttributes}src="${newScriptSrc}">`
-            );
-          } catch (err) {
-            console.warn(`Warning: Could not copy TypeScript file ${scriptSrc}:`, err.message);
-          }
-        } else {
-          console.warn(`Warning: TypeScript file not found: ${sourceTsPath}`);
-        }
+    const sourceTsPath = resolve(sourceDir, scriptSrc);
+    const tsFileName = basename(scriptSrc);
+    
+    if (!existsSync(sourceTsPath)) {
+      console.warn(`Warning: TypeScript file not found: ${sourceTsPath}`);
+      return match;
+    }
+    
+    // Ensure dist directory exists
+    const distTsDir = dirname(distHtmlDir);
+    if (!existsSync(distTsDir)) {
+      mkdirSync(distTsDir, { recursive: true });
+    }
+    
+    // Copy TypeScript file to dist directory (same directory as HTML)
+    // Note: Vite will process this during build, but we copy it for reference
+    const distTsPath = join(distTsDir, tsFileName);
+    if (!processedScripts.has(scriptSrc)) {
+      try {
+        copyFileSync(sourceTsPath, distTsPath);
+        console.log(`✓ Copied TypeScript file: ${tsFileName}`);
+      } catch (err) {
+        console.warn(`Warning: Could not copy TypeScript file ${scriptSrc}:`, err.message);
+      }
+      processedScripts.add(scriptSrc);
+    }
+    
+    // Update script path in HTML to be absolute from root
+    const distHtmlDirRelative = relative(distDir, dirname(distHtmlDir));
+    let absoluteTsPath;
+    if (!distHtmlDirRelative || distHtmlDirRelative === '.' || distHtmlDirRelative === './') {
+      absoluteTsPath = `/${tsFileName}`;
+    } else {
+      absoluteTsPath = join('/', distHtmlDirRelative, tsFileName).replace(/\\/g, '/');
+    }
+    const newScriptSrc = absoluteTsPath;
+    
+    // Ensure script tag has type="module"
+    let rawAttributes = `${beforeSrc}${afterSrc}`;
+    rawAttributes = rawAttributes.replace(/\s+/g, ' ').trim();
+    if (!/type\s*=\s*['"]module['"]/i.test(rawAttributes)) {
+      if (/type\s*=/i.test(rawAttributes)) {
+        rawAttributes = rawAttributes.replace(/type\s*=['"][^'"]*['"]/i, 'type="module"');
+      } else {
+        rawAttributes = rawAttributes ? `${rawAttributes} type="module"` : 'type="module"';
       }
     }
-  }
-  
-  return processedHtml;
+
+    const attributesString = rawAttributes ? ` ${rawAttributes}` : '';
+    return `<script${attributesString} src="${newScriptSrc}"></script>`;
+  });
 }
 
 /**
@@ -1289,10 +1293,12 @@ export function markdownPlugin() {
       server.middlewares.use(async (req, res, next) => {
         // Only handle HTML files from blog directory or article routes
         // Pattern: /articles/{name} or /articles/{name}/{lang} or /articles/{name}/{lang}.html
-        const articleMatch = req.url?.match(/^\/articles\/([^/]+)(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i);
-        const isHtmlFile = req.url?.endsWith('.html');
+        const rawUrl = req.url || '/';
+        const pathname = rawUrl.split('?')[0].split('#')[0];
+        const articleMatch = pathname.match(/^\/articles\/([^/]+)(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i);
+        const isHtmlFile = pathname.endsWith('.html');
         
-        if (!req.url || (!isHtmlFile && !articleMatch)) {
+        if (!pathname || (!isHtmlFile && !articleMatch)) {
           return next();
         }
         
@@ -1306,7 +1312,7 @@ export function markdownPlugin() {
             lang = articleMatch[2]?.toLowerCase() || null;
           } else if (isHtmlFile) {
             // Try to extract from HTML file path
-            const htmlPath = req.url.replace(/^\//, '');
+            const htmlPath = pathname.replace(/^\//, '');
             const resolvedPath = resolve(process.cwd(), htmlPath);
             const htmlDir = dirname(resolvedPath);
             const blogMatch = htmlDir.match(/articles[\/\\]([^\/\\]+)$/);
@@ -1395,7 +1401,7 @@ export function markdownPlugin() {
           }
           
           // Resolve the HTML file path
-          let htmlPath = req.url.replace(/^\//, '');
+          let htmlPath = pathname.replace(/^\//, '');
           let resolvedPath = resolve(process.cwd(), htmlPath);
           
           // Check if path is a directory, if so look for index.html
@@ -1405,17 +1411,30 @@ export function markdownPlugin() {
             if (existsSync(indexPath)) {
               resolvedPath = indexPath;
             } else {
-              // Use template
-              if (existsSync(templateHTMLPath)) {
+              // Try article-specific base HTML before falling back to template
+              const defaultArticleHtml = join(postDir, 'index.html');
+              if (existsSync(defaultArticleHtml)) {
+                resolvedPath = defaultArticleHtml;
+              } else if (existsSync(templateHTMLPath)) {
                 resolvedPath = templateHTMLPath;
               } else {
                 return next();
               }
             }
           } else if (!existsSync(resolvedPath)) {
-            // File doesn't exist, use template
+            // Try language-specific HTML (index.lang.html) then default article HTML before template
+            let candidatePaths = [];
+            if (lang) {
+              candidatePaths.push(join(postDir, `index.${lang}.html`));
+            }
+            candidatePaths.push(join(postDir, 'index.html'));
             if (existsSync(templateHTMLPath)) {
-              resolvedPath = templateHTMLPath;
+              candidatePaths.push(templateHTMLPath);
+            }
+
+            const fallbackPath = candidatePaths.find(p => existsSync(p));
+            if (fallbackPath) {
+              resolvedPath = fallbackPath;
             } else {
               return next();
             }
@@ -1568,6 +1587,68 @@ export function markdownPlugin() {
         }
       });
       
+      // Directly serve 404 page for non-article routes that don't map to on-disk files
+      server.middlewares.use((req, res, next) => {
+        if (!req.url || req.method !== 'GET') {
+          return next();
+        }
+
+        const pathname = req.url.split('?')[0].split('#')[0];
+
+        // Skip Vite internal modules, assets, and known valid paths
+        if (
+          pathname === '/' ||
+          pathname === '/index.html' ||
+          pathname === '/404.html' ||
+          pathname === '/favicon.ico' ||
+          pathname === '/blog-styles.css' ||
+          pathname === '/dark-mode.css' ||
+          pathname.startsWith('/@') ||
+          pathname.startsWith('/node_modules') ||
+          pathname.startsWith('/src') ||
+          pathname.match(/\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|webp|bmp|woff|woff2|ttf|eot|map|json)$/)
+        ) {
+          return next();
+        }
+
+        // Allow article routes to fall through to markdown handler logic
+        if (pathname.startsWith('/articles')) {
+          return next();
+        }
+
+        const relativePath = pathname.replace(/^\//, '');
+        const diskPath = resolve(process.cwd(), relativePath);
+
+        let pathExists = false;
+        if (existsSync(diskPath)) {
+          const pathStat = statSync(diskPath);
+          if (pathStat.isDirectory()) {
+            const indexHtmlPath = join(diskPath, 'index.html');
+            pathExists = existsSync(indexHtmlPath);
+          } else {
+            pathExists = true;
+          }
+        }
+
+        if (!pathExists) {
+          const notFoundPath = resolve(process.cwd(), '404.html');
+          if (existsSync(notFoundPath)) {
+            try {
+              const notFoundContent = readFileSync(notFoundPath, 'utf-8');
+              res.statusCode = 404;
+              res.setHeader('Content-Type', 'text/html; charset=utf-8');
+              res.setHeader('Content-Length', Buffer.byteLength(notFoundContent));
+              res.end(notFoundContent);
+              return;
+            } catch (err) {
+              console.warn(`Error serving 404 page:`, err.message);
+            }
+          }
+        }
+
+        next();
+      });
+
       // Universal 404 handler - catch all unmatched routes
       // Wrap response methods early to intercept all 404 responses
       server.middlewares.use((req, res, next) => {

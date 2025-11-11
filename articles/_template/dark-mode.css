@@ -5,15 +5,28 @@
   --text-color: #333;
   --text-meta-color: #666;
   --link-color: #777;
-  --link-hover-color: #555;
-  --link-visited-color: #aaa;
+  --link-unvisited-color: #666;
+  --link-hover-color: #222;
+  --link-visited-color: #777;
   --link-decoration-color: rgba(0, 0, 0, 0.2);
+  --link-decoration-unvisited-color: rgba(0, 0, 0, 0.5);
   --link-decoration-hover-color: rgba(0, 0, 0, 0.4);
-  --link-decoration-visited-color: rgba(0, 0, 0, 0.1);
+  --link-decoration-visited-color: rgba(0, 0, 0, 0.15);
   --code-border-color: #000;
   --code-label-color: #666;
   --code-label-bg: rgba(255, 255, 255, 0.9);
   --inline-code-bg: #f5f5f5;
+  --emphasis-bg: rgba(255, 215, 0, 0.35);
+  --emphasis-text-color: #8a4b00;
+  --remark-bg: rgba(0, 0, 0, 0.04);
+  --remark-border-color: rgba(0, 0, 0, 0.15);
+  --remark-text-color: var(--text-color);
+  --remark-inline-code-bg: rgba(0, 0, 0, 0.06);
+  --tldr-bg: rgba(59, 130, 246, 0.08);
+  --tldr-border-color: rgba(59, 130, 246, 0.3);
+  --tldr-text-color: var(--text-color);
+  --tldr-title-color: #2563eb;
+  --tldr-inline-code-bg: rgba(59, 130, 246, 0.12);
   --table-header-bg: #f5f5f5;
   --table-border-color: rgba(0, 0, 0, 0.1);
   --table-row-hover-bg: #f9f9f9;
@@ -37,15 +50,28 @@ html:has(#dark-mode-toggle:checked) {
   --text-color: #e0e0e0;
   --text-meta-color: #999;
   --link-color: #bbb;
+  --link-unvisited-color: #f0f0f0;
   --link-hover-color: #e0e0e0;
-  --link-visited-color: #888;
+  --link-visited-color: #999;
   --link-decoration-color: rgba(255, 255, 255, 0.2);
+  --link-decoration-unvisited-color: rgba(255, 255, 255, 0.5);
   --link-decoration-hover-color: rgba(255, 255, 255, 0.4);
-  --link-decoration-visited-color: rgba(255, 255, 255, 0.1);
+  --link-decoration-visited-color: rgba(255, 255, 255, 0.15);
   --code-border-color: #444;
   --code-label-color: #ccc;
   --code-label-bg: rgba(26, 26, 26, 0.9);
   --inline-code-bg: #4a4a4a;
+  --emphasis-bg: rgba(255, 183, 0, 0.25);
+  --emphasis-text-color: #ffd479;
+  --remark-bg: rgba(255, 255, 255, 0.05);
+  --remark-border-color: rgba(255, 255, 255, 0.18);
+  --remark-text-color: var(--text-color);
+  --remark-inline-code-bg: rgba(255, 255, 255, 0.08);
+  --tldr-bg: rgba(96, 165, 250, 0.1);
+  --tldr-border-color: rgba(96, 165, 250, 0.4);
+  --tldr-text-color: var(--text-color);
+  --tldr-title-color: #60a5fa;
+  --tldr-inline-code-bg: rgba(96, 165, 250, 0.15);
   --table-header-bg: #2a2a2a;
   --table-border-color: rgba(255, 255, 255, 0.1);
   --table-row-hover-bg: #2a2a2a;
@@ -241,6 +267,25 @@ html:not([data-font-size]) {
 
 html[data-font-size="large"] {
   --font-size-scale: 1.125;
+}
+
+/* Increase font sizes for 4K and high-resolution displays */
+@media (min-width: 2560px) {
+  html[data-font-size="small"] {
+    --font-size-scale: 1.0;
+  }
+
+  html[data-font-size="medium"] {
+    --font-size-scale: 1.25;
+  }
+
+  html:not([data-font-size]) {
+    --font-size-scale: 1.5;
+  }
+
+  html[data-font-size="large"] {
+    --font-size-scale: 1.5;
+  }
 }
 
 /* Responsive styles for font size controls */

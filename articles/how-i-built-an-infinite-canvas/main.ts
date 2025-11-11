@@ -1,10 +1,13 @@
 import { Board } from "@ue-too/board";
-console.log('first page');
 
+console.log('infinite canvas');
 const canvas = document.getElementById('graph') as HTMLCanvasElement;
 
 const board = new Board(canvas);
-board.getCameraRig().panToWorld({x: 10, y: 10});
+const canvasWidth = parseFloat(canvas.style.width);
+const canvasHeight = parseFloat(canvas.style.height);
+
+board.getCameraRig().panToWorld({x: canvasWidth / 2, y: canvasHeight / 2});
 
 function step(timestamp: number) {
     board.step(timestamp);
@@ -13,18 +16,9 @@ function step(timestamp: number) {
     }
 
     board.context.fillStyle = 'green';
-    board.context.fillRect(10, 10, 100, 100);
+    board.context.fillRect(10, 10, 150, 100);
 
     requestAnimationFrame(step);
 }
-
-const showButton = document.getElementById('show') as HTMLButtonElement;
-
-showButton.addEventListener('click', () => {
-    console.log('position', board.camera.position);
-    console.log('zoomlevel', board.camera.zoomLevel);
-});
-
-
 
 requestAnimationFrame(step);
