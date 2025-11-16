@@ -18,13 +18,4 @@ function step(timestamp: number) {
     requestAnimationFrame(step);
 }
 
-const showButton = document.getElementById('show') as HTMLButtonElement;
-
-showButton.addEventListener('click', () => {
-    console.log('position', board.camera.position);
-    console.log('zoomlevel', board.camera.zoomLevel);
-});
-
-
-
 requestAnimationFrame(step);

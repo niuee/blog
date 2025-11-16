@@ -299,7 +299,7 @@ pre code {
 
 /* Image shadow class */
 .image-shadow {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--image-shadow, 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1));
   transition: box-shadow 0.3s ease;
 }
 
