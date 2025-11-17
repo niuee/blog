@@ -139,6 +139,29 @@ findBlogPostsAndGenerateHTML(blogEntriesDir, templateHTMLPath)
 
 const blogEntries = findHtmlFiles(blogEntriesDir)
 
+// Find resume HTML files (including language variants)
+const resumeDir = resolve(__dirname, 'resume')
+const resumeEntries = {}
+const resumeHtmlPath = join(resumeDir, 'index.html')
+if (existsSync(resumeHtmlPath)) {
+  resumeEntries.resume = resumeHtmlPath
+}
+// Check for language variants (e.g., index.zh-tw.html)
+try {
+  const resumeFiles = readdirSync(resumeDir)
+  const langPattern = /^index\.([a-z]{2}(-[a-z]{2})?)\.html$/i
+  for (const file of resumeFiles) {
+    const match = file.match(langPattern)
+    if (match) {
+      const lang = match[1].toLowerCase()
+      const langHtmlPath = join(resumeDir, file)
+      resumeEntries[`resume/${lang}`] = langHtmlPath
+    }
+  }
+} catch (err) {
+  // Ignore errors
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   // Base public path when served in production
@@ -169,6 +192,8 @@ export default defineConfig({
           main: resolve(__dirname, 'index.html'),
           // Automatically include all HTML files from entries directory
           ...blogEntries,
+          // Include resume page
+          ...resumeEntries,
           // Include 404 page
           '404': resolve(__dirname, '404.html'),
         },

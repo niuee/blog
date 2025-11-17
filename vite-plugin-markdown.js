@@ -602,6 +602,24 @@ function copySharedCSS(distDir) {
       console.warn(`Warning: Could not copy dark-mode.css:`, err.message);
     }
   }
+  
+  // Copy resume CSS
+  const resumeDir = resolve(process.cwd(), 'resume');
+  const resumeCSSPath = join(resumeDir, 'resume-styles.css');
+  const distResumeDir = join(distDir, 'resume');
+  const distResumeCSSPath = join(distResumeDir, 'resume-styles.css');
+  
+  if (existsSync(resumeCSSPath)) {
+    try {
+      if (!existsSync(distResumeDir)) {
+        mkdirSync(distResumeDir, { recursive: true });
+      }
+      copyFileSync(resumeCSSPath, distResumeCSSPath);
+      console.log(`✓ Copied resume-styles.css to dist`);
+    } catch (err) {
+      console.warn(`Warning: Could not copy resume-styles.css:`, err.message);
+    }
+  }
 }
 
 /**
@@ -824,6 +842,156 @@ function injectMarkdownToHtml(distDir) {
     writeFileSync(distHtmlPath, htmlContent, 'utf-8');
     console.log(`✓ Injected markdown to HTML: ${name}${lang ? ` (${lang})` : ''}`);
   }
+  
+  // Process resume directory (including language variants)
+  const resumeDir = resolve(process.cwd(), 'resume');
+  const resumeVariants = [];
+  
+  // Check for default content.md
+  const defaultResumeMdPath = join(resumeDir, 'content.md');
+  if (existsSync(defaultResumeMdPath)) {
+    resumeVariants.push({ lang: null, mdPath: defaultResumeMdPath, htmlPath: join(resumeDir, 'index.html') });
+  }
+  
+  // Check for language-specific files (content.zh-tw.md, etc.)
+  try {
+    const resumeFiles = readdirSync(resumeDir);
+    const langPattern = /^content\.([a-z]{2}(-[a-z]{2})?)\.md$/i;
+    for (const file of resumeFiles) {
+      const match = file.match(langPattern);
+      if (match) {
+        const lang = match[1].toLowerCase();
+        const mdPath = join(resumeDir, file);
+        const langSuffix = `.${lang}`;
+        const htmlPath = join(resumeDir, `index${langSuffix}.html`);
+        resumeVariants.push({ lang, mdPath, htmlPath });
+      }
+    }
+  } catch (err) {
+    // Ignore errors
+  }
+  
+  // Process each resume variant
+  for (const variant of resumeVariants) {
+    const { lang, mdPath, htmlPath } = variant;
+    const distResumeHtmlPath = lang 
+      ? join(distDir, 'resume', `${lang}`, 'index.html')
+      : join(distDir, 'resume', 'index.html');
+    
+    if (existsSync(mdPath) && existsSync(htmlPath)) {
+      // Ensure dist directory exists
+      const distResumeDir = dirname(distResumeHtmlPath);
+      if (!existsSync(distResumeDir)) {
+        mkdirSync(distResumeDir, { recursive: true });
+      }
+      
+      // Copy HTML to dist if it doesn't exist
+      if (!existsSync(distResumeHtmlPath)) {
+        copyFileSync(htmlPath, distResumeHtmlPath);
+      }
+      
+      let htmlContent = readFileSync(distResumeHtmlPath, 'utf-8');
+      
+      if (htmlContent.includes('<div id="blog-content"></div>')) {
+        // Read and parse markdown
+        const markdownContent = readFileSync(mdPath, 'utf-8');
+        const content = typeof markdownContent === 'string' ? markdownContent : String(markdownContent || '');
+        
+        // Parse frontmatter
+        const { frontmatter, content: bodyContent } = parseFrontmatter(content);
+        
+        // Extract title, date, and author
+        let title = frontmatter?.title || extractTitle(bodyContent) || 'Résumé';
+        const date = frontmatter?.date || frontmatter?.published || null;
+        const formattedDate = formatDate(date);
+        const author = frontmatter?.author || null;
+        
+        // Remove first h1 if there's a title (from frontmatter or extracted)
+        let markdownToRender = bodyContent;
+        if (title && extractTitle(bodyContent)) {
+          markdownToRender = removeFirstH1(bodyContent);
+        }
+        
+        // Process math equations in markdown BEFORE converting to HTML
+        markdownToRender = processMathInMarkdown(markdownToRender);
+        
+        // Convert markdown to HTML
+        const htmlFromMd = marked.parse(markdownToRender);
+        
+        // Inject title and date into header if present
+        if (htmlContent.includes('<header>')) {
+          const headerMatch = htmlContent.match(/<header>([\s\S]*?)<\/header>/);
+          const headerContent = headerMatch ? headerMatch[1].trim() : '';
+          
+          let newHeaderContent = '';
+          
+          // Add title (h1)
+          if (htmlContent.includes('<h1>')) {
+            htmlContent = htmlContent.replace(
+              /<h1>.*?<\/h1>/,
+              `<h1>${escapeHtml(title)}</h1>`
+            );
+            newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
+          } else {
+            newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
+          }
+          
+          // Add date/meta section
+          if (formattedDate || author) {
+            const dateISO = date || new Date().toISOString().split('T')[0];
+            let metaContent = '';
+            if (formattedDate) {
+              metaContent = `<time datetime="${dateISO}">${formattedDate}</time>`;
+            }
+            if (author) {
+              if (metaContent) {
+                metaContent += ` • ${escapeHtml(author)}`;
+              } else {
+                metaContent = escapeHtml(author);
+              }
+            }
+            
+            if (htmlContent.includes('<time') || htmlContent.includes('<div class="meta">')) {
+              htmlContent = htmlContent.replace(
+                /<div class="meta">.*?<\/div>/,
+                `<div class="meta">${metaContent}</div>`
+              );
+              if (htmlContent.includes('<time') && !htmlContent.includes('<div class="meta">')) {
+                htmlContent = htmlContent.replace(
+                  /<time datetime="[^"]*">[^<]*<\/time>/,
+                  `<div class="meta">${metaContent}</div>`
+                );
+              }
+            } else {
+              newHeaderContent += `\n        <div class="meta">${metaContent}</div>`;
+            }
+          }
+          
+          // If header was empty, replace it with the new content
+          if (!headerContent && newHeaderContent) {
+            htmlContent = htmlContent.replace(
+              /<header>\s*<\/header>/,
+              `<header>\n        ${newHeaderContent}\n      </header>`
+            );
+          }
+        }
+        
+        // Inject into HTML
+        htmlContent = htmlContent.replace(
+          '<div id="blog-content"></div>',
+          `<div id="blog-content"><article>${htmlFromMd}</article></div>`
+        );
+        
+        // Process and copy images
+        htmlContent = processImages(htmlContent, resumeDir, distResumeHtmlPath, distDir);
+        
+        // Write back
+        writeFileSync(distResumeHtmlPath, htmlContent, 'utf-8');
+        const langLabel = lang ? ` (${lang})` : '';
+        console.log(`✓ Injected markdown to HTML: resume${langLabel}`);
+      }
+    }
+  }
 }
 
 /**
@@ -848,6 +1016,95 @@ export function markdownPlugin() {
       // Handle both content.md and content.{lang}.md files
       if (file && (file.endsWith('content.md') || file.match(/content\.[a-z]{2}(-[a-z]{2})?\.md$/i))) {
         const blogDir = resolve(process.cwd(), 'articles');
+        const resumeDir = resolve(process.cwd(), 'resume');
+        const absoluteFile = resolve(file);
+        
+        // Check if it's a resume file
+        if (absoluteFile.startsWith(resumeDir)) {
+          // Determine which resume URL(s) to reload
+          const htmlUrls = ['/resume'];
+          
+          // Check if it's a language-specific file
+          const langMatch = file.match(/content\.([a-z]{2}(-[a-z]{2})?)\.md$/i);
+          if (langMatch) {
+            const lang = langMatch[1].toLowerCase();
+            htmlUrls.push(`/resume/${lang}`);
+          } else {
+            // If default content.md changed, also reload all language variants
+            try {
+              const resumeFiles = readdirSync(resumeDir);
+              const langPattern = /^content\.([a-z]{2}(-[a-z]{2})?)\.md$/i;
+              for (const resumeFile of resumeFiles) {
+                const match = resumeFile.match(langPattern);
+                if (match) {
+                  htmlUrls.push(`/resume/${match[1].toLowerCase()}`);
+                }
+              }
+            } catch (err) {
+              // Ignore errors
+            }
+          }
+          
+          console.log(`[HMR] Resume markdown file changed: ${relative(process.cwd(), file)}`);
+          console.log(`[HMR] Attempting to reload: ${htmlUrls.join(', ')}`);
+          
+          // Invalidate modules and force reload for all affected URLs
+          const modulesToInvalidate = [];
+          htmlUrls.forEach(htmlUrl => {
+            ctx.server.moduleGraph.idToModuleMap.forEach((module) => {
+              if (module.url && module.url.includes(htmlUrl)) {
+                modulesToInvalidate.push(module);
+              }
+            });
+          });
+          
+          modulesToInvalidate.forEach((module) => {
+            ctx.server.moduleGraph.invalidateModule(module);
+          });
+          
+          // Send reload message via WebSocket for all URLs
+          try {
+            if (ctx.server.ws) {
+              const wsClients = ctx.server.ws.clients;
+              if (wsClients && wsClients.size > 0) {
+                htmlUrls.forEach(htmlUrl => {
+                  const message = JSON.stringify({
+                    type: 'full-reload',
+                    path: htmlUrl
+                  });
+                  wsClients.forEach((client) => {
+                    if (client.readyState === 1) {
+                      try {
+                        client.send(message);
+                        console.log(`[HMR] Sent reload message to client for: ${htmlUrl}`);
+                      } catch (err) {
+                        console.error(`[HMR] Error sending to client:`, err);
+                      }
+                    }
+                  });
+                });
+              } else {
+                htmlUrls.forEach(htmlUrl => {
+                  try {
+                    ctx.server.ws.send({
+                      type: 'full-reload',
+                      path: htmlUrl
+                    });
+                    console.log(`[HMR] Sent reload message via send():`, { type: 'full-reload', path: htmlUrl });
+                  } catch (err) {
+                    console.error(`[HMR] Error using send():`, err);
+                  }
+                });
+              }
+            }
+          } catch (err) {
+            console.error(`[HMR] Error sending reload message:`, err);
+          }
+          
+          return [];
+        }
+        
+        // Handle blog post files
         const relativePath = relative(blogDir, file);
         const postName = dirname(relativePath);
         
@@ -981,6 +1238,7 @@ export function markdownPlugin() {
     
     configureServer(server) {
       const blogDir = resolve(process.cwd(), 'articles');
+      const resumeDir = resolve(process.cwd(), 'resume');
       const templateHTMLPath = join(blogDir, '_template', 'index.html');
       const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
       const darkModeCSSPath = join(blogDir, '_template', 'dark-mode.css');
@@ -991,7 +1249,18 @@ export function markdownPlugin() {
       
       // Function to get the HTML URL for a markdown file
       function getHtmlUrlForMarkdown(mdPath) {
-        const relativePath = relative(blogDir, mdPath);
+        const absoluteMdPath = resolve(mdPath);
+        
+        // Check if it's a resume file
+        if (absoluteMdPath.startsWith(resumeDir)) {
+          const fileName = basename(mdPath);
+          // Extract language from filename if present
+          const langMatch = fileName.match(/content\.([a-z]{2}(-[a-z]{2})?)\.md$/i);
+          const lang = langMatch ? langMatch[1].toLowerCase() : null;
+          return lang ? `/resume/${lang}` : '/resume';
+        }
+        
+        const relativePath = relative(blogDir, absoluteMdPath);
         const postName = dirname(relativePath);
         const fileName = basename(mdPath);
         
@@ -1109,7 +1378,45 @@ export function markdownPlugin() {
         setupMarkdownWatcher(absoluteMdPath);
       }
       
-      console.log(`[HMR] Watching ${blogPosts.length} markdown file(s) for changes`);
+      // Add resume markdown files to watcher (including language variants)
+      const resumeMdPath = join(resumeDir, 'content.md');
+      let resumeCount = 0;
+      if (existsSync(resumeMdPath)) {
+        const absoluteResumeMdPath = resolve(resumeMdPath);
+        try {
+          server.watcher.add(absoluteResumeMdPath);
+          console.log(`[HMR] Added to Vite watcher: ${relative(process.cwd(), absoluteResumeMdPath)}`);
+        } catch (err) {
+          console.warn(`[HMR] Failed to add ${absoluteResumeMdPath} to watcher:`, err.message);
+        }
+        setupMarkdownWatcher(absoluteResumeMdPath);
+        resumeCount++;
+      }
+      
+      // Check for language-specific resume files
+      try {
+        const resumeFiles = readdirSync(resumeDir);
+        const langPattern = /^content\.([a-z]{2}(-[a-z]{2})?)\.md$/i;
+        for (const file of resumeFiles) {
+          const match = file.match(langPattern);
+          if (match) {
+            const langMdPath = join(resumeDir, file);
+            const absoluteLangMdPath = resolve(langMdPath);
+            try {
+              server.watcher.add(absoluteLangMdPath);
+              console.log(`[HMR] Added to Vite watcher: ${relative(process.cwd(), absoluteLangMdPath)}`);
+            } catch (err) {
+              console.warn(`[HMR] Failed to add ${absoluteLangMdPath} to watcher:`, err.message);
+            }
+            setupMarkdownWatcher(absoluteLangMdPath);
+            resumeCount++;
+          }
+        }
+      } catch (err) {
+        // Ignore errors
+      }
+      
+      console.log(`[HMR] Watching ${blogPosts.length} markdown file(s) for changes${resumeCount > 0 ? ` + ${resumeCount} resume file(s)` : ''}`);
       
       // Test: Log WebSocket info
       console.log(`[HMR DEBUG] WebSocket server:`, server.ws ? 'exists' : 'missing');
@@ -1204,6 +1511,7 @@ export function markdownPlugin() {
       
       
       // Serve shared CSS
+      const resumeCSSPath = join(resumeDir, 'resume-styles.css');
       server.middlewares.use((req, res, next) => {
         if (req.url === '/blog-styles.css') {
           if (existsSync(templateCSSPath)) {
@@ -1221,12 +1529,20 @@ export function markdownPlugin() {
           } else {
             next();
           }
+        } else if (req.url === '/resume/resume-styles.css') {
+          if (existsSync(resumeCSSPath)) {
+            const cssContent = readFileSync(resumeCSSPath, 'utf-8');
+            res.setHeader('Content-Type', 'text/css; charset=utf-8');
+            res.end(cssContent);
+          } else {
+            next();
+          }
         } else {
           next();
         }
       });
       
-      // Serve images from blog post directories
+      // Serve images from blog post directories and resume directory
       server.middlewares.use((req, res, next) => {
         // Check if this is a request for an image in a blog post directory
         // Pattern: /articles/{postName}/{imageName}
@@ -1266,6 +1582,45 @@ export function markdownPlugin() {
             }
           }
         }
+        
+        // Check if this is a request for an image in the resume directory
+        // Pattern: /resume/{imageName}
+        const resumeImageMatch = req.url?.match(/^\/resume\/(.+)$/);
+        if (resumeImageMatch) {
+          const imageName = resumeImageMatch[1];
+          const imagePath = join(resumeDir, imageName);
+          
+          // Check if it's an image file (common extensions)
+          const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp', '.ico'];
+          const isImage = imageExtensions.some(ext => imageName.toLowerCase().endsWith(ext));
+          
+          if (isImage && existsSync(imagePath)) {
+            try {
+              const imageContent = readFileSync(imagePath);
+              // Determine content type based on extension
+              const ext = imageName.toLowerCase().split('.').pop();
+              const contentTypeMap = {
+                'png': 'image/png',
+                'jpg': 'image/jpeg',
+                'jpeg': 'image/jpeg',
+                'gif': 'image/gif',
+                'svg': 'image/svg+xml',
+                'webp': 'image/webp',
+                'bmp': 'image/bmp',
+                'ico': 'image/x-icon'
+              };
+              const contentType = contentTypeMap[ext] || 'application/octet-stream';
+              
+              res.setHeader('Content-Type', contentType);
+              res.setHeader('Content-Length', imageContent.length);
+              res.end(imageContent);
+              return;
+            } catch (err) {
+              console.warn(`Warning: Could not serve image ${req.url}:`, err.message);
+            }
+          }
+        }
+        
         next();
       });
       
@@ -1290,14 +1645,162 @@ export function markdownPlugin() {
       });
       
       // Handle markdown files in dev mode
-      server.middlewares.use(async (req, res, next) => {
+      // This middleware must run before Vite's HTML plugin
+      // We use a custom middleware that checks routes first
+      const markdownMiddleware = async (req, res, next) => {
         // Only handle HTML files from blog directory or article routes
         // Pattern: /articles/{name} or /articles/{name}/{lang} or /articles/{name}/{lang}.html
+        // Also handle /resume route and /resume/{lang}
         const rawUrl = req.url || '/';
         const pathname = rawUrl.split('?')[0].split('#')[0];
         const articleMatch = pathname.match(/^\/articles\/([^/]+)(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i);
+        const resumeMatch = pathname.match(/^\/resume(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i);
         const isHtmlFile = pathname.endsWith('.html');
         
+        // Handle resume route (including language variants)
+        if (resumeMatch) {
+          const lang = resumeMatch[1] ? resumeMatch[1].toLowerCase() : null;
+          const resumeMdPath = lang 
+            ? join(resumeDir, `content.${lang}.md`)
+            : join(resumeDir, 'content.md');
+          const resumeHtmlPath = lang
+            ? join(resumeDir, `index.${lang}.html`)
+            : join(resumeDir, 'index.html');
+          
+          // Always serve the resume HTML file if it exists, even if markdown processing isn't needed
+          if (existsSync(resumeHtmlPath)) {
+            try {
+              let htmlContent = readFileSync(resumeHtmlPath, 'utf-8');
+              
+              // Only process markdown if the marker exists
+              if (existsSync(resumeMdPath) && htmlContent.includes('<div id="blog-content"></div>')) {
+                configureMarked();
+                const markdownContent = readFileSync(resumeMdPath, 'utf-8');
+                const content = typeof markdownContent === 'string' ? markdownContent : String(markdownContent || '');
+                
+                const { frontmatter, content: bodyContent } = parseFrontmatter(content);
+                
+                let title = frontmatter?.title || extractTitle(bodyContent) || 'Résumé';
+                const date = frontmatter?.date || frontmatter?.published || null;
+                const formattedDate = formatDate(date);
+                const author = frontmatter?.author || null;
+                
+                let markdownToRender = bodyContent;
+                if (title && extractTitle(bodyContent)) {
+                  markdownToRender = removeFirstH1(bodyContent);
+                }
+                
+                markdownToRender = processMathInMarkdown(markdownToRender);
+                const htmlFromMd = marked.parse(markdownToRender);
+                
+                if (htmlContent.includes('<header>')) {
+                  const headerMatch = htmlContent.match(/<header>([\s\S]*?)<\/header>/);
+                  const headerContent = headerMatch ? headerMatch[1].trim() : '';
+                  
+                  let newHeaderContent = '';
+                  
+                  if (htmlContent.includes('<h1>')) {
+                    htmlContent = htmlContent.replace(
+                      /<h1>.*?<\/h1>/,
+                      `<h1>${escapeHtml(title)}</h1>`
+                    );
+                    newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
+                  } else {
+                    newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
+                  }
+                  
+                  if (formattedDate || author) {
+                    const dateISO = date || new Date().toISOString().split('T')[0];
+                    let metaContent = '';
+                    if (formattedDate) {
+                      metaContent = `<time datetime="${dateISO}">${formattedDate}</time>`;
+                    }
+                    if (author) {
+                      if (metaContent) {
+                        metaContent += ` • ${escapeHtml(author)}`;
+                      } else {
+                        metaContent = escapeHtml(author);
+                      }
+                    }
+                    
+                    if (htmlContent.includes('<time') || htmlContent.includes('<div class="meta">')) {
+                      htmlContent = htmlContent.replace(
+                        /<div class="meta">.*?<\/div>/,
+                        `<div class="meta">${metaContent}</div>`
+                      );
+                      if (htmlContent.includes('<time') && !htmlContent.includes('<div class="meta">')) {
+                        htmlContent = htmlContent.replace(
+                          /<time datetime="[^"]*">[^<]*<\/time>/,
+                          `<div class="meta">${metaContent}</div>`
+                        );
+                      }
+                    } else {
+                      newHeaderContent += `\n        <div class="meta">${metaContent}</div>`;
+                    }
+                  }
+                  
+                  if (!headerContent && newHeaderContent) {
+                    htmlContent = htmlContent.replace(
+                      /<header>\s*<\/header>/,
+                      `<header>\n        ${newHeaderContent}\n      </header>`
+                    );
+                  }
+                }
+                
+                htmlContent = htmlContent.replace(
+                  '<div id="blog-content"></div>',
+                  `<div id="blog-content"><article>${htmlFromMd}</article></div>`
+                );
+                
+                // Process images for dev mode
+                htmlContent = processImagesForDev(htmlContent, resumeDir, 'resume');
+                
+                // Inject Vite HMR client script for dev mode
+                if (!htmlContent.includes('@vite/client') && !htmlContent.includes('vite/client')) {
+                  const viteClientScript = '<script type="module" src="/@vite/client"></script>';
+                  
+                  if (htmlContent.includes('</body>')) {
+                    htmlContent = htmlContent.replace('</body>', `${viteClientScript}\n  </body>`);
+                  } else if (htmlContent.includes('</html>')) {
+                    htmlContent = htmlContent.replace('</html>', `${viteClientScript}\n</html>`);
+                  } else {
+                    htmlContent += viteClientScript;
+                  }
+                }
+                
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                res.setHeader('Content-Length', Buffer.byteLength(htmlContent));
+                res.end(htmlContent);
+                return;
+              } else {
+                // HTML exists but doesn't need markdown processing - still serve it
+                // Inject Vite HMR client script for dev mode
+                if (!htmlContent.includes('@vite/client') && !htmlContent.includes('vite/client')) {
+                  const viteClientScript = '<script type="module" src="/@vite/client"></script>';
+                  
+                  if (htmlContent.includes('</body>')) {
+                    htmlContent = htmlContent.replace('</body>', `${viteClientScript}\n  </body>`);
+                  } else if (htmlContent.includes('</html>')) {
+                    htmlContent = htmlContent.replace('</html>', `${viteClientScript}\n</html>`);
+                  } else {
+                    htmlContent += viteClientScript;
+                  }
+                }
+                
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                res.setHeader('Content-Length', Buffer.byteLength(htmlContent));
+                res.end(htmlContent);
+                return;
+              }
+            } catch (error) {
+              console.warn(`Error in markdown plugin for ${req.url}:`, error.message);
+              return next();
+            }
+          }
+          return next();
+        }
+        
+        // Continue with article handling...
         if (!pathname || (!isHtmlFile && !articleMatch)) {
           return next();
         }
@@ -1585,7 +2088,10 @@ export function markdownPlugin() {
           console.warn(`Error in markdown plugin for ${req.url}:`, error.message);
           return next();
         }
-      });
+      };
+      
+      // Register the markdown middleware - use it early to handle resume routes
+      server.middlewares.use(markdownMiddleware);
       
       // Directly serve 404 page for non-article routes that don't map to on-disk files
       server.middlewares.use((req, res, next) => {
@@ -1746,4 +2252,5 @@ export function markdownPlugin() {
     }
   };
 }
+
 

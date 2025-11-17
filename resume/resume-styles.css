@@ -1,0 +1,217 @@
+/* Resume-specific styles */
+
+/* Override font-family for Chinese text - use Source Han Serif */
+body {
+  font-family: 'Iowan Old Style', 'Noto Serif TC', 'Noto Serif SC', 'Noto Serif', 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, 'Times New Roman', serif;
+}
+
+.container {
+  max-width: 900px;
+}
+
+.resume-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--code-border-color, #e1e4e8);
+}
+
+.resume-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.resume-contact {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-meta-color);
+  line-height: 1.8;
+}
+
+.resume-contact a {
+  color: var(--link-color);
+  text-decoration: none;
+  border-bottom: 1px solid var(--link-decoration-color);
+  padding-bottom: 1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.resume-contact a:hover {
+  color: var(--link-hover-color);
+  border-bottom-color: var(--link-decoration-hover-color);
+}
+
+.separator {
+  color: var(--text-meta-color);
+  opacity: 0.5;
+  margin: 0 0.25rem;
+}
+
+.resume-section {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--code-border-color, #e1e4e8);
+}
+
+.resume-section:last-child {
+  border-bottom: none;
+}
+
+.resume-section h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+  line-height: 1.4;
+}
+
+.resume-company {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.resume-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-meta-color);
+  line-height: 1.6;
+}
+
+.resume-date,
+.resume-duration,
+.resume-location {
+  color: var(--text-meta-color);
+}
+
+.resume-tech {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.4rem 0.8rem;
+  background-color: var(--inline-code-bg, #f6f8fa);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.resume-skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.resume-skill-category {
+  padding: 0.75rem 1rem;
+  background-color: var(--inline-code-bg, #f6f8fa);
+  border-radius: 6px;
+  line-height: 1.6;
+}
+
+.resume-skill-category strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+article .resume-section ul {
+  margin-top: 0.75rem;
+}
+
+article .resume-section ul li {
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+}
+
+/* Hide default article header since we have custom resume header */
+header,
+article > header,
+.container > header {
+  display: none !important;
+}
+
+article {
+  margin-top: 0;
+}
+
+/* Also hide meta information if it appears */
+.meta {
+  display: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .resume-name {
+    font-size: 2rem;
+  }
+
+  .resume-contact {
+    font-size: 0.85rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .resume-contact .separator {
+    display: none;
+  }
+
+  .resume-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+
+  .resume-meta .separator {
+    display: none;
+  }
+
+  .resume-meta > * {
+    display: block;
+  }
+
+  .resume-tech {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .resume-skills {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .resume-section h3 {
+    font-size: 1.15rem;
+  }
+}
+
+@media print {
+  .resume-header {
+    border-bottom: 1px solid #000;
+  }
+
+  .resume-section {
+    border-bottom: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+
+  .resume-contact a {
+    color: #000;
+    border-bottom: none;
+  }
+}
+
