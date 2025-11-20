@@ -29,14 +29,14 @@ published: 2025-01-01
 </div>
 <div class="resume-tech">React • TypeScript • PixiJS • HTML Canvas • WebGL</div>
 
-**<a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>：線上協作白板平台**
+**主要參與開發的產品: <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a> - 線上協作白板平台**
 
-- 使用 **React**、**TypeScript** 和 **PixiJS** 開發和維護 <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>
-- 最佳化筆觸橡皮擦效能使擦拭計算時間減少至少 30%；筆觸橡皮擦是大多數無限畫布產品（例如 Excalidraw、tldraw）中沒有的功能。Miro 最近才導入此功能（稱為 Precision Eraser），但使用者體驗跟 TeamOne 截然不同。
-- 將實作於 DOM 的互動元素重構成基於 Canvas 渲染的元素，以提升應用程式效能，與使用者操作體驗的流暢度。
-- 重構客製化文字編輯器，將框架從 Slate.js 轉換成 Lexical。
-- 實作客製化的 pixi mesh 來渲染重疊的半透明筆觸，使其顏色不會混合在一起。
-- 與後端工程師、其他前端工程師協作，以 scrum 敏捷模式開發 PM roadmap 上重大的新功能。
+- 使用 **React**、**Next.js**、**TypeScript** 和 **PixiJS** 開發及維護 <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>
+- 最佳化筆觸橡皮擦計算方式，提升至少 30% 的效能；筆觸像皮擦是大不份線上協作白板缺少的功能，(Excalidraw、tldraw 皆不具備此功能)，Miro 近期推出的 Precision Eraser 、 Whimsical 的 Eraser Tool 與 BenQ 的 EZWrite 皆有實作此功能，但使用者體驗與 TeamOne 截然不同。
+- 透過將互動元素從 DOM 遷移至 canvas，解決了關鍵的同步問題並提升應用程式效能（確保主線程交互不會阻塞）。
+- 透過將客製化文字編輯器從基於 Slate.js 重構為基於 Lexical，增強了文字編輯功能和使用者體驗，為未來功能開發帶來更高的靈活性和可維護性。
+- 透過實作客製化 mesh，改善視覺品質和使用者體驗，在重疊透明筆畫時保留個別筆畫顏色，消除顏色混合的視覺瑕疵。
+- 與後端團隊合作，實作讓使用者無需登入平台也可以分享及共編白板的功能。
 
 </div>
 
@@ -124,19 +124,12 @@ published: 2025-01-01
 
 ### <a href="https://github.com/ue-too/ue-too" target="_blank">ue-too</a>
 
-一個將 HTML canvas 轉換為無限畫布的函式庫。它具有以下特點：
-
-- 不依賴任何外部函式庫。使用純 **JavaScript** 和 **TypeScript** 建構。
-- 開箱即用的畫布平移、縮放和旋轉支援。
-- 支援不同的輸入方式：鍵盤滑鼠、觸控板和觸控操作。
-- 使用 Rollup 打包，使用 Jest 測試，並使用 GitHub Actions 進行 CI 和自動發布到 npmjs。
-- board 的一些範例應用可以在 <a href="https://github.com/niuee/board-testground" target="_blank">board testground</a> 找到。
-
-**其他專案：**
-
-- <a href="https://github.com/niuee/bend" target="_blank"><strong>bend</strong></a>：一個貝茲曲線計算函式庫
-- <a href="https://github.com/niuee/bolt" target="_blank"><strong>bolt</strong></a>：一個利用四元樹進行快速碰撞檢測的基礎物理模擬
-- <a href="https://github.com/niuee/bounce" target="_blank"><strong>bounce</strong></a>：一個動畫函式庫
+用於快速搭建基於 HTML canvas 的應用程式。主要分為以下幾個模組套件（彼此可以各自獨立）（所有套件皆由一個 <a href="https://github.com/ue-too/ue-too" target="_blank">monorepo</a> 做管理）：
+- <a href="https://github.com/ue-too/board" target="_blank"><strong>board</strong></a>：HTML canvas viewport 的管理工具。可以快速建立一個簡易的無限畫布，並支援平移、縮放、旋轉等操作。
+- <a href="https://github.com/ue-too/ue-too/tree/main/packages/being" target="_blank"><strong>being</strong></a>：有限狀態機的實作。 board 其中判斷使用者操作意圖的部分有使用到這個套件，
+- <a href="https://github.com/ue-too/ue-too/tree/main/packages/animate" target="_blank"><strong>animate</strong></a>：簡易動畫函式庫。
+- <a href="https://github.com/ue-too/ue-too/tree/main/packages/curve" target="_blank"><strong>curve</strong></a>：貝茲曲線計算。
+- <a href="https://github.com/ue-too/ue-too/tree/main/packages/math" target="_blank"><strong>math</strong></a>：基礎數學計算（主要是向量相關）。
 
 </div>
 
@@ -153,4 +146,3 @@ published: 2025-01-01
 - <a href="https://github.com/niuee/point2point" target="_blank"><strong>point2point</strong></a>：一個用於向量計算的簡單 TypeScript 函式庫。主要用於賽道製作器。
 
 </div>
-
