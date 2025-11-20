@@ -29,12 +29,14 @@ published: 2025-01-01
 </div>
 <div class="resume-tech">React • TypeScript • PixiJS • HTML Canvas • WebGL</div>
 
-**<a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>: Online Collaboration Whiteboard Platform**
+**<a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>: An Online Collaboration Whiteboard Platform**
 
-- Develop and maintain <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>, an online collaboration whiteboard platform using **React**, **TypeScript**, and **PixiJS**.
-- Optimized the new stroke eraser performance by at least 30%, a feature not found in most infinite canvas products (e.g., Excalidraw, tldraw). Miro introduced this feature (known as the precision eraser) recently but the UX is drastically different.
+- Developed and maintained <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>, an online collaboration whiteboard platform serving real-time collaborative editing using **React**, **Next.js**, **TypeScript**, and **PixiJS**.
+- Optimized the calculation algorithm for the novel stroke eraser feature providing at least 30% performance improvement, offering a superior UX compared to Miro's recent precision eraser.
 - Migrated DOM-based interactive elements to canvas-based elements to improve the performance of the app.
-- Implemented a custom mesh for rendering overlapping transparent pen strokes so their color does not blend together.
+- Improved visual quality and user experience by implementing a custom mesh that preserves individual stroke colors when overlapping transparent pen strokes, eliminating color blending artifacts.
+- Improved text editing capabilities and user experience by refactoring the custom text editor to switch from using Slate.js to using Lexical, resulting in improved flexibility and maintainability for future feature development.
+- Collaborated with the backend team to implement a feature that allows users to share and collaborate on their whiteboard without the need to login to the platform.
 
 </div>
 
@@ -140,6 +142,13 @@ A library that transforms HTML canvas into infinite canvas. It has the following
 
 <div class="resume-section">
 
+### <a href="https://github.com/ue-too/ue-too/tree/main/apps/banana" target="_blank"><strong>banana</strong></a>
+This is what I currently devoted most of my time to in terms of side projects. This is a city builder simulation that focuses on the railroad system.
+
+</div>
+
+<div class="resume-section">
+
 ### Web Based Horse Racing Simulation Game
 
 A series of projects that will ultimately come together as a horse racing simulation game.
@@ -151,4 +160,3 @@ A series of projects that will ultimately come together as a horse racing simula
 - <a href="https://github.com/niuee/point2point" target="_blank"><strong>point2point</strong></a>: A simple TypeScript library used for vector calculations. This is mostly used in the race track maker.
 
 </div>
-
