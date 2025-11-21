@@ -32,11 +32,11 @@ published: 2025-01-01
 **主要參與開發的產品: <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a> - 線上協作白板平台**
 
 - 使用 **React**、**Next.js**、**TypeScript** 和 **PixiJS** 開發及維護 <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>
-- 最佳化筆觸橡皮擦計算方式，提升至少 30% 的效能；筆觸像皮擦是大不份線上協作白板缺少的功能，(Excalidraw、tldraw 皆不具備此功能)，Miro 近期推出的 Precision Eraser 、 Whimsical 的 Eraser Tool 與 BenQ 的 EZWrite 皆有實作此功能，但使用者體驗與 TeamOne 截然不同。
+- 最佳化筆觸橡皮擦計算方式，提升至少 30% 的效能；與 Miro 近期推出的 Precision Eraser 使用體驗截然不同。
 - 透過將互動元素從 DOM 遷移至 canvas，解決了關鍵的同步問題並提升應用程式效能（確保主線程交互不會阻塞）。
 - 透過將客製化文字編輯器從基於 Slate.js 重構為基於 Lexical，增強了文字編輯功能和使用者體驗，為未來功能開發帶來更高的靈活性和可維護性。
 - 透過實作客製化 mesh，改善視覺品質和使用者體驗，在重疊透明筆畫時保留個別筆畫顏色，消除顏色混合的視覺瑕疵。
-- 與後端團隊合作，實作讓使用者無需登入平台也可以分享及共編白板的功能。
+- 與後端團隊合作，實作讓使用者無需登入平台也可以分享及共編白板的功能。(目前尚未上線，預計 2026 年第一季上線)
 
 </div>
 
@@ -135,14 +135,19 @@ published: 2025-01-01
 
 <div class="resume-section">
 
+### <a href="https://github.com/ue-too/ue-too/tree/main/apps/banana" target="_blank"><strong>banana</strong></a>
+目前投入最多時間在這個專案上面。目標是想要做一個城市發展模擬的遊戲，但主要聚焦在鐵路的建設和發展。可以參考 [readme](https://github.com/ue-too/ue-too/tree/main/apps/banana) 了解更多。或是去這個 [live demo](https://banana.vntchang.dev) 看看。
+
+</div>
+
+<div class="resume-section">
+
 ### 網頁版賽馬模擬
 
 一系列最終將整合為賽馬模擬遊戲的專案。
 
-- <a href="https://github.com/niuee/hrphysics-simulation" target="_blank"><strong>HR Physics Simulation</strong></a>：使用 Python 實作的簡化物理模擬。
-- <a href="https://github.com/niuee/hrGraphql" target="_blank"><strong>HR GraphQL Server</strong></a>：使用 gqlgen 函式庫在 Golang 中實作的 GraphQL 伺服器。此 GraphQL 伺服器作為查詢賽馬複雜資料（例如賽馬的血統）的 API 端點。<a href="https://vntchang.dev/hrgraphql" target="_blank">線上演示</a>
-- <a href="https://github.com/niuee/hrcrawler" target="_blank"><strong>HR Crawler</strong></a>：使用 BeautifulSoup 解析 HTML 頁面的 Python 爬蟲；該爬蟲從日本網站 netkeiba.com 抓取真實世界的賽馬資料。部分抓取的資料會呈現在上述 GraphQL 伺服器中。
-- <a href="https://github.com/niuee/hrracetrack-maker" target="_blank"><strong>HR Racetrack Maker</strong></a>：用於建立賽道的編輯器，可在上述物理引擎中用於模擬賽馬。這基本上是一個貝茲曲線編輯器。不同操作背後的邏輯靈感來自 3D 建模軟體 Blender。<a href="https://vntchang.dev/racetrack-maker" target="_blank">線上演示</a>
-- <a href="https://github.com/niuee/point2point" target="_blank"><strong>point2point</strong></a>：一個用於向量計算的簡單 TypeScript 函式庫。主要用於賽道製作器。
-
+- <a href="https://github.com/niuee/hrphysics-simulation" target="_blank"><strong>HR Physics Simulation</strong></a>：使用 Python 實作的簡化物理模擬，主要是模擬 Top Down 2D 的碰撞檢測以及運動狀態。
+- <a href="https://github.com/niuee/hrGraphql" target="_blank"><strong>HR GraphQL Server</strong></a>：使用 gqlgen 實作的一個 GraphQL 伺服器。主要作為查詢賽馬血統相關的複雜資料（例如家系、等等）<a href="https://vntchang.dev/hrgraphql" target="_blank">線上演示</a>
+- <a href="https://github.com/niuee/hrcrawler" target="_blank"><strong>HR Crawler</strong></a>：簡易的 Python 爬蟲；主要從日本網站 netkeiba.com 抓取真實世界的賽馬資料。部分抓取的資料會呈現在上述 GraphQL 伺服器中。並非用來盈利，主要是實驗性質，之後的會使用虛構架空的賽馬資料。
+- <a href="https://github.com/niuee/hrracetrack-maker" target="_blank"><strong>HR Racetrack Maker</strong></a>：用於建立賽道的編輯器，可在上述物理引擎中用於模擬賽馬。基本上是一個貝茲曲線編輯器。操作背後的邏輯靈感來自 3D 建模軟體 Blender。<a href="https://vntchang.dev/racetrack-maker" target="_blank">live demo</a>
 </div>

@@ -98,6 +98,8 @@ Started taking courses within the CS curriculum as technical electives. Followed
 
 ## Technical Skills
 
+<div class="resume-section">
+
 <div class="resume-skills">
 
 <div class="resume-skill-category">
@@ -114,6 +116,8 @@ Started taking courses within the CS curriculum as technical electives. Followed
 
 <div class="resume-skill-category">
   <strong>Languages:</strong> Chinese/Mandarin (Native), English (Fluent)
+</div>
+
 </div>
 
 </div>
