@@ -96,7 +96,7 @@ published: 2025-01-01
 
 </div>
 
-## 使用過的技術與工具
+## 技術能力
 
 <div class="resume-skills">
 
@@ -135,7 +135,7 @@ published: 2025-01-01
 
 <div class="resume-section">
 
-### 網頁版賽馬模擬遊戲
+### 網頁版賽馬模擬
 
 一系列最終將整合為賽馬模擬遊戲的專案。
 

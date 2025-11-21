@@ -122,21 +122,15 @@ Started taking courses within the CS curriculum as technical electives. Followed
 
 <div class="resume-section">
 
-### <a href="https://github.com/niuee/board" target="_blank">board</a>
+### <a href="https://github.com/ue-too/ue-too" target="_blank">ue-too</a>
 
-A library that transforms HTML canvas into infinite canvas. It has the following highlights:
+This is a HTML canvas toolkit for creating interactive HTML canvas applications. It consists of the following components (all of the packages are organized in a monorepo on <a href="https://github.com/ue-too/ue-too" target="_blank">GitHub</a>):
 
-- It does not rely on any external libraries. Built with vanilla **JavaScript** and **TypeScript**.
-- Out of the box support for panning, zooming, and rotating the canvas.
-- Supports different inputs: keyboard-mouse, trackpad, and touch control.
-- Bundled using Rollup, testing with Jest, and GitHub Actions for CI and automating publishing to npmjs.
-- Some example applications of board can be found at <a href="https://github.com/niuee/board-testground" target="_blank">board testground</a>.
-
-**Other Projects:**
-
-- <a href="https://github.com/niuee/bend" target="_blank"><strong>bend</strong></a>: A bezier curve computation library
-- <a href="https://github.com/niuee/bolt" target="_blank"><strong>bolt</strong></a>: A rudimental physics simulation that utilizes a quad tree for quick collision detection
-- <a href="https://github.com/niuee/bounce" target="_blank"><strong>bounce</strong></a>: An animation library
+- <a href="https://github.com/ue-too/board" target="_blank"><strong>board</strong></a>: an HTML canvas viewport management library.
+- <a href="https://github.com/ue-too/ue-too/tree/main/packages/being" target="_blank"><strong>being</strong></a>: a for finite state machine implementation.
+- <a href="https://github.com/ue-too/ue-too/tree/main/packages/animate" target="_blank"><strong>animate</strong></a>: a simple animation library.
+- <a href="https://github.com/ue-too/ue-too/tree/main/packages/curve" target="_blank"><strong>curve</strong></a>: a bezier curve computation library.
+- <a href="https://github.com/ue-too/ue-too/tree/main/packages/math" target="_blank"><strong>math</strong></a>: a math library for vector calculations.
 
 </div>
 
@@ -158,5 +152,4 @@ A series of projects that will ultimately come together as a horse racing simula
 - <a href="https://github.com/niuee/hrcrawler" target="_blank"><strong>HR Crawler</strong></a>: A simple crawler implemented in Python using BeautifulSoup to parse HTML pages; the crawler scrapes real-world race horses data from a Japanese website netkeiba.com. Some portion of the crawled data is presented in the GraphQL server mentioned above.
 - <a href="https://github.com/niuee/hrracetrack-maker" target="_blank"><strong>HR Racetrack Maker</strong></a>: An editor used to create race tracks that can be used in the physics engine mentioned above to simulate horse races. This is essentially a bezier curve editor. The logic behind different operations is inspired by the 3D modeling software Blender. <a href="https://vntchang.dev/racetrack-maker" target="_blank">Live Demo</a>
 - <a href="https://github.com/niuee/point2point" target="_blank"><strong>point2point</strong></a>: A simple TypeScript library used for vector calculations. This is mostly used in the race track maker.
-
 </div>
