@@ -80,6 +80,6 @@ I'll list out some of the libraries that I've surveyed and why I didn't choose t
 
 - [pixi-viewport](https://github.com/pixijs-userland/pixi-viewport): it's a great library and it's the closest to what I want. But it's tied to the pixi.js framework; the plugin system is exactly what I initially planned for @ue-too/board but then I realized that I needed to have a more flexible plugin system. pixi-viewport's plugin is tied to the event handlers but not all behaviors are directly related to those.
 - [infinite-canvas](https://infinite-canvas.org/): it wraps around the canvas 2D rendering context and provides a way to actually draw lines or geometries on the canvas that extends to infinity. Although it does come with some viewport management features, there are too many other features that I don't need. 
-- [scroller](https://github.com/pbakaus/scroller): it's a standalone library that is independent of any framework but when I surveyed the library it was being activly maintained. But seems like the author is make new updates recently.
+- [scroller](https://github.com/pbakaus/scroller): it's a standalone library that is independent of any framework but when I surveyed the library it not was being activly maintained. But seems like the author is making new updates recently.
 
-There are many many more libraries that I haven't listed here. 
+In the next article, I'll start to dissect the source code of @ue-too/board.
