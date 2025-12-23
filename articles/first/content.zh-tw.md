@@ -2,6 +2,7 @@
 title: 第一篇文章
 published: 2025-11-04
 author: vee
+tags: tutorial, demo
 ---
 
 # First Post

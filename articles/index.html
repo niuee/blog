@@ -1,0 +1,1265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Articles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/dark-mode.css" />
+    <link rel="stylesheet" href="/blog-styles.css" />
+    <script>
+      // Set font size attribute immediately before body renders to prevent animation
+      (function() {
+        const savedFontSize = localStorage.getItem('blog-font-size') || 'large';
+        document.documentElement.setAttribute('data-font-size', savedFontSize);
+      })();
+      
+      // Set language attribute based on current URL
+      (function() {
+        const urlMatch = window.location.pathname.match(/^\/articles(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/)?$/i);
+        if (urlMatch && urlMatch[1]) {
+          document.documentElement.lang = urlMatch[1].toLowerCase();
+        } else {
+          const savedLang = localStorage.getItem('blog-language');
+          document.documentElement.lang = savedLang || 'en';
+        }
+      })();
+    </script>
+    <style>
+      .articles-header {
+        margin-bottom: 2rem;
+      }
+      
+      .articles-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .articles-header .subtitle {
+        color: var(--text-meta-color);
+        font-size: 1.1rem;
+      }
+      
+      .article-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      
+      .article-item {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--table-border-color, #e5e7eb);
+      }
+      
+      .article-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+      
+      .article-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      
+      .article-link:hover .article-title {
+        color: var(--link-hover-color, #2563eb);
+      }
+      
+      .article-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        transition: color 0.2s ease;
+      }
+      
+      .article-meta {
+        color: var(--text-meta-color);
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+      }
+      
+      .article-excerpt {
+        color: var(--text-color);
+        line-height: 1.6;
+        opacity: 0.85;
+      }
+      
+      .back-link {
+        display: inline-block;
+        margin-bottom: 2rem;
+        color: var(--text-meta-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s ease;
+      }
+      
+      .back-link:hover {
+        color: var(--link-hover-color, #2563eb);
+      }
+      
+      .back-link::before {
+        content: "← ";
+      }
+      
+      .no-articles {
+        color: var(--text-meta-color);
+        font-style: italic;
+      }
+      
+      /* Controls section */
+      .articles-controls {
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid var(--table-border-color, #e5e7eb);
+        overflow: hidden;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .articles-controls {
+        border-color: #444;
+      }
+      
+      .controls-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background: var(--bg-secondary, #f8f9fa);
+        cursor: pointer;
+        user-select: none;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .controls-header {
+        --bg-secondary: transparent;
+      }
+      
+      .controls-header:hover {
+        background: var(--bg-hover, #f0f0f0);
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .controls-header:hover {
+        --bg-hover: #2a2a2a;
+      }
+      
+      .controls-title {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-meta-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      
+      .controls-toggle {
+        font-size: 0.75rem;
+        color: var(--text-meta-color);
+        transition: transform 0.2s ease;
+      }
+      
+      .articles-controls.collapsed .controls-toggle {
+        transform: rotate(-90deg);
+      }
+      
+      .controls-body {
+        padding: 1rem;
+        border-top: 1px solid var(--table-border-color, #e5e7eb);
+        transition: max-height 0.2s ease, padding 0.2s ease, opacity 0.2s ease;
+        max-height: 200px;
+        opacity: 1;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .controls-body {
+        border-top-color: #444;
+      }
+      
+      .articles-controls.collapsed .controls-body {
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        opacity: 0;
+        border-top: none;
+        overflow: hidden;
+      }
+      
+      .controls-summary {
+        font-size: 0.8rem;
+        color: var(--text-meta-color);
+        opacity: 0.7;
+      }
+      
+      .articles-controls:not(.collapsed) .controls-summary {
+        display: none;
+      }
+      
+      .articles-controls-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      
+      .articles-filter,
+      .articles-sort {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      
+      .articles-filter label,
+      .articles-sort label {
+        font-size: 0.9rem;
+        color: var(--text-meta-color);
+        white-space: nowrap;
+      }
+      
+      .tag-filter-select,
+      .sort-order-select {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.9rem;
+        border: 1px solid var(--table-border-color, #e5e7eb);
+        border-radius: 6px;
+        background: var(--bg-color, #fff);
+        color: var(--text-color);
+        cursor: pointer;
+        min-width: 120px;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .tag-filter-select,
+      :root:has(#dark-mode-toggle:checked) .sort-order-select {
+        background: transparent;
+        border-color: #555;
+        color: #ccc;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .tag-filter-select option,
+      :root:has(#dark-mode-toggle:checked) .sort-order-select option {
+        background: #1a1a1a;
+        color: #ccc;
+      }
+      
+      .tag-filter-select:hover,
+      .sort-order-select:hover {
+        border-color: #888;
+      }
+      
+      .articles-info {
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        color: var(--text-meta-color);
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+      
+      .active-filter {
+        padding: 0.2rem 0.5rem;
+        background: #555;
+        color: white;
+        border-radius: 4px;
+        font-size: 0.8rem;
+      }
+      
+      .active-filter .clear-filter {
+        margin-left: 0.4rem;
+        cursor: pointer;
+        opacity: 0.8;
+      }
+      
+      .active-filter .clear-filter:hover {
+        opacity: 1;
+      }
+      
+      /* Tags */
+      .article-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+      }
+      
+      .article-tag {
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        font-size: 0.75rem;
+        background: var(--tag-bg, #f0f0f0);
+        color: var(--tag-color, #555);
+        border-radius: 4px;
+        font-weight: 500;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .article-tag {
+        --tag-bg: #333;
+        --tag-color: #bbb;
+      }
+      
+      /* Pagination */
+      .articles-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--table-border-color, #e5e7eb);
+      }
+      
+      .articles-pagination:empty {
+        display: none;
+      }
+      
+      .pagination-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        border: 1px solid var(--table-border-color, #e5e7eb);
+        border-radius: 6px;
+        background: var(--bg-color, #fff);
+        color: var(--text-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .pagination-btn:hover:not(:disabled) {
+        border-color: #888;
+        color: #333;
+      }
+      
+      .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .pagination-btn {
+        background: transparent;
+        border-color: #555;
+        color: #ccc;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .pagination-btn:hover:not(:disabled) {
+        border-color: #888;
+        color: #fff;
+      }
+      
+      .pagination-info {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        color: var(--text-meta-color);
+      }
+      
+      .pagination-pages {
+        display: flex;
+        gap: 0.25rem;
+      }
+      
+      .page-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.85rem;
+        border: 1px solid var(--table-border-color, #e5e7eb);
+        border-radius: 4px;
+        background: var(--bg-color, #fff);
+        color: var(--text-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 36px;
+      }
+      
+      .page-btn:hover:not(.active) {
+        border-color: #888;
+      }
+      
+      .page-btn.active {
+        background: #333;
+        color: white;
+        border-color: #333;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .page-btn {
+        background: transparent;
+        border-color: #555;
+        color: #ccc;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .page-btn:hover:not(.active) {
+        border-color: #888;
+        color: #fff;
+      }
+      
+      :root:has(#dark-mode-toggle:checked) .page-btn.active {
+        background: #555;
+        border-color: #555;
+        color: #fff;
+      }
+      
+      /* Hidden article */
+      .article-item.hidden {
+        display: none;
+      }
+      
+      /* No results message */
+      .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-meta-color);
+        font-style: italic;
+      }
+      
+      @media (max-width: 600px) {
+        .articles-controls-row {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .articles-filter,
+        .articles-sort {
+          width: 100%;
+        }
+        
+        .tag-filter-select,
+        .sort-order-select {
+          flex: 1;
+        }
+        
+        .pagination-pages {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="font-size-controls">
+      <button class="font-size-btn" id="font-size-small" aria-label="Small font size" title="Small">A</button>
+      <button class="font-size-btn" id="font-size-medium" aria-label="Medium font size" title="Medium">A</button>
+      <button class="font-size-btn" id="font-size-large" aria-label="Large font size" title="Large">A</button>
+    </div>
+    <input type="checkbox" id="dark-mode-toggle" class="dark-mode-toggle" />
+    <script>
+      // Set dark mode state immediately to prevent flash
+      (function() {
+        const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
+        if (savedDarkMode) {
+          const darkModeToggle = document.getElementById('dark-mode-toggle');
+          if (darkModeToggle) {
+            darkModeToggle.checked = true;
+          }
+        }
+      })();
+    </script>
+    <label for="dark-mode-toggle" class="dark-mode-label" aria-label="Toggle dark mode">
+      <span class="switch-plate">
+        <span class="switch-toggle"></span>
+      </span>
+    </label>
+    <div class="language-selector" id="language-selector">
+      <button class="language-selector-btn" id="language-selector-btn" aria-label="Select language" aria-haspopup="true" aria-expanded="false">
+        <span class="language-selector-icon">Aa</span>
+        <span class="language-selector-text" id="language-selector-text">English</span>
+      </button>
+      <div class="language-dropdown" id="language-dropdown" role="menu">
+        <!-- Language options will be populated by JavaScript -->
+      </div>
+    </div>
+    <div class="container">
+      <a href="/" class="back-link" id="back-link">Home</a>
+      <header class="articles-header">
+        <h1 id="page-title">Articles</h1>
+        <p class="subtitle" id="page-subtitle">Thoughts, tutorials, and explorations</p>
+      </header>
+      <div id="articles-list">
+        <!-- Articles will be injected here -->
+      </div>
+    </div>
+    <script>
+      // Reset scroll position on page load
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+
+      // Prevent scroll when toggling dark mode
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      const darkModeLabel = document.querySelector('.dark-mode-label');
+      
+      // Load saved dark mode preference on page load
+      const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
+      if (savedDarkMode && darkModeToggle) {
+        darkModeToggle.checked = true;
+      }
+
+      if (darkModeToggle && darkModeLabel) {
+        let scrollPosition = 0;
+        
+        darkModeLabel.addEventListener('mousedown', () => {
+          scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+        });
+        
+        darkModeLabel.addEventListener('click', (e) => {
+          e.preventDefault();
+          darkModeToggle.checked = !darkModeToggle.checked;
+          localStorage.setItem('blog-dark-mode', darkModeToggle.checked ? 'true' : 'false');
+          
+          setTimeout(() => {
+            window.scrollTo(0, scrollPosition);
+          }, 0);
+        });
+        
+        darkModeToggle.addEventListener('focus', (e) => {
+          e.preventDefault();
+          darkModeToggle.blur();
+        });
+        
+        darkModeToggle.addEventListener('change', function(e) {
+          localStorage.setItem('blog-dark-mode', e.target.checked ? 'true' : 'false');
+        });
+      }
+
+      // Font size controls
+      const fontSizeButtons = {
+        small: document.getElementById('font-size-small'),
+        medium: document.getElementById('font-size-medium'),
+        large: document.getElementById('font-size-large')
+      };
+
+      const savedFontSize = localStorage.getItem('blog-font-size') || 'large';
+      if (!document.documentElement.hasAttribute('data-font-size')) {
+        document.documentElement.setAttribute('data-font-size', savedFontSize);
+      }
+
+      document.body.classList.add('font-size-transition-enabled');
+
+      function updateFontSize(size) {
+        document.documentElement.setAttribute('data-font-size', size);
+        localStorage.setItem('blog-font-size', size);
+        
+        Object.keys(fontSizeButtons).forEach(key => {
+          if (fontSizeButtons[key]) {
+            fontSizeButtons[key].classList.toggle('active', key === size);
+          }
+        });
+      }
+
+      updateFontSize(savedFontSize);
+
+      Object.keys(fontSizeButtons).forEach(size => {
+        if (fontSizeButtons[size]) {
+          fontSizeButtons[size].addEventListener('click', () => {
+            updateFontSize(size);
+          });
+        }
+      });
+
+      // Language selector functionality
+      (function() {
+        const languageSelector = document.getElementById('language-selector');
+        const languageSelectorBtn = document.getElementById('language-selector-btn');
+        const languageDropdown = document.getElementById('language-dropdown');
+        const languageSelectorText = document.getElementById('language-selector-text');
+
+        if (!languageSelector || !languageSelectorBtn || !languageDropdown) {
+          return;
+        }
+
+        // Language names mapping
+        const languageNames = {
+          'en': 'English',
+          'zh-tw': '繁體中文',
+          'zh-cn': '简体中文',
+          'zh': '中文',
+          'ja': '日本語',
+          'ko': '한국어',
+          'es': 'Español',
+          'fr': 'Français',
+          'de': 'Deutsch',
+          'it': 'Italiano',
+          'pt': 'Português',
+          'ru': 'Русский',
+          'ar': 'العربية',
+          'hi': 'हिन्दी'
+        };
+
+        // UI translations
+        const translations = {
+          'en': {
+            home: 'Home',
+            articles: 'Articles',
+            subtitle: 'Thoughts, tutorials, and explorations',
+            prev: '← Prev',
+            next: 'Next →',
+            noResults: 'No articles match your filter.',
+            article: 'article',
+            articles_count: 'articles',
+            tag: 'Tag:'
+          },
+          'zh-tw': {
+            home: '首頁',
+            articles: '文章',
+            subtitle: '想法、教學與探索',
+            prev: '← 上一頁',
+            next: '下一頁 →',
+            noResults: '沒有符合篩選條件的文章。',
+            article: '篇文章',
+            articles_count: '篇文章',
+            tag: '標籤：'
+          },
+          'ja': {
+            home: 'ホーム',
+            articles: '記事',
+            subtitle: '考え、チュートリアル、探求',
+            prev: '← 前へ',
+            next: '次へ →',
+            noResults: 'フィルターに一致する記事がありません。',
+            article: '件の記事',
+            articles_count: '件の記事',
+            tag: 'タグ：'
+          },
+          'ko': {
+            home: '홈',
+            articles: '글',
+            subtitle: '생각, 튜토리얼, 탐구',
+            prev: '← 이전',
+            next: '다음 →',
+            noResults: '필터와 일치하는 글이 없습니다.',
+            article: '개의 글',
+            articles_count: '개의 글',
+            tag: '태그:'
+          },
+          'zh-cn': {
+            home: '首页',
+            articles: '文章',
+            subtitle: '想法、教程与探索',
+            prev: '← 上一页',
+            next: '下一页 →',
+            noResults: '没有符合筛选条件的文章。',
+            article: '篇文章',
+            articles_count: '篇文章',
+            tag: '标签：'
+          }
+        };
+
+        // Get translation for current language (expose globally)
+        window.getTranslation = function(key) {
+          const { currentLang } = getCurrentUrlInfo();
+          const lang = currentLang || 'en';
+          const langTranslations = translations[lang] || translations['en'];
+          return langTranslations[key] || translations['en'][key] || key;
+        };
+        const t = window.getTranslation;
+
+        // Apply translations to the page
+        function applyTranslations() {
+          const { currentLang } = getCurrentUrlInfo();
+          const lang = currentLang || 'en';
+          
+          // Update page elements
+          const backLink = document.getElementById('back-link');
+          const pageTitle = document.getElementById('page-title');
+          const pageSubtitle = document.getElementById('page-subtitle');
+          
+          if (backLink) backLink.textContent = t('home');
+          if (pageTitle) pageTitle.textContent = t('articles');
+          if (pageSubtitle) pageSubtitle.textContent = t('subtitle');
+        }
+
+        // Get current URL info
+        function getCurrentUrlInfo() {
+          const path = window.location.pathname;
+          const match = path.match(/^\/articles(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/)?$/i);
+          if (match) {
+            return {
+              isArticles: true,
+              currentLang: match[1] ? match[1].toLowerCase() : null
+            };
+          }
+          return { isArticles: false, currentLang: null };
+        }
+
+        // Get available languages from injected data (set by vite plugin)
+        function getAvailableLanguages() {
+          const dataScript = document.getElementById('available-languages');
+          if (dataScript) {
+            try {
+              const langs = JSON.parse(dataScript.textContent);
+              // langs is an array like [null, "zh-tw", "ja"] where null = default (English)
+              return langs;
+            } catch (e) {
+              console.warn('Could not parse available languages:', e);
+            }
+          }
+          // Fallback: assume only default exists
+          return [null];
+        }
+
+        // Initialize language selector
+        function initLanguageSelector() {
+          const { isArticles, currentLang } = getCurrentUrlInfo();
+          
+          if (!isArticles) {
+            // Not an articles page, hide language selector
+            if (languageSelector) {
+              languageSelector.style.display = 'none';
+            }
+            return;
+          }
+
+          // Get available languages from injected data
+          const availableLanguages = getAvailableLanguages();
+          
+          if (availableLanguages.length <= 1) {
+            // Only one language available, hide selector
+            if (languageSelector) {
+              languageSelector.style.display = 'none';
+            }
+            return;
+          }
+
+          // Update current language display - use full language name
+          const currentLangCode = currentLang || 'en';
+          const displayText = languageNames[currentLangCode] || currentLangCode.toUpperCase().split('-')[0];
+          if (languageSelectorText) {
+            languageSelectorText.textContent = displayText;
+          }
+          
+          // Apply translations to the page
+          applyTranslations();
+
+          // Populate dropdown
+          languageDropdown.innerHTML = '';
+          availableLanguages.forEach(lang => {
+            const langCode = lang || 'en';
+            const langName = languageNames[langCode] || langCode.toUpperCase();
+            const langOption = document.createElement('button');
+            langOption.className = 'language-option';
+            langOption.textContent = langName;
+            langOption.setAttribute('data-lang', lang || '');
+            langOption.setAttribute('role', 'menuitem');
+            
+            if ((lang === null && currentLang === null) || (lang === currentLang)) {
+              langOption.classList.add('active');
+            }
+
+            langOption.addEventListener('click', () => {
+              switchLanguage(lang);
+            });
+
+            languageDropdown.appendChild(langOption);
+          });
+
+          // Check saved preference first, then system language if no language is selected
+          if (currentLang === null) {
+            const savedLang = localStorage.getItem('blog-language');
+            
+            // If user has a saved preference, use it
+            if (savedLang && availableLanguages.includes(savedLang)) {
+              switchLanguage(savedLang, false); // Don't save again, it's already saved
+              return;
+            }
+
+            // Otherwise, try to match system language with available languages
+            const systemLang = navigator.language || navigator.userLanguage || 'en';
+            const systemLangCode = systemLang.toLowerCase().split('-')[0];
+            const systemLangFull = systemLang.toLowerCase();
+            
+            // Try to match system language with available languages
+            let preferredLang = null;
+            if (availableLanguages.includes(systemLangFull)) {
+              preferredLang = systemLangFull;
+            } else if (availableLanguages.includes(systemLangCode)) {
+              preferredLang = systemLangCode;
+            } else if (systemLangFull.startsWith('zh') && availableLanguages.includes('zh-tw')) {
+              preferredLang = 'zh-tw';
+            } else if (systemLangFull.startsWith('zh') && availableLanguages.includes('zh-cn')) {
+              preferredLang = 'zh-cn';
+            }
+
+            // If system language matches an available language, auto-switch
+            if (preferredLang) {
+              switchLanguage(preferredLang, false); // Don't save to localStorage on auto-detect
+            }
+          } else {
+            // Update saved preference if current language is different
+            const savedLang = localStorage.getItem('blog-language');
+            if (savedLang !== currentLang) {
+              localStorage.setItem('blog-language', currentLang);
+            }
+          }
+        }
+
+        // Switch language
+        function switchLanguage(lang, savePreference = true) {
+          // Update HTML lang attribute
+          const langCode = lang || 'en';
+          document.documentElement.lang = langCode;
+
+          // Save preference
+          if (savePreference) {
+            localStorage.setItem('blog-language', langCode);
+          }
+
+          // Navigate to new URL
+          const newUrl = lang ? `/articles/${lang}` : `/articles`;
+          window.location.href = newUrl;
+        }
+
+        // Toggle dropdown
+        languageSelectorBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isExpanded = languageSelectorBtn.getAttribute('aria-expanded') === 'true';
+          languageSelectorBtn.setAttribute('aria-expanded', !isExpanded);
+          languageDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!languageSelector.contains(e.target)) {
+            languageSelectorBtn.setAttribute('aria-expanded', 'false');
+            languageDropdown.classList.remove('show');
+          }
+        });
+
+        // Close dropdown on escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && languageDropdown.classList.contains('show')) {
+            languageSelectorBtn.setAttribute('aria-expanded', 'false');
+            languageDropdown.classList.remove('show');
+          }
+        });
+
+        // Initialize on page load
+        initLanguageSelector();
+      })();
+
+      // Articles pagination, sorting, and filtering
+      (function() {
+        const ITEMS_PER_PAGE = 10;
+        let currentPage = 1;
+        let currentTag = '';
+        let currentSort = 'newest';
+        let filteredArticles = [];
+        let allArticles = [];
+        
+        // Get articles data from embedded JSON
+        function getArticlesData() {
+          const dataScript = document.getElementById('articles-data');
+          if (!dataScript) return [];
+          try {
+            return JSON.parse(dataScript.textContent);
+          } catch (e) {
+            console.warn('Could not parse articles data:', e);
+            return [];
+          }
+        }
+        
+        // Get DOM elements
+        const tagFilter = document.getElementById('tag-filter');
+        const sortOrder = document.getElementById('sort-order');
+        const articleList = document.getElementById('article-list');
+        const articlesCount = document.getElementById('articles-count');
+        const activeFilterEl = document.getElementById('active-filter');
+        const paginationContainer = document.getElementById('articles-pagination');
+        const controlsContainer = document.getElementById('articles-controls');
+        const controlsHeader = document.getElementById('controls-header');
+        const controlsSummary = document.getElementById('controls-summary');
+        
+        // URL query string helpers
+        function getQueryParams() {
+          const params = new URLSearchParams(window.location.search);
+          return {
+            page: parseInt(params.get('page'), 10) || 1,
+            tag: params.get('tag') || '',
+            sort: params.get('sort') || 'newest'
+          };
+        }
+        
+        function updateQueryParams(skipHistory = false) {
+          const params = new URLSearchParams();
+          
+          // Only add non-default values to keep URL clean
+          if (currentPage > 1) {
+            params.set('page', currentPage);
+          }
+          if (currentTag) {
+            params.set('tag', currentTag);
+          }
+          if (currentSort && currentSort !== 'newest') {
+            params.set('sort', currentSort);
+          }
+          
+          const queryString = params.toString();
+          const newUrl = queryString 
+            ? `${window.location.pathname}?${queryString}` 
+            : window.location.pathname;
+          
+          if (skipHistory) {
+            history.replaceState({ page: currentPage, tag: currentTag, sort: currentSort }, '', newUrl);
+          } else {
+            history.pushState({ page: currentPage, tag: currentTag, sort: currentSort }, '', newUrl);
+          }
+        }
+        
+        // Initialize
+        function init() {
+          allArticles = getArticlesData();
+          if (allArticles.length === 0) return;
+          
+          // Read initial state from URL
+          const params = getQueryParams();
+          currentPage = params.page;
+          currentTag = params.tag;
+          currentSort = params.sort;
+          
+          // Set UI controls to match URL state
+          if (tagFilter && currentTag) {
+            tagFilter.value = currentTag;
+          }
+          if (sortOrder && currentSort) {
+            sortOrder.value = currentSort;
+          }
+          
+          // Apply initial filter
+          applyFilter(false);
+          
+          // Attach event listeners
+          if (tagFilter) {
+            tagFilter.addEventListener('change', handleFilterChange);
+          }
+          if (sortOrder) {
+            sortOrder.addEventListener('change', handleSortChange);
+          }
+          
+          // Controls toggle
+          if (controlsHeader && controlsContainer) {
+            // Load saved collapsed state
+            const savedCollapsed = localStorage.getItem('articles-controls-collapsed');
+            if (savedCollapsed === 'false') {
+              controlsContainer.classList.remove('collapsed');
+            }
+            
+            controlsHeader.addEventListener('click', toggleControls);
+          }
+          
+          // Handle browser back/forward
+          window.addEventListener('popstate', handlePopState);
+          
+          // Initial render (skip history on first load)
+          updateDisplay(true);
+        }
+        
+        // Toggle controls panel
+        function toggleControls() {
+          if (!controlsContainer) return;
+          controlsContainer.classList.toggle('collapsed');
+          const isCollapsed = controlsContainer.classList.contains('collapsed');
+          localStorage.setItem('articles-controls-collapsed', isCollapsed ? 'true' : 'false');
+        }
+        
+        // Update controls summary (shown when collapsed)
+        function updateControlsSummary() {
+          if (!controlsSummary) return;
+          
+          const parts = [];
+          if (currentTag) {
+            parts.push(`tag: ${currentTag}`);
+          }
+          if (currentSort && currentSort !== 'newest') {
+            const sortLabels = {
+              'oldest': 'oldest first',
+              'title-asc': 'A-Z',
+              'title-desc': 'Z-A'
+            };
+            parts.push(sortLabels[currentSort] || currentSort);
+          }
+          
+          controlsSummary.textContent = parts.length > 0 ? `(${parts.join(', ')})` : '';
+        }
+        
+        // Handle browser back/forward navigation
+        function handlePopState(event) {
+          const params = getQueryParams();
+          currentPage = params.page;
+          currentTag = params.tag;
+          currentSort = params.sort;
+          
+          // Update UI controls
+          if (tagFilter) tagFilter.value = currentTag;
+          if (sortOrder) sortOrder.value = currentSort;
+          
+          // Re-apply filter and display
+          applyFilter(false);
+          updateDisplay(true);
+        }
+        
+        // Apply current filter
+        function applyFilter(resetPage = true) {
+          if (resetPage) {
+            currentPage = 1;
+          }
+          
+          if (currentTag) {
+            filteredArticles = allArticles.filter(article => 
+              article.tags && article.tags.includes(currentTag)
+            );
+            showActiveFilter(currentTag);
+          } else {
+            filteredArticles = [...allArticles];
+            hideActiveFilter();
+          }
+          
+          applyCurrentSort();
+        }
+        
+        // Handle filter change
+        function handleFilterChange() {
+          currentTag = tagFilter.value;
+          applyFilter(true);
+          updateDisplay();
+        }
+        
+        // Handle sort change
+        function handleSortChange() {
+          currentSort = sortOrder.value;
+          applyCurrentSort();
+          currentPage = 1;
+          updateDisplay();
+        }
+        
+        // Apply current sort order
+        function applyCurrentSort() {
+          const order = currentSort || 'newest';
+          
+          switch (order) {
+            case 'newest':
+              filteredArticles.sort((a, b) => {
+                if (!a.date && !b.date) return 0;
+                if (!a.date) return 1;
+                if (!b.date) return -1;
+                return new Date(b.date) - new Date(a.date);
+              });
+              break;
+            case 'oldest':
+              filteredArticles.sort((a, b) => {
+                if (!a.date && !b.date) return 0;
+                if (!a.date) return 1;
+                if (!b.date) return -1;
+                return new Date(a.date) - new Date(b.date);
+              });
+              break;
+            case 'title-asc':
+              filteredArticles.sort((a, b) => 
+                (a.title || '').localeCompare(b.title || '')
+              );
+              break;
+            case 'title-desc':
+              filteredArticles.sort((a, b) => 
+                (b.title || '').localeCompare(a.title || '')
+              );
+              break;
+          }
+        }
+        
+        // Show active filter badge
+        function showActiveFilter(tag) {
+          if (activeFilterEl) {
+            const t = window.getTranslation || ((k) => k);
+            activeFilterEl.innerHTML = `${t('tag')} ${escapeHtml(tag)} <span class="clear-filter" onclick="clearTagFilter()">×</span>`;
+            activeFilterEl.style.display = 'inline-flex';
+          }
+        }
+        
+        // Hide active filter badge
+        function hideActiveFilter() {
+          if (activeFilterEl) {
+            activeFilterEl.style.display = 'none';
+          }
+        }
+        
+        // Clear tag filter (global function for onclick)
+        window.clearTagFilter = function() {
+          if (tagFilter) {
+            tagFilter.value = '';
+            handleFilterChange();
+          }
+        };
+        
+        // Update display
+        function updateDisplay(skipHistory = false) {
+          if (!articleList) return;
+          
+          const totalItems = filteredArticles.length;
+          const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+          
+          // Ensure current page is valid
+          if (currentPage > totalPages) currentPage = Math.max(1, totalPages);
+          if (currentPage < 1) currentPage = 1;
+          
+          // Update URL
+          updateQueryParams(skipHistory);
+          
+          const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+          const endIndex = startIndex + ITEMS_PER_PAGE;
+          const pageArticles = filteredArticles.slice(startIndex, endIndex);
+          
+          // Get article names to show on this page
+          const visibleNames = new Set(pageArticles.map(a => a.name));
+          
+          // Get all article names in filtered set
+          const filteredNames = new Set(filteredArticles.map(a => a.name));
+          
+          // Update visibility of article items
+          const allItems = articleList.querySelectorAll('.article-item');
+          allItems.forEach(item => {
+            const title = item.getAttribute('data-title');
+            // Find article by title in original data
+            const article = allArticles.find(a => a.title === title);
+            if (!article) {
+              item.classList.add('hidden');
+              return;
+            }
+            
+            // Check if in filtered set
+            if (!filteredNames.has(article.name)) {
+              item.classList.add('hidden');
+              return;
+            }
+            
+            // Check if on current page
+            if (visibleNames.has(article.name)) {
+              item.classList.remove('hidden');
+            } else {
+              item.classList.add('hidden');
+            }
+          });
+          
+          // Show "no results" if needed
+          let noResultsEl = articleList.querySelector('.no-results');
+          if (totalItems === 0) {
+            if (!noResultsEl) {
+              noResultsEl = document.createElement('p');
+              noResultsEl.className = 'no-results';
+              noResultsEl.textContent = window.getTranslation ? window.getTranslation('noResults') : 'No articles match your filter.';
+              articleList.appendChild(noResultsEl);
+            }
+          } else {
+            if (noResultsEl) {
+              noResultsEl.remove();
+            }
+          }
+          
+          // Update count
+          if (articlesCount) {
+            const t = window.getTranslation || ((k) => k);
+            const countText = `${totalItems} ${totalItems === 1 ? t('article') : t('articles_count')}`;
+            articlesCount.textContent = countText;
+          }
+          
+          // Update controls summary (for collapsed state)
+          updateControlsSummary();
+          
+          // Update pagination
+          renderPagination(totalPages);
+        }
+        
+        // Render pagination controls
+        function renderPagination(totalPages) {
+          if (!paginationContainer) return;
+          
+          if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+          }
+          
+          let html = '';
+          const t = window.getTranslation || ((k) => k);
+          
+          // Previous button
+          html += `<button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">${t('prev')}</button>`;
+          
+          // Page numbers
+          html += '<div class="pagination-pages">';
+          
+          // Show limited page numbers with ellipsis
+          const maxVisible = 5;
+          let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+          let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+          
+          if (endPage - startPage < maxVisible - 1) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+          }
+          
+          if (startPage > 1) {
+            html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+            if (startPage > 2) {
+              html += `<span class="pagination-info">...</span>`;
+            }
+          }
+          
+          for (let i = startPage; i <= endPage; i++) {
+            const isActive = i === currentPage ? 'active' : '';
+            html += `<button class="page-btn ${isActive}" onclick="goToPage(${i})">${i}</button>`;
+          }
+          
+          if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+              html += `<span class="pagination-info">...</span>`;
+            }
+            html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+          }
+          
+          html += '</div>';
+          
+          // Next button
+          html += `<button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">${t('next')}</button>`;
+          
+          paginationContainer.innerHTML = html;
+        }
+        
+        // Go to specific page (global function for onclick)
+        window.goToPage = function(page) {
+          currentPage = page;
+          updateDisplay();
+          // Scroll to top of list
+          if (articleList) {
+            articleList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        };
+        
+        // Escape HTML helper
+        function escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', init);
+        } else {
+          init();
+        }
+      })();
+
+      // Save filter state when clicking on article links
+      (function() {
+        function saveFilterState() {
+          const queryString = window.location.search;
+          if (queryString) {
+            sessionStorage.setItem('articles-filter-state', queryString);
+          } else {
+            sessionStorage.removeItem('articles-filter-state');
+          }
+        }
+
+        // Add click listener to all article links
+        document.addEventListener('click', (e) => {
+          const articleLink = e.target.closest('.article-link');
+          if (articleLink) {
+            saveFilterState();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

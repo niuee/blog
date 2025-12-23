@@ -1,5 +1,5 @@
 ---
-title: 履歷
+title: 履歷 | 張永裕
 author: Vincent Chang
 published: 2025-01-01
 ---
@@ -143,8 +143,6 @@ published: 2025-01-01
 
 ### <a href="https://github.com/ue-too/ue-too" target="_blank">ue-too</a>
 
-This is a HTML canvas toolkit for creating interactive HTML canvas applications. It consists of the following components (all of the packages are organized in a monorepo on <a href="https://github.com/ue-too/ue-too" target="_blank">GitHub</a>):
-
 一系列用來快速開發 HTML canvas 應用程式的工具，全部的 packages 都放在同一個 monorepo 裡面，原始碼放在 [GitHub](https://github.com/ue-too/ue-too)。每個套件也有發佈到 npm 上，如果有興趣可以去看看。 
 
 套件列表:
@@ -167,7 +165,7 @@ This is a HTML canvas toolkit for creating interactive HTML canvas applications.
 
 <div class="resume-section">
 
-### 網頁版的賽馬模擬賽馬
+### 網頁版的賽馬模擬遊戲
 
 以下一系列的專案最終會整合成一個網頁版的賽馬模擬遊戲。
 

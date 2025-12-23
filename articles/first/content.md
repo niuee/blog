@@ -2,6 +2,7 @@
 title: First Post
 published: 2025-11-04
 author: vee
+tags: tutorial, demo
 ---
 
 # First Post

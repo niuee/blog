@@ -75,10 +75,12 @@
       </div>
     </div>
     <div class="container">
+      <nav class="sticky-nav" id="sticky-nav">
+        <a href="/articles" class="back-link" id="back-link">Articles</a>
+      </nav>
       <header>
       </header>
       <div id="blog-content"></div>
-      <p>test</p>
     </div>
     <script>
       // Reset scroll position on page load
@@ -88,6 +90,22 @@
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
+
+      // Sticky nav scroll effect - show border when scrolled
+      (function() {
+        const stickyNav = document.getElementById('sticky-nav');
+        if (stickyNav) {
+          const handleScroll = () => {
+            if (window.scrollY > 10) {
+              stickyNav.classList.add('scrolled');
+            } else {
+              stickyNav.classList.remove('scrolled');
+            }
+          };
+          window.addEventListener('scroll', handleScroll, { passive: true });
+          handleScroll(); // Check initial state
+        }
+      })();
 
       // Prevent scroll when toggling dark mode
       const darkModeToggle = document.getElementById('dark-mode-toggle');
@@ -243,65 +261,24 @@
           return { postName: null, currentLang: null };
         }
 
-        // Detect available languages by trying to fetch them
-        async function detectAvailableLanguages(postName) {
-          if (!postName) return [];
-
-          // Only check for English (default) and Traditional Chinese
-          const languagesToCheck = ['en', 'zh-tw'];
-          const availableLanguages = [];
-
-          // Check if default (null) exists - this is the base URL without language
-          try {
-            const defaultResponse = await fetch(`/articles/${postName}`, { method: 'HEAD', cache: 'no-cache' });
-            if (defaultResponse.ok) {
-              availableLanguages.push(null); // null means default (usually English)
+        // Get available languages from injected data (set by vite plugin)
+        function getAvailableLanguages() {
+          const dataScript = document.getElementById('available-languages');
+          if (dataScript) {
+            try {
+              const langs = JSON.parse(dataScript.textContent);
+              // langs is an array like [null, "zh-tw", "ja"] where null = default (English)
+              return langs;
+            } catch (e) {
+              console.warn('Could not parse available languages:', e);
             }
-          } catch (e) {
-            // If default doesn't exist, we still need to check explicit languages
           }
-
-          // Try to fetch each language variant to see if it exists
-          // Use Promise.allSettled to check all languages in parallel
-          const checks = await Promise.allSettled(
-            languagesToCheck.map(async (lang) => {
-              try {
-                const url = `/articles/${postName}/${lang}`;
-                const response = await fetch(url, { method: 'HEAD', cache: 'no-cache' });
-                return { lang, exists: response.ok };
-              } catch (e) {
-                return { lang, exists: false };
-              }
-            })
-          );
-
-          checks.forEach((result) => {
-            if (result.status === 'fulfilled' && result.value.exists) {
-              // If 'en' exists as explicit file, don't add null (default) to avoid duplicate
-              // If null already exists and 'en' is found, remove null and add 'en' instead
-              if (result.value.lang === 'en') {
-                // Remove null if it exists (to avoid duplicate English)
-                const nullIndex = availableLanguages.indexOf(null);
-                if (nullIndex !== -1) {
-                  availableLanguages.splice(nullIndex, 1);
-                }
-                availableLanguages.push('en');
-              } else {
-                availableLanguages.push(result.value.lang);
-              }
-            }
-          });
-
-          // If no language variants found, assume at least default exists
-          if (availableLanguages.length === 0) {
-            return [null];
-          }
-
-          return availableLanguages;
+          // Fallback: assume only default exists
+          return [null];
         }
 
         // Initialize language selector
-        async function initLanguageSelector() {
+        function initLanguageSelector() {
           const { postName, currentLang } = getCurrentUrlInfo();
           
           if (!postName) {
@@ -312,8 +289,8 @@
             return;
           }
 
-          // Detect available languages
-          const availableLanguages = await detectAvailableLanguages(postName);
+          // Get available languages from injected data
+          const availableLanguages = getAvailableLanguages();
           
           if (availableLanguages.length <= 1) {
             // Only one language available, hide selector
@@ -323,11 +300,31 @@
             return;
           }
 
+          // Check if current language from URL is actually available
+          // If not, treat it as the default language (null/English)
+          let effectiveLang = currentLang;
+          if (currentLang && !availableLanguages.includes(currentLang)) {
+            // Current language not available for this article, fall back to default
+            effectiveLang = null;
+          }
+
           // Update current language display - use full language name
-          const currentLangCode = currentLang || 'en';
+          const currentLangCode = effectiveLang || 'en';
           const displayText = languageNames[currentLangCode] || currentLangCode.toUpperCase().split('-')[0];
           if (languageSelectorText) {
             languageSelectorText.textContent = displayText;
+          }
+          
+          // Also update HTML lang attribute to match effective language
+          document.documentElement.lang = currentLangCode;
+          
+          // Update back link to preserve current language and filter state
+          const baseBackUrl = effectiveLang ? `/articles/${effectiveLang}` : '/articles';
+          const savedFilterState = sessionStorage.getItem('articles-filter-state') || '';
+          const backLinkUrl = baseBackUrl + savedFilterState;
+          const backLink = document.getElementById('back-link');
+          if (backLink) {
+            backLink.href = backLinkUrl;
           }
 
           // Populate dropdown
@@ -341,7 +338,7 @@
             langOption.setAttribute('data-lang', lang || '');
             langOption.setAttribute('role', 'menuitem');
             
-            if ((lang === null && currentLang === null) || (lang === currentLang)) {
+            if ((lang === null && effectiveLang === null) || (lang === effectiveLang)) {
               langOption.classList.add('active');
             }
 
