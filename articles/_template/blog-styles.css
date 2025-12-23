@@ -15,6 +15,16 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* CJK (Chinese, Japanese, Korean) typography adjustments */
+html:lang(zh) body,
+html:lang(zh-tw) body,
+html:lang(zh-cn) body,
+html:lang(ja) body,
+html:lang(ko) body {
+  letter-spacing: 0.08em;
+  line-height: 1.9;
+}
+
 /* Only enable font-size transition after initial load */
 body.font-size-transition-enabled {
   transition: background-color 0.3s ease, color 0.3s ease, font-size 0.3s ease;

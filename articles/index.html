@@ -432,9 +432,9 @@
   </head>
   <body>
     <div class="font-size-controls">
-      <button class="font-size-btn" id="font-size-small" aria-label="Small font size" title="Small">A</button>
       <button class="font-size-btn" id="font-size-medium" aria-label="Medium font size" title="Medium">A</button>
       <button class="font-size-btn" id="font-size-large" aria-label="Large font size" title="Large">A</button>
+      <button class="font-size-btn" id="font-size-xl" aria-label="Extra large font size" title="Extra Large">A</button>
     </div>
     <input type="checkbox" id="dark-mode-toggle" class="dark-mode-toggle" />
     <script>
@@ -519,9 +519,9 @@
 
       // Font size controls
       const fontSizeButtons = {
-        small: document.getElementById('font-size-small'),
         medium: document.getElementById('font-size-medium'),
-        large: document.getElementById('font-size-large')
+        large: document.getElementById('font-size-large'),
+        xl: document.getElementById('font-size-xl')
       };
 
       const savedFontSize = localStorage.getItem('blog-font-size') || 'large';

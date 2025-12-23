@@ -210,24 +210,30 @@ html:has(#dark-mode-toggle:checked) .switch-toggle {
   border: none;
   color: var(--text-color);
   font-weight: 600;
-  padding: 0.4rem 0.6rem;
+  padding: 0;
   cursor: pointer;
   border-radius: 0.2rem;
   transition: background-color 0.2s ease, color 0.2s ease;
   font-family: system-ui, -apple-system, sans-serif;
   line-height: 1;
-}
-
-#font-size-small {
-  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  text-align: center;
 }
 
 #font-size-medium {
-  font-size: 0.9rem;
+  font-size: 0.75rem;
 }
 
 #font-size-large {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+}
+
+#font-size-xl {
+  font-size: 1.15rem;
 }
 
 .font-size-btn:hover {
@@ -255,28 +261,24 @@ html:has(#dark-mode-toggle:checked) .font-size-btn.active {
 }
 
 /* Font size scaling */
-html[data-font-size="small"] {
-  --font-size-scale: 0.875;
-}
-
 html[data-font-size="medium"] {
   --font-size-scale: 1.0;
 }
 
 html:not([data-font-size]) {
-  --font-size-scale: 1.125;
+  --font-size-scale: 1.2;
 }
 
 html[data-font-size="large"] {
-  --font-size-scale: 1.125;
+  --font-size-scale: 1.2;
+}
+
+html[data-font-size="xl"] {
+  --font-size-scale: 1.4;
 }
 
 /* Increase font sizes for 4K and high-resolution displays */
 @media (min-width: 2560px) {
-  html[data-font-size="small"] {
-    --font-size-scale: 1.0;
-  }
-
   html[data-font-size="medium"] {
     --font-size-scale: 1.25;
   }
@@ -287,6 +289,10 @@ html[data-font-size="large"] {
 
   html[data-font-size="large"] {
     --font-size-scale: 1.5;
+  }
+
+  html[data-font-size="xl"] {
+    --font-size-scale: 1.75;
   }
 }
 
@@ -299,15 +305,15 @@ html[data-font-size="large"] {
     gap: 0.2rem;
   }
 
-  #font-size-small {
+  #font-size-medium {
     font-size: 0.65rem;
   }
 
-  #font-size-medium {
-    font-size: 0.75rem;
+  #font-size-large {
+    font-size: 0.8rem;
   }
 
-  #font-size-large {
+  #font-size-xl {
     font-size: 0.95rem;
   }
 
