@@ -953,20 +953,11 @@ function injectMarkdownToHtml(distDir) {
         }
       }
     } else {
-      // Default: dist/articles/{name}/index.html or dist/articles/{name}.html
-      const distHtmlPath1 = join(distDir, 'articles', name, 'index.html');
-      const distHtmlPath2 = join(distDir, 'articles', `${name}.html`);
-      
-      if (existsSync(distHtmlPath1)) {
-        distHtmlPath = distHtmlPath1;
-      } else if (existsSync(distHtmlPath2)) {
-        distHtmlPath = distHtmlPath2;
-      } else {
-        distHtmlPath = join(distDir, 'articles', `${name}.html`);
-        const distHtmlDir = dirname(distHtmlPath);
-        if (!existsSync(distHtmlDir)) {
-          mkdirSync(distHtmlDir, { recursive: true });
-        }
+      // Default: dist/articles/{name}/index.html (clean URLs)
+      distHtmlPath = join(distDir, 'articles', name, 'index.html');
+      const distHtmlDir = dirname(distHtmlPath);
+      if (!existsSync(distHtmlDir)) {
+        mkdirSync(distHtmlDir, { recursive: true });
       }
     }
     
