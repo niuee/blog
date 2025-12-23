@@ -55,7 +55,7 @@ console.log(c);
 
 # Images
 
-<img src="test.png" alt="Test Image" class="image-shadow image-rounded" style="object-fit: contain; width: 100%; height: 100%;"/>
+<img src="test.png" alt="Test Image" class="image-shadow image-rounded" data-zoomable style="object-fit: contain; width: 100%; height: 100%;"/>
 
 # Links
 
