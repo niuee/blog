@@ -133,6 +133,31 @@ article li {
   margin-left: 0;
 }
 
+/* Nested ordered list numbering styles: 1 -> a -> i */
+article ol {
+  list-style-type: decimal;
+}
+
+article ol ol {
+  list-style-type: lower-alpha;
+}
+
+article ol ol ol {
+  list-style-type: lower-roman;
+}
+
+article ol ol ol ol {
+  list-style-type: decimal;
+}
+
+article ol ol ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+article ol ol ol ol ol ol {
+  list-style-type: lower-roman;
+}
+
 article a {
   color: var(--link-color);
   text-decoration: none;
