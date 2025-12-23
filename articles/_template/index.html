@@ -502,11 +502,17 @@
         const MAX_SCALE = 5;
         const SCALE_STEP = 0.25;
 
+        let rafId = null;
+        
         function updateTransform() {
-          viewerImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-          if (zoomLevelEl) {
-            zoomLevelEl.textContent = Math.round(scale * 100) + '%';
-          }
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(() => {
+            viewerImg.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
+            if (zoomLevelEl) {
+              zoomLevelEl.textContent = Math.round(scale * 100) + '%';
+            }
+            rafId = null;
+          });
         }
 
         function resetView() {
@@ -584,7 +590,7 @@
             startY = e.clientY;
             lastTranslateX = translateX;
             lastTranslateY = translateY;
-            viewerImg.style.cursor = 'grabbing';
+            viewerImg.classList.add('dragging');
             e.preventDefault();
           }
         });
@@ -597,24 +603,29 @@
         });
 
         document.addEventListener('mouseup', () => {
-          isDragging = false;
-          viewerImg.style.cursor = scale > 1 ? 'grab' : 'zoom-out';
+          if (isDragging) {
+            isDragging = false;
+            viewerImg.classList.remove('dragging');
+          }
         });
 
         // Touch support for mobile
         let lastTouchDistance = 0;
-        let lastTouchX = 0;
-        let lastTouchY = 0;
+        let isPinching = false;
 
         viewerImg.addEventListener('touchstart', (e) => {
           if (e.touches.length === 1 && scale > 1) {
             isDragging = true;
+            isPinching = false;
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             lastTranslateX = translateX;
             lastTranslateY = translateY;
+            viewerImg.classList.add('dragging');
           } else if (e.touches.length === 2) {
             isDragging = false;
+            isPinching = true;
+            viewerImg.classList.add('dragging');
             lastTouchDistance = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
               e.touches[0].clientY - e.touches[1].clientY
@@ -628,19 +639,16 @@
             translateX = lastTranslateX + (e.touches[0].clientX - startX);
             translateY = lastTranslateY + (e.touches[0].clientY - startY);
             updateTransform();
-          } else if (e.touches.length === 2) {
+          } else if (e.touches.length === 2 && isPinching) {
             e.preventDefault();
             const currentDistance = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
               e.touches[0].clientY - e.touches[1].clientY
             );
             const delta = currentDistance - lastTouchDistance;
-            if (Math.abs(delta) > 5) {
-              if (delta > 0) {
-                scale = Math.min(MAX_SCALE, scale + 0.05);
-              } else {
-                scale = Math.max(MIN_SCALE, scale - 0.05);
-              }
+            if (Math.abs(delta) > 3) {
+              const scaleChange = delta * 0.008;
+              scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale + scaleChange));
               updateTransform();
               lastTouchDistance = currentDistance;
             }
@@ -649,7 +657,16 @@
 
         viewerImg.addEventListener('touchend', () => {
           isDragging = false;
+          isPinching = false;
           lastTouchDistance = 0;
+          viewerImg.classList.remove('dragging');
+        });
+
+        viewerImg.addEventListener('touchcancel', () => {
+          isDragging = false;
+          isPinching = false;
+          lastTouchDistance = 0;
+          viewerImg.classList.remove('dragging');
         });
 
         // Keyboard controls

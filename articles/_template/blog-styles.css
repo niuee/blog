@@ -33,6 +33,7 @@ body.font-size-transition-enabled {
 .container {
   max-width: 700px;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 /* Sticky back navigation */
@@ -119,7 +120,7 @@ article h3 {
 article ul,
 article ol {
   margin-left: 0;
-  padding-left: 1.5rem;
+  padding-left: calc(1.5rem * var(--font-size-scale, 1));
   margin-bottom: 1rem;
   list-style-position: outside;
 }
@@ -127,6 +128,8 @@ article ol {
 article li {
   margin-bottom: 0.5rem;
   padding-left: 0.25rem;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 article a {
@@ -582,10 +585,22 @@ article table tbody tr:last-child td {
   max-width: 90%;
   max-height: 85vh;
   object-fit: contain;
-  transition: transform 0.1s ease;
   cursor: grab;
   user-select: none;
   -webkit-user-drag: none;
+  will-change: transform;
+  transform-origin: center center;
+  -webkit-transform-origin: center center;
+  touch-action: none;
+}
+
+.image-viewer-img.dragging {
+  cursor: grabbing;
+  transition: none !important;
+}
+
+.image-viewer-img:not(.dragging) {
+  transition: transform 0.15s ease-out;
 }
 
 .image-viewer-img:active {
