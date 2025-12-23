@@ -114,3 +114,12 @@ $$
 ## 漢字
 
 漢字
+
+## Paragraph Text
+> This text is AI-generated, just to test multi-line content.
+
+In this digital age, we are surrounded by an overwhelming amount of information every day. From the moment we wake up and reach for our phones to the last message we read before falling asleep, technology has become deeply woven into the fabric of our lives. Yet, has this convenience also brought costs we have yet to fully recognize?
+
+As we grow accustomed to instant messaging, social media, and endless content streams, do we still remember those quiet moments of reading a book, having face-to-face conversations with friends, or simply gazing out the window lost in thought? Perhaps true wisdom lies not in acquiring more information, but in learning to choose what truly deserves our attention.
+
+Every choice is a trade-off, every click a decision. In this attention economy, our most precious resource is not money, but our time and focus. May we all find our own direction in this vast ocean of information.

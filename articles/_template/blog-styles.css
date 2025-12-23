@@ -522,3 +522,290 @@ article table tbody tr:last-child td {
   }
 }
 
+/* Table of Contents Sidebar */
+.toc-sidebar {
+  position: fixed;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 240px;
+  max-height: 60vh;
+  overflow-y: auto;
+  z-index: 50;
+  display: none;
+  
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--table-border-color, rgba(0, 0, 0, 0.2)) transparent;
+}
+
+/* Webkit scrollbar styles */
+.toc-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.toc-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toc-sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--table-border-color, rgba(0, 0, 0, 0.2));
+  border-radius: 4px;
+}
+
+.toc-sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-meta-color);
+}
+
+.toc-nav {
+  padding: 1rem;
+  background-color: var(--bg-color);
+  border-radius: 8px;
+  border: 1px solid var(--table-border-color, rgba(0, 0, 0, 0.1));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.toc-title {
+  font-size: calc(0.7rem * var(--font-size-scale, 1));
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-meta-color);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--table-border-color, rgba(0, 0, 0, 0.1));
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-item {
+  margin: 0;
+  padding: 0;
+}
+
+.toc-link {
+  display: block;
+  padding: 0.35rem 0;
+  font-size: calc(0.75rem * var(--font-size-scale, 1));
+  color: var(--text-meta-color);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  padding-left: 0.75rem;
+  margin-left: -0.75rem;
+  transition: color 0.2s ease, border-color 0.2s ease, font-size 0.3s ease;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toc-link:hover {
+  color: var(--text-color);
+}
+
+.toc-link.active {
+  color: var(--text-color);
+  border-left-color: var(--text-color);
+  font-weight: 500;
+}
+
+/* Indent based on heading level */
+.toc-h2 .toc-link {
+  padding-left: 1.25rem;
+  margin-left: -0.75rem;
+}
+
+.toc-h3 .toc-link {
+  padding-left: 1.75rem;
+  margin-left: -0.75rem;
+  font-size: calc(0.7rem * var(--font-size-scale, 1));
+}
+
+/* Hide TOC sidebar on smaller screens where there's no room */
+@media (max-width: 1200px) {
+  .toc-sidebar {
+    display: none !important;
+  }
+}
+
+/* Mobile TOC */
+.toc-mobile {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+}
+
+.toc-mobile-btn {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--bg-color);
+  border: 1px solid var(--table-border-color, rgba(0, 0, 0, 0.1));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.toc-mobile-btn:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.toc-mobile-btn:active {
+  transform: scale(0.95);
+}
+
+.toc-mobile-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.toc-mobile-dropdown {
+  position: absolute;
+  bottom: calc(100% + 0.75rem);
+  right: 0;
+  width: 280px;
+  max-height: 60vh;
+  background-color: var(--bg-color);
+  border: 1px solid var(--table-border-color, rgba(0, 0, 0, 0.1));
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.toc-mobile-dropdown.show {
+  display: flex;
+}
+
+.toc-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--table-border-color, rgba(0, 0, 0, 0.1));
+}
+
+.toc-mobile-title {
+  font-size: calc(0.8rem * var(--font-size-scale, 1));
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.toc-mobile-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-meta-color);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.toc-mobile-close:hover {
+  color: var(--text-color);
+}
+
+.toc-mobile-list {
+  list-style: none;
+  padding: 0.5rem 0;
+  margin: 0;
+  overflow-y: auto;
+  
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--table-border-color, rgba(0, 0, 0, 0.2)) transparent;
+}
+
+.toc-mobile-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.toc-mobile-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toc-mobile-list::-webkit-scrollbar-thumb {
+  background-color: var(--table-border-color, rgba(0, 0, 0, 0.2));
+  border-radius: 4px;
+}
+
+.toc-mobile-item {
+  margin: 0;
+  padding: 0;
+}
+
+.toc-mobile-link {
+  display: block;
+  padding: 0.6rem 1rem;
+  font-size: calc(0.85rem * var(--font-size-scale, 1));
+  color: var(--text-meta-color);
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.toc-mobile-link:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  color: var(--text-color);
+}
+
+html:has(#dark-mode-toggle:checked) .toc-mobile-link:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.toc-mobile-link.active {
+  color: var(--text-color);
+  border-left-color: var(--text-color);
+  font-weight: 500;
+}
+
+/* Indent based on heading level */
+.toc-mobile-h2 .toc-mobile-link {
+  padding-left: 1.5rem;
+}
+
+.toc-mobile-h3 .toc-mobile-link {
+  padding-left: 2rem;
+  font-size: calc(0.8rem * var(--font-size-scale, 1));
+}
+
+/* Show mobile TOC only on smaller screens */
+@media (max-width: 1200px) {
+  .toc-mobile {
+    display: block;
+  }
+}
+
+/* Adjust position on very small screens */
+@media (max-width: 480px) {
+  .toc-mobile {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .toc-mobile-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  
+  .toc-mobile-dropdown {
+    width: calc(100vw - 2rem);
+    max-width: 320px;
+  }
+}
+
