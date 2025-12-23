@@ -33,6 +33,16 @@ published: 2025-01-01
 
 - Developed and maintained <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>, an online collaboration whiteboard platform serving real-time collaborative editing using **React**, **Next.js**, **TypeScript**, and **PixiJS**.
 - Optimized the calculation algorithm for the novel stroke eraser feature providing at least 30% performance improvement, offering a superior UX compared to Miro's recent precision eraser.
+  <div style="display: flex; gap: 10px; margin-top: 8px;">
+    <figure style="flex: 1; margin: 0; text-align: center;">
+      <img src="teamone.gif" alt="TeamOne Eraser" style="width: 100%;">
+      <figcaption style="font-size: 0.85em; color: #666; margin-top: 4px;">TeamOne</figcaption>
+    </figure>
+    <figure style="flex: 1; margin: 0; text-align: center;">
+      <img src="miro.gif" alt="Miro Eraser" style="width: 100%;">
+      <figcaption style="font-size: 0.85em; color: #666; margin-top: 4px;">Miro</figcaption>
+    </figure>
+  </div>
 - Migrated DOM-based interactive elements to canvas-based elements to improve the performance of the app.
 - Improved visual quality and user experience by implementing a custom mesh that preserves individual stroke colors when overlapping transparent pen strokes, eliminating color blending artifacts.
 - Improved text editing capabilities and user experience by refactoring the custom text editor to switch from using Slate.js to using Lexical, resulting in improved flexibility and maintainability for future feature development.
@@ -42,7 +52,7 @@ published: 2025-01-01
 
 <div class="resume-section">
 
-### <span class="resume-company">Jubo</span> — Frontend Engineer
+### <span class="resume-company"><a href="https://www.jubohealth.com/home" target="_blank">Jubo</a></span> — Frontend Engineer
 <div class="resume-meta">
   <span class="resume-date">Jan. 2024 - Oct. 2024</span>
   <span class="separator">•</span>
@@ -61,7 +71,7 @@ published: 2025-01-01
 
 <div class="resume-section">
 
-### <span class="resume-company">Droxo Tech</span> — Software Developer
+### <span class="resume-company"><a href="https://www.droxotech.com/" target="_blank">Droxo Tech</a></span> — Software Developer
 <div class="resume-meta">
   <span class="resume-date">Jan. 2021 - Jul. 2022</span>
   <span class="separator">•</span>

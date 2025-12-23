@@ -438,6 +438,120 @@
         // Initialize on page load
         initLanguageSelector();
       })();
+
+      // Code block copy button functionality
+      (function() {
+        function addCopyButtons() {
+          const codeBlocks = document.querySelectorAll('pre');
+          
+          codeBlocks.forEach(pre => {
+            // Skip if already has a copy button
+            if (pre.querySelector('.code-copy-btn')) {
+              return;
+            }
+            
+            // Create copy button
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-btn';
+            copyBtn.setAttribute('aria-label', 'Copy code');
+            copyBtn.setAttribute('title', 'Copy code');
+            copyBtn.innerHTML = `
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Copy</span>
+            `;
+            
+            copyBtn.addEventListener('click', async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              // Get the code content
+              const codeElement = pre.querySelector('code');
+              const textToCopy = codeElement ? codeElement.textContent : pre.textContent;
+              
+              try {
+                await navigator.clipboard.writeText(textToCopy);
+                
+                // Show success state
+                copyBtn.classList.add('copied');
+                copyBtn.innerHTML = `
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>Copied!</span>
+                `;
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                  copyBtn.classList.remove('copied');
+                  copyBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>Copy</span>
+                  `;
+                }, 2000);
+              } catch (err) {
+                console.error('Failed to copy code:', err);
+                
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                  document.execCommand('copy');
+                  copyBtn.classList.add('copied');
+                  copyBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Copied!</span>
+                  `;
+                  setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtn.innerHTML = `
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      <span>Copy</span>
+                    `;
+                  }, 2000);
+                } catch (e) {
+                  console.error('Fallback copy failed:', e);
+                }
+                document.body.removeChild(textArea);
+              }
+            });
+            
+            pre.appendChild(copyBtn);
+          });
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', addCopyButtons);
+        } else {
+          addCopyButtons();
+        }
+        
+        // Also observe for dynamically added code blocks
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length) {
+              addCopyButtons();
+            }
+          });
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
+      })();
     </script>
   </body>
 </html>

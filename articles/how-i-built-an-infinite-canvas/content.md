@@ -83,3 +83,5 @@ I'll list out some of the libraries that I've surveyed and why I didn't choose t
 - [scroller](https://github.com/pbakaus/scroller): it's a standalone library that is independent of any framework but when I surveyed the library it not was being activly maintained. But seems like the author is making new updates recently.
 
 In the next article, I'll start to dissect the source code of @ue-too/board.
+
+<script src="./main.ts" type="module"></script>

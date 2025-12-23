@@ -387,8 +387,12 @@ function processTypeScriptForDev(htmlContent, blogPostDir, blogPostName) {
 /**
  * Process image paths in HTML content for dev mode
  * Updates relative image paths to absolute paths based on blog post location
+ * @param {string} htmlContent - The HTML content to process
+ * @param {string} blogPostDir - The directory containing the source files
+ * @param {string} blogPostName - The name of the blog post or 'resume' for resume
+ * @param {boolean} isResume - Whether this is for the resume (uses /resume/ prefix instead of /articles/)
  */
-function processImagesForDev(htmlContent, blogPostDir, blogPostName) {
+function processImagesForDev(htmlContent, blogPostDir, blogPostName, isResume = false) {
   // Find all img tags with src attributes
   const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
   const matches = [];
@@ -417,8 +421,9 @@ function processImagesForDev(htmlContent, blogPostDir, blogPostName) {
     
     // Check if image exists in source
     if (existsSync(sourceImgPath)) {
-      // Update image path to be absolute from root (e.g., /articles/first/test.png)
-      const newImgSrc = `/articles/${blogPostName}/${imgSrc}`;
+      // Update image path to be absolute from root
+      // For resume: /resume/image.gif, for articles: /articles/postName/image.png
+      const newImgSrc = isResume ? `/resume/${imgSrc}` : `/articles/${blogPostName}/${imgSrc}`;
       // Escape special regex characters in the source path
       const escapedSrc = imgSrc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       // Replace all occurrences of this image path
@@ -696,41 +701,17 @@ function injectMarkdownToHtml(distDir) {
       }
     }
     
-    // Check if HTML exists, if not use template
-    let htmlContent;
-    let sourceHtmlPath;
-    
-    if (existsSync(htmlPath)) {
-      // Use existing HTML file
-      sourceHtmlPath = htmlPath;
-      
-      if (!existsSync(distHtmlPath)) {
-        // If dist HTML doesn't exist, copy source HTML
-        const distHtmlDir = dirname(distHtmlPath);
-        if (!existsSync(distHtmlDir)) {
-          mkdirSync(distHtmlDir, { recursive: true });
-        }
-        copyFileSync(htmlPath, distHtmlPath);
-      }
-      htmlContent = readFileSync(distHtmlPath, 'utf-8');
-    } else if (existsSync(templateHTMLPath)) {
-      // Use template HTML
-      sourceHtmlPath = templateHTMLPath;
-      htmlContent = readFileSync(templateHTMLPath, 'utf-8');
-      
-      // Ensure dist file exists
-      if (!existsSync(distHtmlPath)) {
-        const distHtmlDir = dirname(distHtmlPath);
-        if (!existsSync(distHtmlDir)) {
-          mkdirSync(distHtmlDir, { recursive: true });
-        }
-        writeFileSync(distHtmlPath, htmlContent, 'utf-8');
-      } else {
-        htmlContent = readFileSync(distHtmlPath, 'utf-8');
-      }
-    } else {
-      console.warn(`Warning: No HTML template found for blog post: ${name}${lang ? ` (${lang})` : ''}`);
+    // Always use the template HTML for articles
+    if (!existsSync(templateHTMLPath)) {
+      console.warn(`Warning: No HTML template found at ${templateHTMLPath}`);
       continue;
+    }
+    
+    // Read template and ensure dist directory exists
+    let htmlContent = readFileSync(templateHTMLPath, 'utf-8');
+    const distHtmlDir = dirname(distHtmlPath);
+    if (!existsSync(distHtmlDir)) {
+      mkdirSync(distHtmlDir, { recursive: true });
     }
     
     if (!htmlContent.includes('<div id="blog-content"></div>')) {
@@ -749,6 +730,14 @@ function injectMarkdownToHtml(distDir) {
     const date = frontmatter?.date || frontmatter?.published || null;
     const formattedDate = formatDate(date);
     const author = frontmatter?.author || null;
+    
+    // Update the HTML <title> tag with the article title
+    if (title && title !== 'Blog Post') {
+      htmlContent = htmlContent.replace(
+        /<title>.*?<\/title>/,
+        `<title>${escapeHtml(title)}</title>`
+      );
+    }
     
     // Remove first h1 if there's a title (from frontmatter or extracted)
     let markdownToRender = bodyContent;
@@ -844,13 +833,15 @@ function injectMarkdownToHtml(distDir) {
   }
   
   // Process resume directory (including language variants)
+  // Uses template from resume/_template/index.html (like articles)
   const resumeDir = resolve(process.cwd(), 'resume');
+  const resumeTemplatePath = join(resumeDir, '_template', 'index.html');
   const resumeVariants = [];
   
   // Check for default content.md
   const defaultResumeMdPath = join(resumeDir, 'content.md');
   if (existsSync(defaultResumeMdPath)) {
-    resumeVariants.push({ lang: null, mdPath: defaultResumeMdPath, htmlPath: join(resumeDir, 'index.html') });
+    resumeVariants.push({ lang: null, mdPath: defaultResumeMdPath });
   }
   
   // Check for language-specific files (content.zh-tw.md, etc.)
@@ -862,133 +853,142 @@ function injectMarkdownToHtml(distDir) {
       if (match) {
         const lang = match[1].toLowerCase();
         const mdPath = join(resumeDir, file);
-        const langSuffix = `.${lang}`;
-        const htmlPath = join(resumeDir, `index${langSuffix}.html`);
-        resumeVariants.push({ lang, mdPath, htmlPath });
+        resumeVariants.push({ lang, mdPath });
       }
     }
   } catch (err) {
     // Ignore errors
   }
   
-  // Process each resume variant
-  for (const variant of resumeVariants) {
-    const { lang, mdPath, htmlPath } = variant;
-    const distResumeHtmlPath = lang 
-      ? join(distDir, 'resume', `${lang}`, 'index.html')
-      : join(distDir, 'resume', 'index.html');
-    
-    if (existsSync(mdPath) && existsSync(htmlPath)) {
-      // Ensure dist directory exists
-      const distResumeDir = dirname(distResumeHtmlPath);
-      if (!existsSync(distResumeDir)) {
-        mkdirSync(distResumeDir, { recursive: true });
-      }
+  // Check if resume template exists
+  if (!existsSync(resumeTemplatePath)) {
+    if (resumeVariants.length > 0) {
+      console.warn(`Warning: Resume template not found at ${resumeTemplatePath}`);
+    }
+  } else {
+    // Process each resume variant using the template
+    for (const variant of resumeVariants) {
+      const { lang, mdPath } = variant;
+      const distResumeHtmlPath = lang 
+        ? join(distDir, 'resume', `${lang}`, 'index.html')
+        : join(distDir, 'resume', 'index.html');
       
-      // Copy HTML to dist if it doesn't exist
-      if (!existsSync(distResumeHtmlPath)) {
-        copyFileSync(htmlPath, distResumeHtmlPath);
-      }
-      
-      let htmlContent = readFileSync(distResumeHtmlPath, 'utf-8');
-      
-      if (htmlContent.includes('<div id="blog-content"></div>')) {
-        // Read and parse markdown
-        const markdownContent = readFileSync(mdPath, 'utf-8');
-        const content = typeof markdownContent === 'string' ? markdownContent : String(markdownContent || '');
-        
-        // Parse frontmatter
-        const { frontmatter, content: bodyContent } = parseFrontmatter(content);
-        
-        // Extract title, date, and author
-        let title = frontmatter?.title || extractTitle(bodyContent) || 'Résumé';
-        const date = frontmatter?.date || frontmatter?.published || null;
-        const formattedDate = formatDate(date);
-        const author = frontmatter?.author || null;
-        
-        // Remove first h1 if there's a title (from frontmatter or extracted)
-        let markdownToRender = bodyContent;
-        if (title && extractTitle(bodyContent)) {
-          markdownToRender = removeFirstH1(bodyContent);
+      if (existsSync(mdPath)) {
+        // Ensure dist directory exists
+        const distResumeDir = dirname(distResumeHtmlPath);
+        if (!existsSync(distResumeDir)) {
+          mkdirSync(distResumeDir, { recursive: true });
         }
         
-        // Process math equations in markdown BEFORE converting to HTML
-        markdownToRender = processMathInMarkdown(markdownToRender);
+        // Read the template HTML
+        let htmlContent = readFileSync(resumeTemplatePath, 'utf-8');
         
-        // Convert markdown to HTML
-        const htmlFromMd = marked.parse(markdownToRender);
-        
-        // Inject title and date into header if present
-        if (htmlContent.includes('<header>')) {
-          const headerMatch = htmlContent.match(/<header>([\s\S]*?)<\/header>/);
-          const headerContent = headerMatch ? headerMatch[1].trim() : '';
+        if (htmlContent.includes('<div id="blog-content"></div>')) {
+          // Read and parse markdown
+          const markdownContent = readFileSync(mdPath, 'utf-8');
+          const content = typeof markdownContent === 'string' ? markdownContent : String(markdownContent || '');
           
-          let newHeaderContent = '';
+          // Parse frontmatter
+          const { frontmatter, content: bodyContent } = parseFrontmatter(content);
           
-          // Add title (h1)
-          if (htmlContent.includes('<h1>')) {
+          // Extract title, date, and author
+          let title = frontmatter?.title || extractTitle(bodyContent) || 'Résumé';
+          const date = frontmatter?.date || frontmatter?.published || null;
+          const formattedDate = formatDate(date);
+          const author = frontmatter?.author || null;
+          
+          // Update the HTML <title> tag with the resume title
+          if (title && title !== 'Résumé') {
             htmlContent = htmlContent.replace(
-              /<h1>.*?<\/h1>/,
-              `<h1>${escapeHtml(title)}</h1>`
+              /<title>.*?<\/title>/,
+              `<title>${escapeHtml(title)}</title>`
             );
-            newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
-          } else {
-            newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
           }
           
-          // Add date/meta section
-          if (formattedDate || author) {
-            const dateISO = date || new Date().toISOString().split('T')[0];
-            let metaContent = '';
-            if (formattedDate) {
-              metaContent = `<time datetime="${dateISO}">${formattedDate}</time>`;
+          // Remove first h1 if there's a title (from frontmatter or extracted)
+          let markdownToRender = bodyContent;
+          if (title && extractTitle(bodyContent)) {
+            markdownToRender = removeFirstH1(bodyContent);
+          }
+          
+          // Process math equations in markdown BEFORE converting to HTML
+          markdownToRender = processMathInMarkdown(markdownToRender);
+          
+          // Convert markdown to HTML
+          const htmlFromMd = marked.parse(markdownToRender);
+          
+          // Inject title and date into header if present
+          if (htmlContent.includes('<header>')) {
+            const headerMatch = htmlContent.match(/<header>([\s\S]*?)<\/header>/);
+            const headerContent = headerMatch ? headerMatch[1].trim() : '';
+            
+            let newHeaderContent = '';
+            
+            // Add title (h1)
+            if (htmlContent.includes('<h1>')) {
+              htmlContent = htmlContent.replace(
+                /<h1>.*?<\/h1>/,
+                `<h1>${escapeHtml(title)}</h1>`
+              );
+              newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
+            } else {
+              newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
             }
-            if (author) {
-              if (metaContent) {
-                metaContent += ` • ${escapeHtml(author)}`;
+            
+            // Add date/meta section
+            if (formattedDate || author) {
+              const dateISO = date || new Date().toISOString().split('T')[0];
+              let metaContent = '';
+              if (formattedDate) {
+                metaContent = `<time datetime="${dateISO}">${formattedDate}</time>`;
+              }
+              if (author) {
+                if (metaContent) {
+                  metaContent += ` • ${escapeHtml(author)}`;
+                } else {
+                  metaContent = escapeHtml(author);
+                }
+              }
+              
+              if (htmlContent.includes('<time') || htmlContent.includes('<div class="meta">')) {
+                htmlContent = htmlContent.replace(
+                  /<div class="meta">.*?<\/div>/,
+                  `<div class="meta">${metaContent}</div>`
+                );
+                if (htmlContent.includes('<time') && !htmlContent.includes('<div class="meta">')) {
+                  htmlContent = htmlContent.replace(
+                    /<time datetime="[^"]*">[^<]*<\/time>/,
+                    `<div class="meta">${metaContent}</div>`
+                  );
+                }
               } else {
-                metaContent = escapeHtml(author);
+                newHeaderContent += `\n        <div class="meta">${metaContent}</div>`;
               }
             }
             
-            if (htmlContent.includes('<time') || htmlContent.includes('<div class="meta">')) {
+            // If header was empty, replace it with the new content
+            if (!headerContent && newHeaderContent) {
               htmlContent = htmlContent.replace(
-                /<div class="meta">.*?<\/div>/,
-                `<div class="meta">${metaContent}</div>`
+                /<header>\s*<\/header>/,
+                `<header>\n        ${newHeaderContent}\n      </header>`
               );
-              if (htmlContent.includes('<time') && !htmlContent.includes('<div class="meta">')) {
-                htmlContent = htmlContent.replace(
-                  /<time datetime="[^"]*">[^<]*<\/time>/,
-                  `<div class="meta">${metaContent}</div>`
-                );
-              }
-            } else {
-              newHeaderContent += `\n        <div class="meta">${metaContent}</div>`;
             }
           }
           
-          // If header was empty, replace it with the new content
-          if (!headerContent && newHeaderContent) {
-            htmlContent = htmlContent.replace(
-              /<header>\s*<\/header>/,
-              `<header>\n        ${newHeaderContent}\n      </header>`
-            );
-          }
+          // Inject into HTML
+          htmlContent = htmlContent.replace(
+            '<div id="blog-content"></div>',
+            `<div id="blog-content"><article>${htmlFromMd}</article></div>`
+          );
+          
+          // Process and copy images
+          htmlContent = processImages(htmlContent, resumeDir, distResumeHtmlPath, distDir);
+          
+          // Write the generated HTML
+          writeFileSync(distResumeHtmlPath, htmlContent, 'utf-8');
+          const langLabel = lang ? ` (${lang})` : '';
+          console.log(`✓ Generated resume HTML: resume${langLabel}`);
         }
-        
-        // Inject into HTML
-        htmlContent = htmlContent.replace(
-          '<div id="blog-content"></div>',
-          `<div id="blog-content"><article>${htmlFromMd}</article></div>`
-        );
-        
-        // Process and copy images
-        htmlContent = processImages(htmlContent, resumeDir, distResumeHtmlPath, distDir);
-        
-        // Write back
-        writeFileSync(distResumeHtmlPath, htmlContent, 'utf-8');
-        const langLabel = lang ? ` (${lang})` : '';
-        console.log(`✓ Injected markdown to HTML: resume${langLabel}`);
       }
     }
   }
@@ -1658,144 +1658,155 @@ export function markdownPlugin() {
         const isHtmlFile = pathname.endsWith('.html');
         
         // Handle resume route (including language variants)
+        // Uses template from resume/_template/index.html (like articles)
         if (resumeMatch) {
           const lang = resumeMatch[1] ? resumeMatch[1].toLowerCase() : null;
           const resumeMdPath = lang 
             ? join(resumeDir, `content.${lang}.md`)
             : join(resumeDir, 'content.md');
-          const resumeHtmlPath = lang
-            ? join(resumeDir, `index.${lang}.html`)
-            : join(resumeDir, 'index.html');
+          const resumeTemplatePath = join(resumeDir, '_template', 'index.html');
           
-          // Always serve the resume HTML file if it exists, even if markdown processing isn't needed
-          if (existsSync(resumeHtmlPath)) {
-            try {
-              let htmlContent = readFileSync(resumeHtmlPath, 'utf-8');
+          // Check if markdown file exists
+          if (!existsSync(resumeMdPath)) {
+            // Markdown file doesn't exist - serve 404
+            const notFoundPath = resolve(process.cwd(), '404.html');
+            if (existsSync(notFoundPath)) {
+              try {
+                const notFoundContent = readFileSync(notFoundPath, 'utf-8');
+                res.statusCode = 404;
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                res.setHeader('Content-Length', Buffer.byteLength(notFoundContent));
+                res.end(notFoundContent);
+                return;
+              } catch (err) {
+                console.warn(`Error serving 404 page:`, err.message);
+              }
+            }
+            return next();
+          }
+          
+          // Check if template exists
+          if (!existsSync(resumeTemplatePath)) {
+            console.warn(`Warning: Resume template not found at ${resumeTemplatePath}`);
+            return next();
+          }
+          
+          try {
+            // Read the template HTML
+            let htmlContent = readFileSync(resumeTemplatePath, 'utf-8');
+            
+            // Process markdown
+            if (htmlContent.includes('<div id="blog-content"></div>')) {
+              configureMarked();
+              const markdownContent = readFileSync(resumeMdPath, 'utf-8');
+              const content = typeof markdownContent === 'string' ? markdownContent : String(markdownContent || '');
               
-              // Only process markdown if the marker exists
-              if (existsSync(resumeMdPath) && htmlContent.includes('<div id="blog-content"></div>')) {
-                configureMarked();
-                const markdownContent = readFileSync(resumeMdPath, 'utf-8');
-                const content = typeof markdownContent === 'string' ? markdownContent : String(markdownContent || '');
+              const { frontmatter, content: bodyContent } = parseFrontmatter(content);
+              
+              let title = frontmatter?.title || extractTitle(bodyContent) || 'Résumé';
+              const date = frontmatter?.date || frontmatter?.published || null;
+              const formattedDate = formatDate(date);
+              const author = frontmatter?.author || null;
+              
+              // Update the HTML <title> tag with the resume title
+              if (title && title !== 'Résumé') {
+                htmlContent = htmlContent.replace(
+                  /<title>.*?<\/title>/,
+                  `<title>${escapeHtml(title)}</title>`
+                );
+              }
+              
+              let markdownToRender = bodyContent;
+              if (title && extractTitle(bodyContent)) {
+                markdownToRender = removeFirstH1(bodyContent);
+              }
+              
+              markdownToRender = processMathInMarkdown(markdownToRender);
+              const htmlFromMd = marked.parse(markdownToRender);
+              
+              if (htmlContent.includes('<header>')) {
+                const headerMatch = htmlContent.match(/<header>([\s\S]*?)<\/header>/);
+                const headerContent = headerMatch ? headerMatch[1].trim() : '';
                 
-                const { frontmatter, content: bodyContent } = parseFrontmatter(content);
+                let newHeaderContent = '';
                 
-                let title = frontmatter?.title || extractTitle(bodyContent) || 'Résumé';
-                const date = frontmatter?.date || frontmatter?.published || null;
-                const formattedDate = formatDate(date);
-                const author = frontmatter?.author || null;
-                
-                let markdownToRender = bodyContent;
-                if (title && extractTitle(bodyContent)) {
-                  markdownToRender = removeFirstH1(bodyContent);
+                if (htmlContent.includes('<h1>')) {
+                  htmlContent = htmlContent.replace(
+                    /<h1>.*?<\/h1>/,
+                    `<h1>${escapeHtml(title)}</h1>`
+                  );
+                  newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
+                } else {
+                  newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
                 }
                 
-                markdownToRender = processMathInMarkdown(markdownToRender);
-                const htmlFromMd = marked.parse(markdownToRender);
-                
-                if (htmlContent.includes('<header>')) {
-                  const headerMatch = htmlContent.match(/<header>([\s\S]*?)<\/header>/);
-                  const headerContent = headerMatch ? headerMatch[1].trim() : '';
-                  
-                  let newHeaderContent = '';
-                  
-                  if (htmlContent.includes('<h1>')) {
-                    htmlContent = htmlContent.replace(
-                      /<h1>.*?<\/h1>/,
-                      `<h1>${escapeHtml(title)}</h1>`
-                    );
-                    newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
-                  } else {
-                    newHeaderContent = `<h1>${escapeHtml(title)}</h1>`;
+                if (formattedDate || author) {
+                  const dateISO = date || new Date().toISOString().split('T')[0];
+                  let metaContent = '';
+                  if (formattedDate) {
+                    metaContent = `<time datetime="${dateISO}">${formattedDate}</time>`;
+                  }
+                  if (author) {
+                    if (metaContent) {
+                      metaContent += ` • ${escapeHtml(author)}`;
+                    } else {
+                      metaContent = escapeHtml(author);
+                    }
                   }
                   
-                  if (formattedDate || author) {
-                    const dateISO = date || new Date().toISOString().split('T')[0];
-                    let metaContent = '';
-                    if (formattedDate) {
-                      metaContent = `<time datetime="${dateISO}">${formattedDate}</time>`;
-                    }
-                    if (author) {
-                      if (metaContent) {
-                        metaContent += ` • ${escapeHtml(author)}`;
-                      } else {
-                        metaContent = escapeHtml(author);
-                      }
-                    }
-                    
-                    if (htmlContent.includes('<time') || htmlContent.includes('<div class="meta">')) {
+                  if (htmlContent.includes('<time') || htmlContent.includes('<div class="meta">')) {
+                    htmlContent = htmlContent.replace(
+                      /<div class="meta">.*?<\/div>/,
+                      `<div class="meta">${metaContent}</div>`
+                    );
+                    if (htmlContent.includes('<time') && !htmlContent.includes('<div class="meta">')) {
                       htmlContent = htmlContent.replace(
-                        /<div class="meta">.*?<\/div>/,
+                        /<time datetime="[^"]*">[^<]*<\/time>/,
                         `<div class="meta">${metaContent}</div>`
                       );
-                      if (htmlContent.includes('<time') && !htmlContent.includes('<div class="meta">')) {
-                        htmlContent = htmlContent.replace(
-                          /<time datetime="[^"]*">[^<]*<\/time>/,
-                          `<div class="meta">${metaContent}</div>`
-                        );
-                      }
-                    } else {
-                      newHeaderContent += `\n        <div class="meta">${metaContent}</div>`;
                     }
-                  }
-                  
-                  if (!headerContent && newHeaderContent) {
-                    htmlContent = htmlContent.replace(
-                      /<header>\s*<\/header>/,
-                      `<header>\n        ${newHeaderContent}\n      </header>`
-                    );
-                  }
-                }
-                
-                htmlContent = htmlContent.replace(
-                  '<div id="blog-content"></div>',
-                  `<div id="blog-content"><article>${htmlFromMd}</article></div>`
-                );
-                
-                // Process images for dev mode
-                htmlContent = processImagesForDev(htmlContent, resumeDir, 'resume');
-                
-                // Inject Vite HMR client script for dev mode
-                if (!htmlContent.includes('@vite/client') && !htmlContent.includes('vite/client')) {
-                  const viteClientScript = '<script type="module" src="/@vite/client"></script>';
-                  
-                  if (htmlContent.includes('</body>')) {
-                    htmlContent = htmlContent.replace('</body>', `${viteClientScript}\n  </body>`);
-                  } else if (htmlContent.includes('</html>')) {
-                    htmlContent = htmlContent.replace('</html>', `${viteClientScript}\n</html>`);
                   } else {
-                    htmlContent += viteClientScript;
+                    newHeaderContent += `\n        <div class="meta">${metaContent}</div>`;
                   }
                 }
                 
-                res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                res.setHeader('Content-Length', Buffer.byteLength(htmlContent));
-                res.end(htmlContent);
-                return;
-              } else {
-                // HTML exists but doesn't need markdown processing - still serve it
-                // Inject Vite HMR client script for dev mode
-                if (!htmlContent.includes('@vite/client') && !htmlContent.includes('vite/client')) {
-                  const viteClientScript = '<script type="module" src="/@vite/client"></script>';
-                  
-                  if (htmlContent.includes('</body>')) {
-                    htmlContent = htmlContent.replace('</body>', `${viteClientScript}\n  </body>`);
-                  } else if (htmlContent.includes('</html>')) {
-                    htmlContent = htmlContent.replace('</html>', `${viteClientScript}\n</html>`);
-                  } else {
-                    htmlContent += viteClientScript;
-                  }
+                if (!headerContent && newHeaderContent) {
+                  htmlContent = htmlContent.replace(
+                    /<header>\s*<\/header>/,
+                    `<header>\n        ${newHeaderContent}\n      </header>`
+                  );
                 }
-                
-                res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                res.setHeader('Content-Length', Buffer.byteLength(htmlContent));
-                res.end(htmlContent);
-                return;
               }
-            } catch (error) {
-              console.warn(`Error in markdown plugin for ${req.url}:`, error.message);
-              return next();
+              
+              htmlContent = htmlContent.replace(
+                '<div id="blog-content"></div>',
+                `<div id="blog-content"><article>${htmlFromMd}</article></div>`
+              );
+              
+              // Process images for dev mode (isResume = true)
+              htmlContent = processImagesForDev(htmlContent, resumeDir, 'resume', true);
+              
+              // Inject Vite HMR client script for dev mode
+              if (!htmlContent.includes('@vite/client') && !htmlContent.includes('vite/client')) {
+                const viteClientScript = '<script type="module" src="/@vite/client"></script>';
+                
+                if (htmlContent.includes('</body>')) {
+                  htmlContent = htmlContent.replace('</body>', `${viteClientScript}\n  </body>`);
+                } else if (htmlContent.includes('</html>')) {
+                  htmlContent = htmlContent.replace('</html>', `${viteClientScript}\n</html>`);
+                } else {
+                  htmlContent += viteClientScript;
+                }
+              }
+              
+              res.setHeader('Content-Type', 'text/html; charset=utf-8');
+              res.setHeader('Content-Length', Buffer.byteLength(htmlContent));
+              res.end(htmlContent);
+              return;
             }
+          } catch (error) {
+            console.warn(`Error in markdown plugin for ${req.url}:`, error.message);
+            return next();
           }
           return next();
         }
@@ -1903,54 +1914,14 @@ export function markdownPlugin() {
             }
           }
           
-          // Resolve the HTML file path
-          let htmlPath = pathname.replace(/^\//, '');
-          let resolvedPath = resolve(process.cwd(), htmlPath);
-          
-          // Check if path is a directory, if so look for index.html
-          const pathStat = existsSync(resolvedPath) ? statSync(resolvedPath) : null;
-          if (pathStat && pathStat.isDirectory()) {
-            const indexPath = join(resolvedPath, 'index.html');
-            if (existsSync(indexPath)) {
-              resolvedPath = indexPath;
-            } else {
-              // Try article-specific base HTML before falling back to template
-              const defaultArticleHtml = join(postDir, 'index.html');
-              if (existsSync(defaultArticleHtml)) {
-                resolvedPath = defaultArticleHtml;
-              } else if (existsSync(templateHTMLPath)) {
-                resolvedPath = templateHTMLPath;
-              } else {
-                return next();
-              }
-            }
-          } else if (!existsSync(resolvedPath)) {
-            // Try language-specific HTML (index.lang.html) then default article HTML before template
-            let candidatePaths = [];
-            if (lang) {
-              candidatePaths.push(join(postDir, `index.${lang}.html`));
-            }
-            candidatePaths.push(join(postDir, 'index.html'));
-            if (existsSync(templateHTMLPath)) {
-              candidatePaths.push(templateHTMLPath);
-            }
-
-            const fallbackPath = candidatePaths.find(p => existsSync(p));
-            if (fallbackPath) {
-              resolvedPath = fallbackPath;
-            } else {
-              return next();
-            }
-          }
-          
-          // Double-check that resolvedPath is a file, not a directory
-          const finalStat = existsSync(resolvedPath) ? statSync(resolvedPath) : null;
-          if (!finalStat || finalStat.isDirectory()) {
+          // Always use the template for articles
+          if (!existsSync(templateHTMLPath)) {
+            console.warn(`Warning: Template not found at ${templateHTMLPath}`);
             return next();
           }
           
-          // Read the HTML file
-          let htmlContent = readFileSync(resolvedPath, 'utf-8');
+          // Read the template HTML file
+          let htmlContent = readFileSync(templateHTMLPath, 'utf-8');
           
           // Check if this HTML needs markdown rendering
           if (!htmlContent.includes('<div id="blog-content"></div>')) {
@@ -1974,6 +1945,14 @@ export function markdownPlugin() {
           const date = frontmatter?.date || frontmatter?.published || null;
           const formattedDate = formatDate(date);
           const author = frontmatter?.author || null;
+          
+          // Update the HTML <title> tag with the article title
+          if (title && title !== 'Blog Post') {
+            htmlContent = htmlContent.replace(
+              /<title>.*?<\/title>/,
+              `<title>${escapeHtml(title)}</title>`
+            );
+          }
           
           // Remove first h1 if there's a title (from frontmatter or extracted)
           let markdownToRender = bodyContent;
