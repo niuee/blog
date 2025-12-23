@@ -13,6 +13,7 @@ body {
   padding: 2rem 1rem;
   position: relative;
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
 }
 
 /* CJK (Chinese, Japanese, Korean) typography adjustments */
@@ -33,7 +34,6 @@ body.font-size-transition-enabled {
 .container {
   max-width: 700px;
   margin: 0 auto;
-  overflow-x: hidden;
 }
 
 /* Sticky back navigation */
@@ -120,16 +120,17 @@ article h3 {
 article ul,
 article ol {
   margin-left: 0;
-  padding-left: calc(1.5rem * var(--font-size-scale, 1));
+  padding-left: calc(2.5rem * var(--font-size-scale, 1));
   margin-bottom: 1rem;
   list-style-position: outside;
 }
 
 article li {
   margin-bottom: 0.5rem;
-  padding-left: 0.25rem;
+  padding-left: calc(0.5rem * var(--font-size-scale, 1));
   overflow-wrap: break-word;
   word-wrap: break-word;
+  margin-left: 0;
 }
 
 article a {
