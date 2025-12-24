@@ -62,8 +62,7 @@ published: 2025-01-01
 </div>
 <div class="resume-tech">React • TypeScript • Golang • PostgreSQL • ASP.NET</div>
 
-- Maintained consumer-facing elderly care portal, [Jubo Care](https://www.jubo-care.com/), using **React**, **TypeScript**, and **Next.js**.
-- 使用 **React**, **TypeScript**, 和 **Next.js** 開發和維護老年人照護平台 [Jubo Care 智齡照顧網](https://www.jubo-care.com/)。
+- 使用 **React**, **TypeScript**、**Next.js** 開發和維護老年人照護平台 [Jubo Care 智齡照顧網](https://www.jubo-care.com/)。
 - 使用 shaka-player，汰換 Azure Media Player，實作影音串流播放功能。
 - 開發支援手機 APP、網頁 APP的跨平台畫面截圖匯出功能。
 - 實作地區相關推播通知功能，並與資料團隊合作，半自動化資料爬蟲的流程。
@@ -85,7 +84,7 @@ published: 2025-01-01
 
 **桶槽貼壁式檢測載具**
 
-- 使用 **React**, **Electron**, 和 **threejs** 開發跨平台監控和視覺化應用程式，設計 **WebSocket**-based 的資料流和整合 **MongoDB** 儲存桶槽檢測數據。
+- 使用 **React**、**Electron**、**threejs** 開發跨平台監控和視覺化應用程式，設計 **WebSocket**-based 的資料流和整合 **MongoDB** 儲存桶槽檢測數據。
 - 整合外部測量儀器，實作桶槽貼壁式檢測載具的測量功能。
 
 **農用植保機: 使用 ROS 整合感測器和飛行控制系統**
@@ -107,7 +106,7 @@ published: 2025-01-01
   <span class="resume-location">印第安納州 西拉法葉, 美國</span>
 </div>
 
-因為系選修誤打誤撞，選了許多資工系的課程，之後照著資工系的輔系學程修了：資料結構、演算法、離散數學等課程，奠定了未來在資工領域探索的基礎。
+因為系選修誤打誤撞，選了許多資工系的課程，之後照著資工系的輔系學程修了：資料結構、演算法、離散數學等課程，奠定了未來在資資訊相關領域探索的基礎。
 
 </div>
 
@@ -122,7 +121,7 @@ published: 2025-01-01
 </div>
 
 <div class="resume-skill-category">
-  <strong>框架 & 函式庫:</strong> Express.js, Django, React, Electron.js, GraphQL
+  <strong>框架 & 函式庫:</strong> Express.js, Django, React, Electron.js, GraphQL, 前端框架最近正在學習 Vue.js
 </div>
 
 <div class="resume-skill-category">
@@ -143,7 +142,7 @@ published: 2025-01-01
 
 ### <a href="https://github.com/ue-too/ue-too" target="_blank">ue-too</a>
 
-一系列用來快速開發 HTML canvas 應用程式的工具，全部的 packages 都放在同一個 monorepo 裡面，原始碼放在 [GitHub](https://github.com/ue-too/ue-too)。每個套件也有發佈到 npm 上，如果有興趣可以去看看。 
+一系列用來快速開發 HTML canvas 應用程式的工具，全部的套件都放在同一個 monorepo 裡面，原始碼放在 [GitHub](https://github.com/ue-too/ue-too)。每個套件也都有發佈到 npm 上，如果有興趣可以去看看。 
 
 套件列表:
 
@@ -159,7 +158,7 @@ published: 2025-01-01
 
 ### <a href="https://github.com/ue-too/ue-too/tree/main/apps/banana" target="_blank"><strong>banana</strong></a>
 
-這是目前我投入最多時間的 side project。目標是打造一個網頁版的都市建造遊戲，目前主要聚焦在鐵道系統的建設。
+目前這是我投入最多時間的 side project。目標是打造一個網頁版的都市建造遊戲，並且主要聚焦在鐵道系統的建設要素。
 
 </div>
 
