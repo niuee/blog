@@ -3,6 +3,7 @@ import { join, dirname, resolve, extname, basename, relative } from 'path';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import katex from 'katex';
+import { build } from 'vite';
 
 // Configure marked once
 let markedConfigured = false;
@@ -708,8 +709,12 @@ function processImagesForDev(htmlContent, blogPostDir, blogPostName, isResume = 
   return processedHtml;
 }
 
+// Store TypeScript files that need to be bundled
+const typescriptFilesToBundle = new Map();
+
 /**
  * Process and copy TypeScript files referenced in HTML content
+ * Returns updated HTML and collects TypeScript files for bundling
  */
 function processTypeScript(htmlContent, sourceDir, distHtmlDir, distDir) {
   // Find all script tags with src attributes pointing to .ts files
@@ -717,12 +722,30 @@ function processTypeScript(htmlContent, sourceDir, distHtmlDir, distDir) {
   const processedScripts = new Set();
   
   return htmlContent.replace(scriptRegex, (match, beforeSrc = '', scriptSrc = '', afterSrc = '') => {
-    if (!scriptSrc || scriptSrc.startsWith('http') || scriptSrc.startsWith('//') || scriptSrc.startsWith('/')) {
+    // Skip external URLs (http, https, //)
+    if (!scriptSrc || scriptSrc.startsWith('http') || scriptSrc.startsWith('//')) {
       return match;
     }
     
-    const sourceTsPath = resolve(sourceDir, scriptSrc);
-    const tsFileName = basename(scriptSrc);
+    // Handle absolute paths starting with / (e.g., /articles/name/file.ts)
+    let sourceTsPath;
+    let tsFileName;
+    if (scriptSrc.startsWith('/')) {
+      // Absolute path - resolve from project root
+      const projectRoot = process.cwd();
+      sourceTsPath = resolve(projectRoot, scriptSrc.substring(1)); // Remove leading /
+      tsFileName = basename(scriptSrc);
+      
+      // Check if this is an article TypeScript file
+      if (!scriptSrc.includes('/articles/') && !scriptSrc.includes('/resume/')) {
+        // Not an article/resume file, skip it (might be a main entry point handled by Vite)
+        return match;
+      }
+    } else {
+      // Relative path - resolve from sourceDir
+      sourceTsPath = resolve(sourceDir, scriptSrc);
+      tsFileName = basename(scriptSrc);
+    }
     
     if (!existsSync(sourceTsPath)) {
       console.warn(`Warning: TypeScript file not found: ${sourceTsPath}`);
@@ -735,28 +758,49 @@ function processTypeScript(htmlContent, sourceDir, distHtmlDir, distDir) {
       mkdirSync(distTsDir, { recursive: true });
     }
     
-    // Copy TypeScript file to dist directory (same directory as HTML)
-    // Note: Vite will process this during build, but we copy it for reference
-    const distTsPath = join(distTsDir, tsFileName);
-    if (!processedScripts.has(scriptSrc)) {
-      try {
-        copyFileSync(sourceTsPath, distTsPath);
-        console.log(`✓ Copied TypeScript file: ${tsFileName}`);
-      } catch (err) {
-        console.warn(`Warning: Could not copy TypeScript file ${scriptSrc}:`, err.message);
+    // Calculate the output path for the bundled JS file
+    // For absolute paths, preserve the directory structure
+    let outputJsPath;
+    if (scriptSrc.startsWith('/')) {
+      // For absolute paths, maintain the same structure in dist
+      // e.g., /articles/name/file.ts -> dist/articles/name/file.js
+      const pathWithoutLeadingSlash = scriptSrc.substring(1);
+      outputJsPath = join(distDir, pathWithoutLeadingSlash.replace(/\.ts$/, '.js'));
+    } else {
+      // For relative paths, use the same directory as the HTML
+      const distHtmlDirRelative = relative(distDir, dirname(distHtmlDir));
+      if (!distHtmlDirRelative || distHtmlDirRelative === '.' || distHtmlDirRelative === './') {
+        outputJsPath = join(distDir, tsFileName.replace(/\.ts$/, '.js'));
+      } else {
+        outputJsPath = join(distDir, distHtmlDirRelative, tsFileName.replace(/\.ts$/, '.js'));
       }
-      processedScripts.add(scriptSrc);
     }
     
-    // Update script path in HTML to be absolute from root
-    const distHtmlDirRelative = relative(distDir, dirname(distHtmlDir));
-    let absoluteTsPath;
-    if (!distHtmlDirRelative || distHtmlDirRelative === '.' || distHtmlDirRelative === './') {
-      absoluteTsPath = `/${tsFileName}`;
-    } else {
-      absoluteTsPath = join('/', distHtmlDirRelative, tsFileName).replace(/\\/g, '/');
+    // Store TypeScript file for bundling
+    const bundleKey = `${sourceTsPath}:${outputJsPath}`;
+    if (!typescriptFilesToBundle.has(bundleKey)) {
+      typescriptFilesToBundle.set(bundleKey, {
+        sourcePath: sourceTsPath,
+        outputPath: outputJsPath,
+        outputDir: dirname(outputJsPath),
+        outputFileName: basename(outputJsPath)
+      });
     }
-    const newScriptSrc = absoluteTsPath;
+    
+    // Calculate the URL path for the bundled JS file
+    let jsUrlPath;
+    if (scriptSrc.startsWith('/')) {
+      // For absolute paths, just replace .ts with .js
+      jsUrlPath = scriptSrc.replace(/\.ts$/, '.js');
+    } else {
+      // For relative paths, calculate from HTML location
+      const distHtmlDirRelativeForUrl = relative(distDir, dirname(distHtmlDir));
+      if (!distHtmlDirRelativeForUrl || distHtmlDirRelativeForUrl === '.' || distHtmlDirRelativeForUrl === './') {
+        jsUrlPath = `/${tsFileName.replace(/\.ts$/, '.js')}`;
+      } else {
+        jsUrlPath = join('/', distHtmlDirRelativeForUrl, tsFileName.replace(/\.ts$/, '.js')).replace(/\\/g, '/');
+      }
+    }
     
     // Ensure script tag has type="module"
     let rawAttributes = `${beforeSrc}${afterSrc}`;
@@ -770,7 +814,8 @@ function processTypeScript(htmlContent, sourceDir, distHtmlDir, distDir) {
     }
 
     const attributesString = rawAttributes ? ` ${rawAttributes}` : '';
-    return `<script${attributesString} src="${newScriptSrc}"></script>`;
+    // Return script tag pointing to the bundled JS file
+    return `<script${attributesString} src="${jsUrlPath}"></script>`;
   });
 }
 
@@ -916,6 +961,56 @@ function copy404Page(distDir) {
 /**
  * Inject markdown content into HTML files during build
  */
+/**
+ * Bundle TypeScript files using Vite's build API
+ */
+async function bundleTypeScriptFiles() {
+  const bundlePromises = [];
+  
+  for (const [key, fileInfo] of typescriptFilesToBundle.entries()) {
+    const { sourcePath, outputPath, outputDir, outputFileName } = fileInfo;
+    
+    // Ensure output directory exists
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir, { recursive: true });
+    }
+    
+    try {
+      // Bundle using Vite with the TypeScript file as entry point
+      const bundlePromise = build({
+        configFile: false,
+        root: process.cwd(),
+        build: {
+          outDir: outputDir,
+          emptyOutDir: false,
+          rollupOptions: {
+            input: sourcePath,
+            output: {
+              entryFileNames: outputFileName,
+              format: 'es',
+            },
+          },
+          write: true,
+          minify: false, // Keep readable for debugging, set to true for production
+          sourcemap: false,
+        },
+        logLevel: 'silent', // Suppress Vite's build output
+      }).then(() => {
+        console.log(`✓ Bundled: ${relative(process.cwd(), sourcePath)} → ${relative(process.cwd(), outputPath)}`);
+      }).catch((err) => {
+        console.warn(`Warning: Failed to bundle ${sourcePath}:`, err.message);
+      });
+      
+      bundlePromises.push(bundlePromise);
+    } catch (err) {
+      console.warn(`Warning: Failed to create bundle for ${sourcePath}:`, err.message);
+    }
+  }
+  
+  // Wait for all bundles to complete
+  await Promise.all(bundlePromises);
+}
+
 function injectMarkdownToHtml(distDir) {
   configureMarked();
   
@@ -2660,10 +2755,19 @@ export function markdownPlugin() {
       distDir = options.dir || 'dist';
     },
     
-    writeBundle() {
+    async writeBundle() {
+      // Clear the TypeScript files map for this build
+      typescriptFilesToBundle.clear();
+      
       // This runs after all files are written to disk
       // Convert markdown to HTML for all blog entries
       injectMarkdownToHtml(distDir);
+      
+      // Bundle all collected TypeScript files
+      if (typescriptFilesToBundle.size > 0) {
+        console.log(`\n📦 Bundling ${typescriptFilesToBundle.size} TypeScript file(s)...`);
+        await bundleTypeScriptFiles();
+      }
     }
   };
 }
