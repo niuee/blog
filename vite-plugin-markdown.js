@@ -296,47 +296,88 @@ function findLanguageVariants(postDir) {
 }
 
 /**
- * Find all blog post directories that contain content.md or language variants
+ * Find all blog post directories that contain content.md or language variants.
+ * Standalone: articles/{slug}/content.md
+ * Series: articles/{series-slug}/{article-slug}/content.md (top-level dir has no content.md)
  */
 function findBlogPosts(blogDir) {
   const posts = [];
-  
+
   try {
     const entries = readdirSync(blogDir);
-    
+
     for (const entry of entries) {
       const fullPath = join(blogDir, entry);
       const stat = statSync(fullPath);
-      
-      if (stat.isDirectory() && entry !== '_template') {
+
+      if (!stat.isDirectory() || entry === '_template') {
+        continue;
+      }
+
+      const defaultMdPath = join(fullPath, 'content.md');
+      const hasOwnContent = existsSync(defaultMdPath);
+
+      if (hasOwnContent) {
+        // Standalone article
         const variants = findLanguageVariants(fullPath);
-        
-        if (variants.length > 0) {
-          // For backward compatibility, if only default content.md exists, treat it as a single post
-          // Otherwise, create entries for each language variant
-          if (variants.length === 1 && variants[0].lang === null) {
-            // Single default content.md
+        if (variants.length === 1 && variants[0].lang === null) {
+          posts.push({
+            dir: fullPath,
+            name: entry,
+            seriesName: null,
+            lang: null,
+            htmlPath: join(fullPath, 'index.html'),
+            mdPath: variants[0].mdPath
+          });
+        } else {
+          for (const variant of variants) {
+            const langSuffix = variant.lang ? `.${variant.lang}` : '';
             posts.push({
               dir: fullPath,
               name: entry,
-              lang: null,
-              htmlPath: join(fullPath, 'index.html'),
-              mdPath: variants[0].mdPath
+              seriesName: null,
+              lang: variant.lang,
+              htmlPath: join(fullPath, `index${langSuffix}.html`),
+              mdPath: variant.mdPath
             });
-          } else {
-            // Multiple language variants
-            for (const variant of variants) {
-              const langSuffix = variant.lang ? `.${variant.lang}` : '';
-              posts.push({
-                dir: fullPath,
-                name: entry,
-                lang: variant.lang,
-                htmlPath: join(fullPath, `index${langSuffix}.html`),
-                mdPath: variant.mdPath
-              });
-            }
           }
         }
+      } else {
+        // Possibly a series folder: subdirs with content.md
+        try {
+          const subEntries = readdirSync(fullPath);
+          for (const subEntry of subEntries) {
+            const subPath = join(fullPath, subEntry);
+            if (!statSync(subPath).isDirectory()) continue;
+            const variants = findLanguageVariants(subPath);
+            if (variants.length === 0) continue;
+            const seriesName = entry;
+            if (variants.length === 1 && variants[0].lang === null) {
+              posts.push({
+                dir: subPath,
+                name: subEntry,
+                seriesName,
+                lang: null,
+                htmlPath: join(subPath, 'index.html'),
+                mdPath: variants[0].mdPath
+              });
+            } else {
+              for (const variant of variants) {
+                const langSuffix = variant.lang ? `.${variant.lang}` : '';
+                posts.push({
+                  dir: subPath,
+                  name: subEntry,
+                  seriesName,
+                  lang: variant.lang,
+                  htmlPath: join(subPath, `index${langSuffix}.html`),
+                  mdPath: variant.mdPath
+                });
+              }
+            }
+          }
+        } catch (err) {
+            // Ignore
+          }
       }
     }
   } catch (err) {
@@ -344,105 +385,126 @@ function findBlogPosts(blogDir) {
       console.warn(`Warning: Could not read directory ${blogDir}:`, err.message);
     }
   }
-  
+
   return posts;
 }
 
 /**
- * Get article metadata for listing page
- * Returns array of articles with title, date, author, excerpt, and URL
+ * Read a single article's metadata from a content path (used for standalone and series)
+ */
+function readArticleMeta(mdPath, entryName, url, seriesSlug = null) {
+  let title, date, author, tags, excerpt, hasLangVariant, seriesOrder;
+  try {
+    const markdownContent = readFileSync(mdPath, 'utf-8');
+    const { frontmatter, content: bodyContent } = parseFrontmatter(markdownContent);
+    title = frontmatter?.title || extractTitle(bodyContent) || entryName;
+    date = frontmatter?.date || frontmatter?.published || null;
+    author = frontmatter?.author || null;
+    tags = [];
+    if (frontmatter?.tags) {
+      if (typeof frontmatter.tags === 'string') {
+        tags = frontmatter.tags.split(',').map(t => t.trim()).filter(t => t);
+      } else if (Array.isArray(frontmatter.tags)) {
+        tags = frontmatter.tags.map(t => String(t).trim()).filter(t => t);
+      }
+    }
+    seriesOrder = frontmatter?.seriesOrder != null ? Number(frontmatter.seriesOrder) : null;
+    excerpt = '';
+    const contentWithoutH1 = removeFirstH1(bodyContent);
+    const paragraphMatch = contentWithoutH1.match(/^([^#<\n][^\n]*)/m);
+    if (paragraphMatch) {
+      excerpt = paragraphMatch[1].trim()
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/\*([^*]+)\*/g, '$1')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/<[^>]+>/g, '');
+      if (excerpt.length > 200) excerpt = excerpt.substring(0, 200).trim() + '...';
+    }
+    hasLangVariant = false;
+    const dir = dirname(mdPath);
+    try {
+      readdirSync(dir).forEach(f => {
+        if (/^content\.[a-z]{2}(-[a-z]{2})?\.md$/i.test(f)) hasLangVariant = true;
+      });
+    } catch (_) {}
+    return {
+      name: entryName,
+      title,
+      date,
+      formattedDate: formatDate(date),
+      author,
+      tags,
+      excerpt,
+      url,
+      hasLangVariant,
+      series: seriesSlug ?? null,
+      seriesOrder: seriesOrder ?? null
+    };
+  } catch (err) {
+    console.warn(`Warning: Could not read article ${entryName}:`, err.message);
+    return null;
+  }
+}
+
+/**
+ * Get article metadata for listing page (standalone + series articles)
  * @param {string} blogDir - The articles directory path
- * @param {string|null} lang - Language code (null for default, e.g., 'zh-tw' for Chinese)
+ * @param {string|null} lang - Language code (null for default)
  */
 function getArticlesMetadata(blogDir, lang = null) {
   const articles = [];
-  
+
   try {
     const entries = readdirSync(blogDir);
-    
+
     for (const entry of entries) {
       const fullPath = join(blogDir, entry);
       const stat = statSync(fullPath);
-      
-      // Skip _template directory and non-directories
-      if (!stat.isDirectory() || entry === '_template') {
-        continue;
-      }
-      
-      // Look for language-specific content first, then fall back to default
-      const langMdPath = lang ? join(fullPath, `content.${lang}.md`) : null;
+
+      if (!stat.isDirectory() || entry === '_template') continue;
+
       const defaultMdPath = join(fullPath, 'content.md');
-      
-      // Determine which markdown file to use
-      let mdPath = defaultMdPath;
-      let hasLangVariant = false;
-      
-      if (lang && existsSync(langMdPath)) {
-        mdPath = langMdPath;
-        hasLangVariant = true;
-      } else if (!existsSync(defaultMdPath)) {
-        continue; // Skip if no content file exists
-      }
-      
-      try {
-        const markdownContent = readFileSync(mdPath, 'utf-8');
-        const { frontmatter, content: bodyContent } = parseFrontmatter(markdownContent);
-        
-        // Extract title from frontmatter or first h1
-        const title = frontmatter?.title || extractTitle(bodyContent) || entry;
-        
-        // Extract date
-        const date = frontmatter?.date || frontmatter?.published || null;
-        
-        // Extract author
-        const author = frontmatter?.author || null;
-        
-        // Extract tags (supports comma-separated string or array)
-        let tags = [];
-        if (frontmatter?.tags) {
-          if (typeof frontmatter.tags === 'string') {
-            // Handle comma-separated tags: "javascript, react, web"
-            tags = frontmatter.tags.split(',').map(t => t.trim()).filter(t => t);
-          } else if (Array.isArray(frontmatter.tags)) {
-            tags = frontmatter.tags.map(t => String(t).trim()).filter(t => t);
-          }
-        }
-        
-        // Extract excerpt (first paragraph or first 150 chars)
-        let excerpt = '';
-        // Remove first h1 and get first paragraph
-        const contentWithoutH1 = removeFirstH1(bodyContent);
-        // Find first paragraph (text before first double newline or HTML tag)
-        const paragraphMatch = contentWithoutH1.match(/^([^#<\n][^\n]*)/m);
-        if (paragraphMatch) {
-          excerpt = paragraphMatch[1].trim();
-          // Remove markdown formatting
-          excerpt = excerpt.replace(/\*\*([^*]+)\*\*/g, '$1'); // bold
-          excerpt = excerpt.replace(/\*([^*]+)\*/g, '$1'); // italic
-          excerpt = excerpt.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'); // links
-          excerpt = excerpt.replace(/<[^>]+>/g, ''); // HTML tags
-          // Truncate if too long
-          if (excerpt.length > 200) {
-            excerpt = excerpt.substring(0, 200).trim() + '...';
-          }
-        }
-        
-        // URL includes language suffix if viewing a language-specific listing
+      const hasOwnContent = existsSync(defaultMdPath);
+
+      if (hasOwnContent) {
+        const langMdPath = lang ? join(fullPath, `content.${lang}.md`) : null;
+        let mdPath = defaultMdPath;
+        let hasLangVariant = false;
+        if (lang && existsSync(langMdPath)) {
+          mdPath = langMdPath;
+          hasLangVariant = true;
+        } else if (!existsSync(defaultMdPath)) continue;
+
         const url = lang ? `/articles/${entry}/${lang}` : `/articles/${entry}`;
-        
-        articles.push({
-          name: entry,
-          title,
-          date,
-          formattedDate: formatDate(date),
-          author,
-          tags,
-          excerpt,
-          url,
-          hasLangVariant
-        });
-      } catch (err) {
-        console.warn(`Warning: Could not read article ${entry}:`, err.message);
+        const meta = readArticleMeta(mdPath, entry, url, null);
+        if (meta) {
+          meta.hasLangVariant = hasLangVariant;
+          articles.push(meta);
+        }
+      } else {
+        try {
+          const subEntries = readdirSync(fullPath);
+          const seriesSlug = entry;
+          for (const subEntry of subEntries) {
+            const subPath = join(fullPath, subEntry);
+            if (!statSync(subPath).isDirectory()) continue;
+            const subDefault = join(subPath, 'content.md');
+            if (!existsSync(subDefault)) continue;
+            const subLangPath = lang ? join(subPath, `content.${lang}.md`) : null;
+            let mdPath = subDefault;
+            let hasLangVariant = false;
+            if (lang && existsSync(subLangPath)) {
+              mdPath = subLangPath;
+              hasLangVariant = true;
+            }
+            const url = lang ? `/articles/${seriesSlug}/${subEntry}/${lang}` : `/articles/${seriesSlug}/${subEntry}`;
+            const meta = readArticleMeta(mdPath, subEntry, url, seriesSlug);
+            if (meta) {
+              meta.hasLangVariant = hasLangVariant;
+              articles.push(meta);
+            }
+          }
+        } catch (_) {}
       }
     }
   } catch (err) {
@@ -450,55 +512,128 @@ function getArticlesMetadata(blogDir, lang = null) {
       console.warn(`Warning: Could not read articles directory:`, err.message);
     }
   }
-  
-  // Sort by date (newest first)
+
   articles.sort((a, b) => {
     if (!a.date && !b.date) return 0;
     if (!a.date) return 1;
     if (!b.date) return -1;
     return new Date(b.date) - new Date(a.date);
   });
-  
+
   return articles;
 }
 
 /**
- * Get available languages for articles listing
+ * Get series metadata (slug, title, description, articles) for listing
+ * @param {string} blogDir
+ * @param {string|null} lang
  */
-function getAvailableArticlesLanguages(blogDir) {
-  const languages = new Set();
-  languages.add(null); // Default language always available
-  
+function getSeriesMetadata(blogDir, lang = null) {
+  const seriesList = [];
+
   try {
     const entries = readdirSync(blogDir);
-    
     for (const entry of entries) {
       const fullPath = join(blogDir, entry);
       const stat = statSync(fullPath);
-      
-      if (!stat.isDirectory() || entry === '_template') {
-        continue;
-      }
-      
-      // Check for language-specific content files
+      if (!stat.isDirectory() || entry === '_template') continue;
+      if (existsSync(join(fullPath, 'content.md'))) continue;
+
+      const articles = [];
       try {
-        const files = readdirSync(fullPath);
-        const langPattern = /^content\.([a-z]{2}(-[a-z]{2})?)\.md$/i;
-        
-        for (const file of files) {
-          const match = file.match(langPattern);
-          if (match) {
-            languages.add(match[1].toLowerCase());
-          }
+        const subEntries = readdirSync(fullPath);
+        for (const subEntry of subEntries) {
+          const subPath = join(fullPath, subEntry);
+          if (!statSync(subPath).isDirectory()) continue;
+          const subDefault = join(subPath, 'content.md');
+          if (!existsSync(subDefault)) continue;
+          const subLangPath = lang ? join(subPath, `content.${lang}.md`) : null;
+          const mdPath = (lang && existsSync(subLangPath)) ? subLangPath : subDefault;
+          const url = lang ? `/articles/${entry}/${subEntry}/${lang}` : `/articles/${entry}/${subEntry}`;
+          const meta = readArticleMeta(mdPath, subEntry, url, entry);
+          if (meta) articles.push(meta);
         }
-      } catch (err) {
-        // Ignore errors for individual directories
+      } catch (_) {}
+
+      if (articles.length === 0) continue;
+
+      articles.sort((a, b) => {
+        if (a.seriesOrder != null && b.seriesOrder != null) return a.seriesOrder - b.seriesOrder;
+        if (a.seriesOrder != null) return -1;
+        if (b.seriesOrder != null) return 1;
+        if (!a.date && !b.date) return 0;
+        if (!a.date) return 1;
+        if (!b.date) return -1;
+        return new Date(a.date) - new Date(b.date);
+      });
+
+      let title = entry.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      let description = '';
+      const seriesJsonPath = join(fullPath, 'series.json');
+      if (existsSync(seriesJsonPath)) {
+        try {
+          const data = JSON.parse(readFileSync(seriesJsonPath, 'utf-8'));
+          if (lang && data.i18n && data.i18n[lang]) {
+            if (data.i18n[lang].title) title = data.i18n[lang].title;
+            if (data.i18n[lang].description != null) description = data.i18n[lang].description;
+          } else {
+            if (data.title) title = data.title;
+            if (data.description != null) description = data.description;
+          }
+        } catch (_) {}
+      }
+
+      seriesList.push({ slug: entry, title, description, articles });
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.warn(`Warning: Could not read series:`, err.message);
+    }
+  }
+
+  return seriesList;
+}
+
+/**
+ * Get available languages for articles listing (standalone + series articles)
+ */
+function getAvailableArticlesLanguages(blogDir) {
+  const languages = new Set();
+  languages.add(null);
+
+  function scanDir(dirPath) {
+    try {
+      const files = readdirSync(dirPath);
+      const langPattern = /^content\.([a-z]{2}(-[a-z]{2})?)\.md$/i;
+      for (const file of files) {
+        const match = file.match(langPattern);
+        if (match) languages.add(match[1].toLowerCase());
+      }
+    } catch (_) {}
+  }
+
+  try {
+    const entries = readdirSync(blogDir);
+    for (const entry of entries) {
+      const fullPath = join(blogDir, entry);
+      const stat = statSync(fullPath);
+      if (!stat.isDirectory() || entry === '_template') continue;
+      if (existsSync(join(fullPath, 'content.md'))) {
+        scanDir(fullPath);
+      } else {
+        try {
+          const subEntries = readdirSync(fullPath);
+          for (const sub of subEntries) {
+            const subPath = join(fullPath, sub);
+            if (statSync(subPath).isDirectory()) scanDir(subPath);
+          }
+        } catch (_) {}
       }
     }
   } catch (err) {
-    // Ignore errors
+    if (err.code !== 'ENOENT') {}
   }
-  
+
   return Array.from(languages);
 }
 
@@ -531,7 +666,9 @@ function generateArticlesListHtml(articles) {
     author: a.author,
     tags: a.tags || [],
     excerpt: a.excerpt,
-    url: a.url
+    url: a.url,
+    series: a.series ?? null,
+    seriesOrder: a.seriesOrder ?? null
   })));
   
   let html = `<script id="articles-data" type="application/json">${articlesJson}</script>`;
@@ -586,11 +723,15 @@ function generateArticlesListHtml(articles) {
       ? `data-tags="${escapeHtml(article.tags.join(','))}"` 
       : 'data-tags=""';
     const dateAttr = article.date ? `data-date="${article.date}"` : 'data-date=""';
-    
+    const seriesBadge = article.series
+      ? `<div class="article-meta"><a href="/series/${escapeHtml(article.series)}" class="article-series-badge">Series: ${escapeHtml(article.series.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</a></div>`
+      : '';
+
     html += `
-      <li class="article-item" ${tagsAttr} ${dateAttr} data-title="${escapeHtml(article.title)}">
+      <li class="article-item" ${tagsAttr} ${dateAttr} data-title="${escapeHtml(article.title)}" data-series="${escapeHtml(article.series || '')}">
         <a href="${escapeHtml(article.url)}" class="article-link">
           <h2 class="article-title">${escapeHtml(article.title)}</h2>
+          ${seriesBadge}
           ${article.formattedDate || article.author || (article.tags && article.tags.length > 0) ? `
           <div class="article-meta">
             ${article.formattedDate ? `<time datetime="${article.date}">${article.formattedDate}</time>` : ''}
@@ -614,6 +755,96 @@ function generateArticlesListHtml(articles) {
   // Add pagination container
   html += '<div class="articles-pagination" id="articles-pagination"></div>';
   
+  return html;
+}
+
+/**
+ * Generate HTML for the series list page
+ * @param {Array} seriesList
+ * @param {string|null} lang - Language code for series detail links
+ */
+function generateSeriesListHtml(seriesList, lang = null) {
+  if (!seriesList || seriesList.length === 0) {
+    return '<p class="no-articles">No series yet.</p>';
+  }
+  let html = '<ul class="article-list series-list">';
+  for (const series of seriesList) {
+    const url = lang ? `/series/${escapeHtml(series.slug)}/${lang}` : `/series/${escapeHtml(series.slug)}`;
+    html += `
+      <li class="article-item series-item">
+        <a href="${url}" class="article-link">
+          <h2 class="article-title">${escapeHtml(series.title)}</h2>
+          ${series.description ? `<p class="article-excerpt">${escapeHtml(series.description)}</p>` : ''}
+          <div class="article-meta">${series.articles.length} article${series.articles.length !== 1 ? 's' : ''}</div>
+        </a>
+      </li>
+    `;
+  }
+  html += '</ul>';
+  return html;
+}
+
+/**
+ * Generate series navigation HTML for an article page (Part X of Y, Prev, Next, link to series)
+ * @param {string} seriesSlug
+ * @param {string} articleName
+ * @param {string} blogDir
+ * @param {string|null} lang
+ * @returns {string}
+ */
+function generateSeriesNavHtml(seriesSlug, articleName, blogDir, lang) {
+  const seriesList = getSeriesMetadata(blogDir, lang);
+  const series = seriesList.find(s => s.slug === seriesSlug);
+  if (!series || !series.articles || series.articles.length === 0) return '';
+  const idx = series.articles.findIndex(a => a.name === articleName);
+  if (idx < 0) return '';
+  const total = series.articles.length;
+  const partNum = idx + 1;
+  const prevArticle = idx > 0 ? series.articles[idx - 1] : null;
+  const nextArticle = idx < total - 1 ? series.articles[idx + 1] : null;
+  const seriesUrl = lang ? `/series/${escapeHtml(seriesSlug)}/${lang}` : `/series/${escapeHtml(seriesSlug)}`;
+  let html = '<nav class="series-nav" aria-label="Series navigation">';
+  html += `<span class="series-nav-label">Part ${partNum} of ${total}</span>`;
+  html += ` · <a href="${seriesUrl}" class="series-nav-link">${escapeHtml(series.title)}</a>`;
+  if (prevArticle) {
+    html += ` · <a href="${escapeHtml(prevArticle.url)}" class="series-nav-link series-nav-prev">← Previous</a>`;
+  }
+  if (nextArticle) {
+    html += ` · <a href="${escapeHtml(nextArticle.url)}" class="series-nav-link series-nav-next">Next →</a>`;
+  }
+  html += '</nav>';
+  return html;
+}
+
+/**
+ * Generate HTML for a single series detail page (list of articles in the series)
+ */
+function generateSeriesDetailHtml(series) {
+  if (!series || !series.articles || series.articles.length === 0) {
+    return '<p class="no-articles">No articles in this series.</p>';
+  }
+  let html = `<div class="series-detail-header"><p class="article-excerpt">${escapeHtml(series.description || '')}</p></div>`;
+  html += '<ul class="article-list">';
+  for (const article of series.articles) {
+    const partLabel = article.seriesOrder != null ? `Part ${article.seriesOrder}` : '';
+    html += `
+      <li class="article-item" data-series-order="${article.seriesOrder != null ? article.seriesOrder : ''}">
+        <a href="${escapeHtml(article.url)}" class="article-link">
+          <h2 class="article-title">${escapeHtml(article.title)}</h2>
+          ${partLabel ? `<div class="article-meta">${escapeHtml(partLabel)}</div>` : ''}
+          ${article.formattedDate || article.author ? `
+          <div class="article-meta">
+            ${article.formattedDate ? `<time datetime="${article.date}">${article.formattedDate}</time>` : ''}
+            ${article.formattedDate && article.author ? ' • ' : ''}
+            ${article.author ? escapeHtml(article.author) : ''}
+          </div>
+          ` : ''}
+          ${article.excerpt ? `<p class="article-excerpt">${escapeHtml(article.excerpt)}</p>` : ''}
+        </a>
+      </li>
+    `;
+  }
+  html += '</ul>';
   return html;
 }
 
@@ -1026,30 +1257,27 @@ function injectMarkdownToHtml(distDir) {
   const templateHTMLPath = join(blogDir, '_template', 'index.html');
   
   for (const post of blogPosts) {
-    const { dir, name, lang, htmlPath, mdPath } = post;
-    
-    // Determine dist HTML path based on language
+    const { dir, name, seriesName, lang, htmlPath, mdPath } = post;
+    const articlePathPrefix = seriesName ? join(seriesName, name) : name;
+
+    // Determine dist HTML path based on language (and series)
     let distHtmlPath;
     if (lang) {
-      // Language-specific: dist/articles/{name}/{lang}/index.html or dist/articles/{name}/{lang}.html
-      const distHtmlPath1 = join(distDir, 'articles', name, lang, 'index.html');
-      const distHtmlPath2 = join(distDir, 'articles', `${name}-${lang}.html`);
-      
+      const distHtmlPath1 = join(distDir, 'articles', articlePathPrefix, lang, 'index.html');
+      const distHtmlPath2 = join(distDir, 'articles', `${articlePathPrefix.replace(/\//g, '-')}-${lang}.html`);
       if (existsSync(distHtmlPath1)) {
         distHtmlPath = distHtmlPath1;
       } else if (existsSync(distHtmlPath2)) {
         distHtmlPath = distHtmlPath2;
       } else {
-        // Create language-specific path
-        distHtmlPath = join(distDir, 'articles', name, lang, 'index.html');
+        distHtmlPath = join(distDir, 'articles', articlePathPrefix, lang, 'index.html');
         const distHtmlDir = dirname(distHtmlPath);
         if (!existsSync(distHtmlDir)) {
           mkdirSync(distHtmlDir, { recursive: true });
         }
       }
     } else {
-      // Default: dist/articles/{name}/index.html (clean URLs)
-      distHtmlPath = join(distDir, 'articles', name, 'index.html');
+      distHtmlPath = join(distDir, 'articles', articlePathPrefix, 'index.html');
       const distHtmlDir = dirname(distHtmlPath);
       if (!existsSync(distHtmlDir)) {
         mkdirSync(distHtmlDir, { recursive: true });
@@ -1175,13 +1403,16 @@ function injectMarkdownToHtml(distDir) {
       '<div id="blog-content"></div>',
       `<div id="blog-content"><article>${htmlFromMd}</article></div>`
     );
-    
+
+    const seriesNavHtml = seriesName ? generateSeriesNavHtml(seriesName, name, blogDir, lang) : '';
+    htmlContent = htmlContent.replace('<div id="series-nav"></div>', `<div id="series-nav">${seriesNavHtml}</div>`);
+
     // Process and copy images
     htmlContent = processImages(htmlContent, dir, distHtmlPath, distDir);
-    
+
     // Process and copy TypeScript files
     htmlContent = processTypeScript(htmlContent, dir, distHtmlPath, distDir);
-    
+
     // Inject available languages data into the page
     const articleVariants = findLanguageVariants(dir);
     const availableLangs = articleVariants.map(v => v.lang);
@@ -1417,6 +1648,81 @@ function injectMarkdownToHtml(distDir) {
         const langLabel = lang ? ` (${lang})` : '';
         console.warn(`Warning: Could not generate articles listing${langLabel}:`, err.message);
       }
+    }
+  }
+
+  // Generate series list and series detail pages (including language variants)
+  const seriesTemplatePath = resolve(process.cwd(), 'series', 'index.html');
+  const seriesAvailableLangs = getAvailableArticlesLanguages(blogDir);
+  if (existsSync(seriesTemplatePath)) {
+    try {
+      const distSeriesDir = join(distDir, 'series');
+      if (!existsSync(distSeriesDir)) mkdirSync(distSeriesDir, { recursive: true });
+      const listingLangsScript = `<script id="available-languages" type="application/json">${JSON.stringify(seriesAvailableLangs)}</script>`;
+
+      for (const lang of seriesAvailableLangs) {
+        const seriesList = getSeriesMetadata(blogDir, lang);
+        let listContent = readFileSync(seriesTemplatePath, 'utf-8');
+        const seriesListHtml = generateSeriesListHtml(seriesList, lang);
+        listContent = listContent.replace(
+          '<div id="series-content">',
+          `<div id="series-content">${seriesListHtml}`
+        );
+        if (lang) {
+          listContent = listContent.replace(/<html lang="[^"]*">/, `<html lang="${lang}">`);
+        }
+        if (listContent.includes('</head>')) {
+          listContent = listContent.replace('</head>', `${listingLangsScript}\n  </head>`);
+        }
+        let listOutPath;
+        if (lang) {
+          const langDir = join(distSeriesDir, lang);
+          if (!existsSync(langDir)) mkdirSync(langDir, { recursive: true });
+          listOutPath = join(langDir, 'index.html');
+        } else {
+          listOutPath = join(distSeriesDir, 'index.html');
+        }
+        writeFileSync(listOutPath, listContent, 'utf-8');
+        console.log(`✓ Generated series listing page${lang ? ` (${lang})` : ''}`);
+
+        for (const series of seriesList) {
+          const detailHtml = generateSeriesDetailHtml(series);
+          let detailContent = readFileSync(seriesTemplatePath, 'utf-8');
+          detailContent = detailContent.replace(
+            '<div id="series-content">',
+            `<div id="series-content">${detailHtml}`
+          );
+          detailContent = detailContent.replace(/<title>.*?<\/title>/, `<title>${escapeHtml(series.title)}</title>`);
+          detailContent = detailContent.replace(
+            /<h1 id="series-page-title">.*?<\/h1>/,
+            `<h1 id="series-page-title">${escapeHtml(series.title)}</h1>`
+          );
+          if (series.description) {
+            detailContent = detailContent.replace(
+              /<p class="subtitle" id="series-page-subtitle">.*?<\/p>/,
+              `<p class="subtitle" id="series-page-subtitle">${escapeHtml(series.description)}</p>`
+            );
+          }
+          if (lang) {
+            detailContent = detailContent.replace(/<html lang="[^"]*">/, `<html lang="${lang}">`);
+          }
+          if (detailContent.includes('</head>')) {
+            detailContent = detailContent.replace('</head>', `${listingLangsScript}\n  </head>`);
+          }
+          const seriesSlugDir = join(distSeriesDir, series.slug);
+          if (!existsSync(seriesSlugDir)) mkdirSync(seriesSlugDir, { recursive: true });
+          if (lang) {
+            const langSlugDir = join(seriesSlugDir, lang);
+            if (!existsSync(langSlugDir)) mkdirSync(langSlugDir, { recursive: true });
+            writeFileSync(join(langSlugDir, 'index.html'), detailContent, 'utf-8');
+          } else {
+            writeFileSync(join(seriesSlugDir, 'index.html'), detailContent, 'utf-8');
+          }
+          console.log(`✓ Generated series detail: ${series.slug}${lang ? ` (${lang})` : ''}`);
+        }
+      }
+    } catch (err) {
+      console.warn('Warning: Could not generate series pages:', err.message);
     }
   }
 }
@@ -1971,42 +2277,48 @@ export function markdownPlugin() {
       
       // Serve images from blog post directories and resume directory
       server.middlewares.use((req, res, next) => {
-        // Check if this is a request for an image in a blog post directory
-        // Pattern: /articles/{postName}/{imageName}
-        const blogImageMatch = req.url?.match(/^\/articles\/([^/]+)\/(.+)$/);
-        if (blogImageMatch) {
-          const postName = blogImageMatch[1];
-          const imageName = blogImageMatch[2];
-          const imagePath = join(blogDir, postName, imageName);
-          
-          // Check if it's an image file (common extensions)
+        // Pattern: /articles/{series}/{article}/{imageName} or /articles/{postName}/{imageName}
+        const blogImageMatch3 = req.url?.match(/^\/articles\/([^/]+)\/([^/]+)\/(.+)$/);
+        const blogImageMatch2 = req.url?.match(/^\/articles\/([^/]+)\/(.+)$/);
+        let imagePath = null;
+        if (blogImageMatch3) {
+          const [, seg1, seg2, imageName] = blogImageMatch3;
           const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp', '.ico'];
-          const isImage = imageExtensions.some(ext => imageName.toLowerCase().endsWith(ext));
-          
-          if (isImage && existsSync(imagePath)) {
-            try {
-              const imageContent = readFileSync(imagePath);
-              // Determine content type based on extension
-              const ext = imageName.toLowerCase().split('.').pop();
-              const contentTypeMap = {
-                'png': 'image/png',
-                'jpg': 'image/jpeg',
-                'jpeg': 'image/jpeg',
-                'gif': 'image/gif',
-                'svg': 'image/svg+xml',
-                'webp': 'image/webp',
-                'bmp': 'image/bmp',
-                'ico': 'image/x-icon'
-              };
-              const contentType = contentTypeMap[ext] || 'application/octet-stream';
-              
-              res.setHeader('Content-Type', contentType);
-              res.setHeader('Content-Length', imageContent.length);
-              res.end(imageContent);
-              return;
-            } catch (err) {
-              console.warn(`Warning: Could not serve image ${req.url}:`, err.message);
-            }
+          if (imageExtensions.some(ext => imageName.toLowerCase().endsWith(ext))) {
+            const p = join(blogDir, seg1, seg2, imageName);
+            if (existsSync(p)) imagePath = p;
+          }
+        }
+        if (!imagePath && blogImageMatch2) {
+          const postName = blogImageMatch2[1];
+          const imageName = blogImageMatch2[2];
+          const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp', '.ico'];
+          if (imageExtensions.some(ext => imageName.toLowerCase().endsWith(ext))) {
+            const p = join(blogDir, postName, imageName);
+            if (existsSync(p)) imagePath = p;
+          }
+        }
+        if (imagePath) {
+          try {
+            const imageContent = readFileSync(imagePath);
+            const imageName = basename(imagePath);
+            const ext = imageName.toLowerCase().split('.').pop();
+            const contentTypeMap = {
+              'png': 'image/png',
+              'jpg': 'image/jpeg',
+              'jpeg': 'image/jpeg',
+              'gif': 'image/gif',
+              'svg': 'image/svg+xml',
+              'webp': 'image/webp',
+              'bmp': 'image/bmp',
+              'ico': 'image/x-icon'
+            };
+            res.setHeader('Content-Type', contentTypeMap[ext] || 'application/octet-stream');
+            res.setHeader('Content-Length', imageContent.length);
+            res.end(imageContent);
+            return;
+          } catch (err) {
+            console.warn(`Warning: Could not serve image ${req.url}:`, err.message);
           }
         }
         
@@ -2052,22 +2364,20 @@ export function markdownPlugin() {
       });
       
       // Serve TypeScript files from blog post directories (Vite will process them)
-      // This middleware ensures TypeScript files are accessible before Vite processes them
       server.middlewares.use((req, res, next) => {
-        // Check if this is a request for a TypeScript file in a blog post directory
-        // Pattern: /articles/{postName}/{fileName}.ts
-        const blogTsMatch = req.url?.match(/^\/articles\/([^/]+)\/(.+\.ts)$/);
-        if (blogTsMatch) {
-          const postName = blogTsMatch[1];
-          const fileName = blogTsMatch[2];
-          const tsPath = join(blogDir, postName, fileName);
-          
-          if (existsSync(tsPath)) {
-            // Let Vite handle the TypeScript transformation
-            // Just pass through - Vite's plugin system will process it
-            return next();
-          }
+        // Pattern: /articles/{series}/{article}/{fileName}.ts or /articles/{postName}/{fileName}.ts
+        const blogTsMatch3 = req.url?.match(/^\/articles\/([^/]+)\/([^/]+)\/(.+\.ts)$/);
+        const blogTsMatch2 = req.url?.match(/^\/articles\/([^/]+)\/(.+\.ts)$/);
+        let tsPath = null;
+        if (blogTsMatch3) {
+          const p = join(blogDir, blogTsMatch3[1], blogTsMatch3[2], blogTsMatch3[3]);
+          if (existsSync(p)) tsPath = p;
         }
+        if (!tsPath && blogTsMatch2) {
+          const p = join(blogDir, blogTsMatch2[1], blogTsMatch2[2]);
+          if (existsSync(p)) tsPath = p;
+        }
+        if (tsPath) return next();
         next();
       });
       
@@ -2080,9 +2390,11 @@ export function markdownPlugin() {
         // Also handle /resume route and /resume/{lang}
         const rawUrl = req.url || '/';
         const pathname = rawUrl.split('?')[0].split('#')[0];
+        const knownLangCodes = ['en', 'zh', 'zh-tw', 'zh-cn', 'ja', 'ko', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ar', 'hi'];
         // Match /articles or /articles/{lang} (but not /articles/{article-name})
         const articlesListMatch = pathname.match(/^\/articles(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/)?$/i);
-        const articleMatch = pathname.match(/^\/articles\/([^/]+)(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i);
+        // Match /articles/{name}, /articles/{name}/{lang}, or /articles/{series}/{article}, /articles/{series}/{article}/{lang}
+        const articleMatch = pathname.match(/^\/articles\/([^/]+)(?:\/([^/]+))?(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i);
         const resumeMatch = pathname.match(/^\/resume(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i);
         const isHtmlFile = pathname.endsWith('.html');
         
@@ -2333,36 +2645,174 @@ export function markdownPlugin() {
           }
           return next();
         }
+
+        // Handle /series (list), /series/{lang} (list i18n), /series/{slug} (detail), /series/{slug}/{lang} (detail i18n)
+        const seriesPathMatch = pathname.match(/^\/series(?:\/([^/]+))?(?:\/([^/]+))?\/?$/);
+        const seriesTemplatePath = resolve(process.cwd(), 'series', 'index.html');
+        const seriesAvailableLangs = getAvailableArticlesLanguages(blogDir);
+        if (existsSync(seriesTemplatePath) && seriesPathMatch) {
+          const seg1 = seriesPathMatch[1] ? seriesPathMatch[1].toLowerCase() : null;
+          const seg2 = seriesPathMatch[2] ? seriesPathMatch[2].toLowerCase() : null;
+          const isLangCode = (s) => s && knownLangCodes.includes(s);
+          let seriesLang = null;
+          let seriesSlug = null;
+          if (!seg1) {
+            seriesLang = null;
+          } else if (!seg2) {
+            if (isLangCode(seg1)) {
+              seriesLang = seg1;
+            } else {
+              seriesSlug = seriesPathMatch[1];
+            }
+          } else {
+            if (isLangCode(seg2)) {
+              seriesSlug = seriesPathMatch[1];
+              seriesLang = seg2;
+            } else {
+              seriesSlug = seriesPathMatch[1];
+            }
+          }
+
+          if (seriesSlug == null) {
+            // Series list (with optional lang)
+            try {
+              let htmlContent = readFileSync(seriesTemplatePath, 'utf-8');
+              const seriesList = getSeriesMetadata(blogDir, seriesLang);
+              const seriesListHtml = generateSeriesListHtml(seriesList, seriesLang);
+              htmlContent = htmlContent.replace(
+                '<div id="series-content">',
+                `<div id="series-content">${seriesListHtml}`
+              );
+              if (seriesLang) {
+                htmlContent = htmlContent.replace(/<html lang="[^"]*">/, `<html lang="${seriesLang}">`);
+              }
+              const listingLangsScript = `<script id="available-languages" type="application/json">${JSON.stringify(seriesAvailableLangs)}</script>`;
+              if (htmlContent.includes('</head>')) {
+                htmlContent = htmlContent.replace('</head>', `${listingLangsScript}\n  </head>`);
+              }
+              if (!htmlContent.includes('@vite/client') && !htmlContent.includes('vite/client')) {
+                const viteClientScript = '<script type="module" src="/@vite/client"></script>';
+                if (htmlContent.includes('</body>')) {
+                  htmlContent = htmlContent.replace('</body>', `${viteClientScript}\n  </body>`);
+                } else {
+                  htmlContent += viteClientScript;
+                }
+              }
+              res.setHeader('Content-Type', 'text/html; charset=utf-8');
+              res.setHeader('Content-Length', Buffer.byteLength(htmlContent));
+              res.end(htmlContent);
+              return;
+            } catch (err) {
+              console.warn(`Error serving series list:`, err.message);
+            }
+          } else {
+            // Series detail (with optional lang)
+            const seriesList = getSeriesMetadata(blogDir, seriesLang);
+            const series = seriesList.find(s => s.slug === seriesSlug);
+            if (series) {
+              try {
+                let htmlContent = readFileSync(seriesTemplatePath, 'utf-8');
+                const detailHtml = generateSeriesDetailHtml(series);
+                htmlContent = htmlContent.replace(
+                  '<div id="series-content">',
+                  `<div id="series-content">${detailHtml}`
+                );
+                htmlContent = htmlContent.replace(/<title>.*?<\/title>/, `<title>${escapeHtml(series.title)}</title>`);
+                htmlContent = htmlContent.replace(
+                  /<h1 id="series-page-title">.*?<\/h1>/,
+                  `<h1 id="series-page-title">${escapeHtml(series.title)}</h1>`
+                );
+                if (series.description) {
+                  htmlContent = htmlContent.replace(
+                    /<p class="subtitle" id="series-page-subtitle">.*?<\/p>/,
+                    `<p class="subtitle" id="series-page-subtitle">${escapeHtml(series.description)}</p>`
+                  );
+                }
+                if (seriesLang) {
+                  htmlContent = htmlContent.replace(/<html lang="[^"]*">/, `<html lang="${seriesLang}">`);
+                }
+                const listingLangsScript = `<script id="available-languages" type="application/json">${JSON.stringify(seriesAvailableLangs)}</script>`;
+                if (htmlContent.includes('</head>')) {
+                  htmlContent = htmlContent.replace('</head>', `${listingLangsScript}\n  </head>`);
+                }
+                if (!htmlContent.includes('@vite/client') && !htmlContent.includes('vite/client')) {
+                  const viteClientScript = '<script type="module" src="/@vite/client"></script>';
+                  if (htmlContent.includes('</body>')) {
+                    htmlContent = htmlContent.replace('</body>', `${viteClientScript}\n  </body>`);
+                  } else {
+                    htmlContent += viteClientScript;
+                  }
+                }
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                res.setHeader('Content-Length', Buffer.byteLength(htmlContent));
+                res.end(htmlContent);
+                return;
+              } catch (err) {
+                console.warn(`Error serving series detail:`, err.message);
+              }
+            }
+          }
+        }
         
         // Continue with article handling...
         if (!pathname || (!isHtmlFile && !articleMatch)) {
           return next();
         }
-        
+
         try {
           let postName = null;
+          let seriesName = null;
           let lang = null;
-          
-          // Extract post name and language from URL
+
           if (articleMatch) {
-            postName = articleMatch[1];
-            lang = articleMatch[2]?.toLowerCase() || null;
+            const seg1 = articleMatch[1];
+            const seg2 = articleMatch[2] ? articleMatch[2].toLowerCase() : null;
+            const seg3 = articleMatch[3] ? articleMatch[3].toLowerCase() : null;
+            const isLangCode = (s) => s && knownLangCodes.includes(s);
+            if (!seg2) {
+              postName = seg1;
+            } else if (seg3) {
+              seriesName = seg1;
+              postName = seg2;
+              lang = seg3;
+            } else {
+              const standalonePath = join(blogDir, seg1, 'content.md');
+              const seriesArticlePath = join(blogDir, seg1, seg2, 'content.md');
+              if (isLangCode(seg2) && existsSync(standalonePath)) {
+                postName = seg1;
+                lang = seg2;
+              } else if (existsSync(seriesArticlePath)) {
+                seriesName = seg1;
+                postName = seg2;
+              } else {
+                postName = seg1;
+                lang = isLangCode(seg2) ? seg2 : null;
+              }
+            }
           } else if (isHtmlFile) {
-            // Try to extract from HTML file path
             const htmlPath = pathname.replace(/^\//, '');
             const resolvedPath = resolve(process.cwd(), htmlPath);
             const htmlDir = dirname(resolvedPath);
-            const blogMatch = htmlDir.match(/articles[\/\\]([^\/\\]+)$/);
+            const blogMatch = htmlDir.match(/articles[\/\\]([^\/\\]+)(?:\/([^\/\\]+))?$/);
             if (blogMatch) {
-              postName = blogMatch[1];
+              if (blogMatch[2] && knownLangCodes.includes(blogMatch[2].toLowerCase())) {
+                postName = blogMatch[1];
+                lang = blogMatch[2].toLowerCase();
+              } else if (blogMatch[2]) {
+                seriesName = blogMatch[1];
+                postName = blogMatch[2];
+              } else {
+                postName = blogMatch[1];
+              }
             }
           }
-          
+
           if (!postName) {
             return next();
           }
-          
-          const postDir = join(blogDir, postName);
+
+          const postDir = seriesName ? join(blogDir, seriesName, postName) : join(blogDir, postName);
+          const blogPostName = seriesName ? `${seriesName}/${postName}` : postName;
           if (!existsSync(postDir)) {
             // Article doesn't exist - serve 404 page
             const notFoundPath = resolve(process.cwd(), '404.html');
@@ -2453,8 +2903,7 @@ export function markdownPlugin() {
           
           // Find the markdown file - we already determined it above
           const htmlDir = postDir;
-          const blogPostName = postName;
-          
+
           // Read and parse markdown
           configureMarked();
           const markdownContent = readFileSync(mdPath, 'utf-8');
@@ -2558,14 +3007,17 @@ export function markdownPlugin() {
             '<div id="blog-content"></div>',
             `<div id="blog-content"><article>${htmlFromMd}</article></div>`
           );
-          
+
+          const seriesNavHtml = seriesName ? generateSeriesNavHtml(seriesName, postName, blogDir, lang) : '';
+          htmlContent = htmlContent.replace('<div id="series-nav"></div>', `<div id="series-nav">${seriesNavHtml}</div>`);
+
           // Process images for dev mode (update paths to absolute)
           if (blogPostName) {
             htmlContent = processImagesForDev(htmlContent, htmlDir, blogPostName);
             // Process TypeScript files for dev mode (update paths to absolute and add type="module")
             htmlContent = processTypeScriptForDev(htmlContent, htmlDir, blogPostName);
           }
-          
+
           // Inject available languages data into the page
           const variants = findLanguageVariants(postDir);
           const availableLangs = variants.map(v => v.lang);
@@ -2627,8 +3079,8 @@ export function markdownPlugin() {
           return next();
         }
 
-        // Allow article routes to fall through to markdown handler logic
-        if (pathname.startsWith('/articles')) {
+        // Allow article and series routes to fall through to markdown handler logic
+        if (pathname.startsWith('/articles') || pathname.startsWith('/series')) {
           return next();
         }
 

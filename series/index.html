@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Series</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/dark-mode.css" />
+    <link rel="stylesheet" href="/blog-styles.css" />
+    <script>
+      (function() {
+        const savedFontSize = localStorage.getItem('blog-font-size') || 'large';
+        document.documentElement.setAttribute('data-font-size', savedFontSize);
+      })();
+      // Set language from URL: /series, /series/{lang}, /series/{slug}, /series/{slug}/{lang}
+      (function() {
+        const path = window.location.pathname.replace(/\/$/, '');
+        const parts = path.replace(/^\/series\/?/, '').split('/').filter(Boolean);
+        const knownLangCodes = ['en', 'zh', 'zh-tw', 'zh-cn', 'ja', 'ko', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ar', 'hi'];
+        let lang = null;
+        if (parts.length === 1 && knownLangCodes.includes(parts[0].toLowerCase())) {
+          lang = parts[0].toLowerCase();
+        } else if (parts.length === 2 && knownLangCodes.includes(parts[1].toLowerCase())) {
+          lang = parts[1].toLowerCase();
+        }
+        if (lang) {
+          document.documentElement.lang = lang;
+        } else {
+          document.documentElement.lang = localStorage.getItem('blog-language') || 'en';
+        }
+      })();
+    </script>
+    <style>
+      .series-header { margin-bottom: 2rem; }
+      .series-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+      .series-header .subtitle { color: var(--text-meta-color); font-size: 1.1rem; }
+      .article-list { list-style: none; padding: 0; margin: 0; }
+      .article-item { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--table-border-color, #e5e7eb); }
+      .article-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+      .article-link { text-decoration: none; color: inherit; display: block; }
+      .article-link:hover .article-title { color: var(--link-hover-color, #2563eb); }
+      .article-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+      .article-meta { color: var(--text-meta-color); font-size: 0.9rem; margin-bottom: 0.75rem; }
+      .article-excerpt { color: var(--text-color); line-height: 1.6; opacity: 0.85; }
+      .back-link { display: inline-block; margin-bottom: 2rem; color: var(--text-meta-color); text-decoration: none; font-size: 0.9rem; }
+      .back-link:hover { color: var(--link-hover-color, #2563eb); }
+      .back-link::before { content: "← "; }
+      .no-articles { color: var(--text-meta-color); font-style: italic; }
+      .series-list .series-item { margin-bottom: 1.5rem; }
+      .series-detail-header { margin-bottom: 1.5rem; color: var(--text-meta-color); }
+    </style>
+  </head>
+  <body>
+    <div class="font-size-controls">
+      <button class="font-size-btn" id="font-size-medium" aria-label="Medium font size">A</button>
+      <button class="font-size-btn" id="font-size-large" aria-label="Large font size">A</button>
+      <button class="font-size-btn" id="font-size-xl" aria-label="Extra large font size">A</button>
+    </div>
+    <input type="checkbox" id="dark-mode-toggle" class="dark-mode-toggle" />
+    <script>
+      (function() {
+        const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
+        if (savedDarkMode) {
+          const darkModeToggle = document.getElementById('dark-mode-toggle');
+          if (darkModeToggle) darkModeToggle.checked = true;
+        }
+      })();
+    </script>
+    <label for="dark-mode-toggle" class="dark-mode-label" aria-label="Toggle dark mode">
+      <span class="switch-plate"><span class="switch-toggle"></span></span>
+    </label>
+    <div class="language-selector" id="language-selector">
+      <button class="language-selector-btn" id="language-selector-btn" aria-label="Select language" aria-haspopup="true" aria-expanded="false">
+        <span class="language-selector-icon">Aa</span>
+        <span class="language-selector-text" id="language-selector-text">English</span>
+      </button>
+      <div class="language-dropdown" id="language-dropdown" role="menu"></div>
+    </div>
+    <div class="container">
+      <nav class="site-nav" aria-label="Site navigation">
+        <a href="/" class="site-nav-link" id="nav-link-home">Home</a>
+        <a href="/articles" class="site-nav-link" id="nav-link-articles">Articles</a>
+        <a href="/series" class="site-nav-link active" id="nav-link-series">Series</a>
+      </nav>
+      <header class="series-header">
+        <h1 id="series-page-title">Series</h1>
+        <p class="subtitle" id="series-page-subtitle">Article series</p>
+      </header>
+      <div id="series-content">
+        <!-- Injected: series list or series detail -->
+      </div>
+    </div>
+    <script>
+      (function() {
+        // Dark mode: restore and persist
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const darkModeLabel = document.querySelector('.dark-mode-label');
+        const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
+        if (savedDarkMode && darkModeToggle) darkModeToggle.checked = true;
+        if (darkModeToggle && darkModeLabel) {
+          let scrollPosition = 0;
+          darkModeLabel.addEventListener('mousedown', function() {
+            scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+          });
+          darkModeLabel.addEventListener('click', function(e) {
+            e.preventDefault();
+            darkModeToggle.checked = !darkModeToggle.checked;
+            localStorage.setItem('blog-dark-mode', darkModeToggle.checked ? 'true' : 'false');
+            setTimeout(function() { window.scrollTo(0, scrollPosition); }, 0);
+          });
+          darkModeToggle.addEventListener('focus', function(e) {
+            e.preventDefault();
+            darkModeToggle.blur();
+          });
+          darkModeToggle.addEventListener('change', function(e) {
+            localStorage.setItem('blog-dark-mode', e.target.checked ? 'true' : 'false');
+          });
+        }
+
+        // Font size: restore and persist
+        const fontSizeButtons = {
+          medium: document.getElementById('font-size-medium'),
+          large: document.getElementById('font-size-large'),
+          xl: document.getElementById('font-size-xl')
+        };
+        const savedFontSize = localStorage.getItem('blog-font-size') || 'large';
+        if (!document.documentElement.hasAttribute('data-font-size')) {
+          document.documentElement.setAttribute('data-font-size', savedFontSize);
+        }
+        document.body.classList.add('font-size-transition-enabled');
+        function updateFontSize(size) {
+          document.documentElement.setAttribute('data-font-size', size);
+          localStorage.setItem('blog-font-size', size);
+          Object.keys(fontSizeButtons).forEach(function(key) {
+            if (fontSizeButtons[key]) {
+              fontSizeButtons[key].classList.toggle('active', key === size);
+            }
+          });
+        }
+        updateFontSize(savedFontSize);
+        Object.keys(fontSizeButtons).forEach(function(size) {
+          if (fontSizeButtons[size]) {
+            fontSizeButtons[size].addEventListener('click', function() {
+              updateFontSize(size);
+            });
+          }
+        });
+
+        // Language selector
+        const languageSelector = document.getElementById('language-selector');
+        const languageNames = { 'en': 'English', 'zh-tw': '繁體中文', 'zh-cn': '简体中文', 'zh': '中文', 'ja': '日本語', 'ko': '한국어', 'es': 'Español', 'fr': 'Français', 'de': 'Deutsch', 'it': 'Italiano', 'pt': 'Português', 'ru': 'Русский', 'ar': 'العربية', 'hi': 'हिन्दी' };
+        const btn = document.getElementById('language-selector-btn');
+        const dropdown = document.getElementById('language-dropdown');
+        const textEl = document.getElementById('language-selector-text');
+        if (!btn || !dropdown || !languageSelector) return;
+        const path = window.location.pathname.replace(/\/$/, '');
+        const pathAfterSeries = path.replace(/^\/series\/?/, '') || '';
+        const parts = pathAfterSeries.split('/').filter(Boolean);
+        const knownLangCodes = ['en', 'zh', 'zh-tw', 'zh-cn', 'ja', 'ko', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ar', 'hi'];
+        const currentLang = (parts.length === 1 && knownLangCodes.includes(parts[0])) ? parts[0] : (parts.length === 2 && knownLangCodes.includes(parts[1])) ? parts[1] : null;
+        const seriesSlug = (parts.length >= 1 && !knownLangCodes.includes(parts[0])) ? parts[0] : null;
+        var navArticlesEl = document.getElementById('nav-link-articles');
+        var navSeriesEl = document.getElementById('nav-link-series');
+        if (navArticlesEl) navArticlesEl.href = currentLang ? '/articles/' + currentLang : '/articles';
+        if (navSeriesEl) navSeriesEl.href = currentLang ? '/series/' + currentLang : '/series';
+        function baseUrl(lang) {
+          if (!seriesSlug) return lang ? '/series/' + lang : '/series';
+          return lang ? '/series/' + seriesSlug + '/' + lang : '/series/' + seriesSlug;
+        }
+        function getLangs() {
+          try {
+            const el = document.getElementById('available-languages');
+            if (el) return JSON.parse(el.textContent);
+          } catch (e) {}
+          return [null];
+        }
+        const langs = getLangs();
+        langs.forEach(function(l) {
+          const a = document.createElement('a');
+          a.href = baseUrl(l);
+          a.className = 'language-option';
+          a.textContent = l ? (languageNames[l] || l) : 'English';
+          a.setAttribute('role', 'menuitem');
+          dropdown.appendChild(a);
+        });
+        if (textEl) textEl.textContent = currentLang ? (languageNames[currentLang] || currentLang) : 'English';
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const expanded = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', !expanded);
+          dropdown.classList.toggle('show', !expanded);
+        });
+        document.addEventListener('click', function(e) {
+          if (!languageSelector.contains(e.target)) {
+            btn.setAttribute('aria-expanded', 'false');
+            dropdown.classList.remove('show');
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

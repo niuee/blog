@@ -478,7 +478,11 @@
       </div>
     </div>
     <div class="container">
-      <a href="/" class="back-link" id="back-link">Home</a>
+      <nav class="site-nav" aria-label="Site navigation">
+        <a href="/" class="site-nav-link" id="nav-link-home">Home</a>
+        <a href="/articles" class="site-nav-link active" id="nav-link-articles">Articles</a>
+        <a href="/series" class="site-nav-link" id="nav-link-series">Series</a>
+      </nav>
       <header class="articles-header">
         <h1 id="page-title">Articles</h1>
         <p class="subtitle" id="page-subtitle">Thoughts, tutorials, and explorations</p>
@@ -600,6 +604,7 @@
           'en': {
             home: 'Home',
             articles: 'Articles',
+            series: 'Series',
             subtitle: 'Thoughts, tutorials, and explorations',
             prev: '← Prev',
             next: 'Next →',
@@ -611,6 +616,7 @@
           'zh-tw': {
             home: '首頁',
             articles: '文章',
+            series: '系列',
             subtitle: '想法、教學與探索',
             prev: '← 上一頁',
             next: '下一頁 →',
@@ -622,6 +628,7 @@
           'ja': {
             home: 'ホーム',
             articles: '記事',
+            series: 'シリーズ',
             subtitle: '考え、チュートリアル、探求',
             prev: '← 前へ',
             next: '次へ →',
@@ -633,6 +640,7 @@
           'ko': {
             home: '홈',
             articles: '글',
+            series: '시리즈',
             subtitle: '생각, 튜토리얼, 탐구',
             prev: '← 이전',
             next: '다음 →',
@@ -644,6 +652,7 @@
           'zh-cn': {
             home: '首页',
             articles: '文章',
+            series: '系列',
             subtitle: '想法、教程与探索',
             prev: '← 上一页',
             next: '下一页 →',
@@ -669,11 +678,21 @@
           const lang = currentLang || 'en';
           
           // Update page elements
-          const backLink = document.getElementById('back-link');
+          const navHome = document.getElementById('nav-link-home');
+          const navArticles = document.getElementById('nav-link-articles');
+          const navSeries = document.getElementById('nav-link-series');
           const pageTitle = document.getElementById('page-title');
           const pageSubtitle = document.getElementById('page-subtitle');
           
-          if (backLink) backLink.textContent = t('home');
+          if (navHome) navHome.textContent = t('home');
+          if (navArticles) {
+            navArticles.textContent = t('articles');
+            navArticles.href = currentLang ? '/articles/' + currentLang : '/articles';
+          }
+          if (navSeries) {
+            navSeries.textContent = t('series');
+            navSeries.href = currentLang ? '/series/' + currentLang : '/series';
+          }
           if (pageTitle) pageTitle.textContent = t('articles');
           if (pageSubtitle) pageSubtitle.textContent = t('subtitle');
         }
