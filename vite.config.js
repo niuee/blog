@@ -42,8 +42,8 @@ export default defineConfig({
   // Development server options
   server: {
     port: 5173,
+    strictPort: false, // use next available port if 5173 is in use
     open: true,
-    host: true,
   },
   
   // Build options
@@ -68,6 +68,7 @@ export default defineConfig({
   // Preview server options
   preview: {
     port: 4173,
+    strictPort: false, // use next available port if 4173 is in use
     host: true,
   },
 })
