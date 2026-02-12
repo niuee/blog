@@ -378,10 +378,8 @@
           
           // Update nav links to preserve current language and filter state
           const baseBackUrl = effectiveLang ? `/articles/${effectiveLang}` : '/articles';
-          const savedFilterState = sessionStorage.getItem('articles-filter-state') || '';
-          const backLinkUrl = baseBackUrl + savedFilterState;
-          const navArticles = document.getElementById('nav-link-articles');
-          const navSeries = document.getElementById('nav-link-series');
+          const savedFilterStateForNav = sessionStorage.getItem('articles-filter-state') || '';
+          const backLinkUrl = baseBackUrl + savedFilterStateForNav;
           if (navArticles) navArticles.href = backLinkUrl;
           if (navSeries) navSeries.href = effectiveLang ? `/series/${effectiveLang}` : '/series';
 

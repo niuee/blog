@@ -22,8 +22,36 @@ html:lang(zh-tw) body,
 html:lang(zh-cn) body,
 html:lang(ja) body,
 html:lang(ko) body {
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   line-height: 1.9;
+}
+
+/* CJK: article content — Latin/Roman in serif, CJK in sans-serif (stack order: serif first for Latin, then CJK sans) */
+html:lang(zh) #blog-content,
+html:lang(zh-tw) #blog-content,
+html:lang(zh-cn) #blog-content,
+html:lang(ja) #blog-content,
+html:lang(ko) #blog-content {
+  font-family: 'Iowan Old Style', 'Noto Serif', 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, 'Times New Roman', 'PingFang TC', 'PingFang SC', 'Microsoft JhengHei', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Malgun Gothic', serif;
+}
+
+/* CJK: headings in article content use serif for both Latin and CJK */
+html:lang(zh) #blog-content article h1,
+html:lang(zh) #blog-content article h2,
+html:lang(zh) #blog-content article h3,
+html:lang(zh-tw) #blog-content article h1,
+html:lang(zh-tw) #blog-content article h2,
+html:lang(zh-tw) #blog-content article h3,
+html:lang(zh-cn) #blog-content article h1,
+html:lang(zh-cn) #blog-content article h2,
+html:lang(zh-cn) #blog-content article h3,
+html:lang(ja) #blog-content article h1,
+html:lang(ja) #blog-content article h2,
+html:lang(ja) #blog-content article h3,
+html:lang(ko) #blog-content article h1,
+html:lang(ko) #blog-content article h2,
+html:lang(ko) #blog-content article h3 {
+  font-family: 'Iowan Old Style', 'Noto Serif TC', 'Noto Serif SC', 'Noto Serif JP', 'Noto Serif KR', 'Noto Serif', 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, 'Times New Roman', serif;
 }
 
 /* Only enable font-size transition after initial load */
@@ -32,7 +60,7 @@ body.font-size-transition-enabled {
 }
 
 .container {
-  max-width: 700px;
+  max-width: 860px;
   margin: 0 auto;
 }
 

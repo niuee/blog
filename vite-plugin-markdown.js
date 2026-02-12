@@ -2385,11 +2385,16 @@ export function markdownPlugin() {
       // This middleware must run before Vite's HTML plugin
       // We use a custom middleware that checks routes first
       const markdownMiddleware = async (req, res, next) => {
+        const rawUrl = req.url || '/';
+        const pathname = rawUrl.split('?')[0].split('#')[0];
+        // Skip static assets so they can be served by TS middleware or Vite (e.g. /articles/board-a-user-manual/main.ts)
+        const staticExt = /\.(ts|js|mjs|cjs|css|wasm)(\?|$)/i;
+        if (staticExt.test(pathname)) {
+          return next();
+        }
         // Only handle HTML files from blog directory or article routes
         // Pattern: /articles/{name} or /articles/{name}/{lang} or /articles/{name}/{lang}.html
         // Also handle /resume route and /resume/{lang}
-        const rawUrl = req.url || '/';
-        const pathname = rawUrl.split('?')[0].split('#')[0];
         const knownLangCodes = ['en', 'zh', 'zh-tw', 'zh-cn', 'ja', 'ko', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ar', 'hi'];
         // Match /articles or /articles/{lang} (but not /articles/{article-name})
         const articlesListMatch = pathname.match(/^\/articles(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/)?$/i);
