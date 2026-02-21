@@ -43,10 +43,10 @@ published: 2025-01-01
       <figcaption style="font-size: 0.85em; color: #666; margin-top: 4px;">Miro</figcaption>
     </figure>
   </div>
-- 重構互動元素，將 DOM 元素轉換成 Canvas 元素，解決使用者操作同步問題，並減少主線程負載。
-- 重新實作客製化 mesh ，用於同筆畫重疊筆跡時不疊加帶有透明色的色彩，消除色彩混合帶來的視覺瑕疵。
-- 重構文字編輯器，將 Slate.js 轉換成 Lexical，提升未來功能開發的靈活性和可維護性。
-- 與後端團隊合作，實作無需登入即可分享和協作白板的功能。
+- 重構互動元素，將 DOM 元素轉換成 Canvas 元素，解決使用者操作同步問題，並減少主線程在平移／縮放時的阻塞約 25%。
+- 重新實作客製化 mesh ，用於同筆畫重疊筆跡時不疊加帶有透明色的色彩，消除 100% 的色彩混合視覺瑕疵。
+- 重構文字編輯器，將 Slate.js 轉換成 Lexical，文字編輯器，一次性減少 50% 編輯器相關 bug，提升可維護性。
+- 與後端團隊合作，實作無需登入即可分享和協作白板的功能，使所有白板連結皆可一鍵分享、無需註冊。提升 BYOD (Bring Your Own Device) 使用者體驗，進而提升使用率。
 
 </div>
 
@@ -117,11 +117,11 @@ published: 2025-01-01
 <div class="resume-skills">
 
 <div class="resume-skill-category">
-  <strong>程式語言:</strong> Java, C/C++, JavaScript/TypeScript, Golang, Python, PHP, HTML, CSS
+  <strong>程式語言相關:</strong> Java, C/C++, JavaScript/TypeScript, Golang, Python, PHP, HTML, CSS
 </div>
 
 <div class="resume-skill-category">
-  <strong>框架 & 函式庫:</strong> Express.js, Django, React, Electron.js, GraphQL, 前端框架最近正在學習 Vue.js
+  <strong>框架 & 函式庫:</strong> Express.js, Django, React, Vue, Electron.js, GraphQL
 </div>
 
 <div class="resume-skill-category">
@@ -146,7 +146,7 @@ published: 2025-01-01
 
 套件列表:
 
-- <a href="https://github.com/ue-too/board" target="_blank"><strong>board</strong></a>: HTML canvas 視窗管理工具（使 canvas 可以被縮放、平移、與旋轉）
+- <a href="https://github.com/ue-too/ue-too/tree/main/packages/board" target="_blank"><strong>board</strong></a>: HTML canvas 視窗管理工具（使 canvas 可以被縮放、平移、與旋轉）
 - <a href="https://github.com/ue-too/ue-too/tree/main/packages/being" target="_blank"><strong>being</strong></a>: 有限狀態機的實作
 - <a href="https://github.com/ue-too/ue-too/tree/main/packages/animate" target="_blank"><strong>animate</strong></a>: 動畫插值相關工具。
 - <a href="https://github.com/ue-too/ue-too/tree/main/packages/curve" target="_blank"><strong>curve</strong></a>: 貝茲曲線相關計算工具。
