@@ -84,4 +84,3 @@
   - Dev.to, Hashnode, or a personal blog work well for this kind of technical series
   - Cross-post key visuals to Twitter/X for engagement
   - Consider a "devlog" framing if you want a more casual tone
-  
