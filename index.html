@@ -5,32 +5,134 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>blog</title>
-    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/dark-mode.css" />
+    <link rel="stylesheet" href="/blog-styles.css" />
+    <script>
+      (function() {
+        const savedFontSize = localStorage.getItem('blog-font-size') || 'large';
+        document.documentElement.setAttribute('data-font-size', savedFontSize);
+      })();
+    </script>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+      }
+      .intro-content {
+        max-width: 600px;
+        width: 100%;
+        padding: 2rem 1rem;
+      }
+      .intro-name {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .intro-subtitle {
+        color: var(--text-meta-color);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+      }
+      .intro-description {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        margin: 0 0 2rem 0;
+        color: var(--text-color);
+        opacity: 0.85;
+      }
+      .intro-link {
+        color: var(--link-color);
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+      .intro-link:hover {
+        color: var(--link-hover-color, #2563eb);
+      }
+      .intro-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--table-border-color, #e5e7eb);
+      }
+      .intro-nav-link {
+        color: var(--text-meta-color);
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: color 0.2s ease;
+      }
+      .intro-nav-link:hover {
+        color: var(--link-hover-color, #2563eb);
+      }
+    </style>
   </head>
   <body>
     <input type="checkbox" id="dark-mode-toggle" class="dark-mode-toggle" />
+    <script>
+      (function() {
+        const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
+        if (savedDarkMode) {
+          const darkModeToggle = document.getElementById('dark-mode-toggle');
+          if (darkModeToggle) darkModeToggle.checked = true;
+        }
+      })();
+    </script>
     <label for="dark-mode-toggle" class="dark-mode-label" aria-label="Toggle dark mode">
-      <span class="switch-plate">
-        <span class="switch-toggle"></span>
-      </span>
+      <span class="switch-plate"><span class="switch-toggle"></span></span>
     </label>
-    <div id="app">
-      <main class="intro-container">
-        <section class="intro-section">
-          <h1 class="intro-name">vee</h1>
-          <p class="intro-title">Software Developer and a little bit of everything I'm interested in.</p>
-          <div class="intro-description">
-            <a href="#" class="intro-link">Developing</a>, <a href="#" class="intro-link">Papercrafting</a>, <a href="#" class="intro-link">Reading</a>, and <a href="#" class="intro-link">Gaming</a>.
-            <br>Currently crafting digital experiences at <a href="#" class="intro-link">Tech Company</a>.
-          </div>
-          <nav class="intro-nav">
-            <a href="/articles" class="intro-nav-link">Articles</a>
-            <a href="/series" class="intro-nav-link">Series</a>
-            <a href="https://github.com/niuee" class="intro-nav-link" target="_blank" rel="noopener">GitHub</a>
-          </nav>
-        </section>
-      </main>
+    <div class="container">
+      <div class="intro-content">
+        <h1 class="intro-name">vee</h1>
+        <p class="intro-subtitle">Software Developer and a little bit of everything I'm interested in.</p>
+        <div class="intro-description">
+          <a href="#" class="intro-link">Developing</a>, <a href="#" class="intro-link">Papercrafting</a>, <a href="#" class="intro-link">Reading</a>, and <a href="#" class="intro-link">Gaming</a>.
+          <br>Currenttly working on<a href="https://banana.vntchang.dev" class="intro-link">banana</a>.
+        </div>
+        <nav class="intro-nav">
+          <a href="/articles" class="intro-nav-link">Articles</a>
+          <a href="/series" class="intro-nav-link">Series</a>
+          <a href="https://github.com/niuee" class="intro-nav-link" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+      </div>
     </div>
-    <script type="module" src="/src/main.ts"></script>
+    <script>
+      (function() {
+        // Dark mode: restore and persist
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const darkModeLabel = document.querySelector('.dark-mode-label');
+        const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
+        if (savedDarkMode && darkModeToggle) darkModeToggle.checked = true;
+        if (darkModeToggle && darkModeLabel) {
+          let scrollPosition = 0;
+          darkModeLabel.addEventListener('mousedown', function() {
+            scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+          });
+          darkModeLabel.addEventListener('click', function(e) {
+            e.preventDefault();
+            darkModeToggle.checked = !darkModeToggle.checked;
+            localStorage.setItem('blog-dark-mode', darkModeToggle.checked ? 'true' : 'false');
+            setTimeout(function() { window.scrollTo(0, scrollPosition); }, 0);
+          });
+          darkModeToggle.addEventListener('focus', function(e) {
+            e.preventDefault();
+            darkModeToggle.blur();
+          });
+          darkModeToggle.addEventListener('change', function(e) {
+            localStorage.setItem('blog-dark-mode', e.target.checked ? 'true' : 'false');
+          });
+        }
+      })();
+    </script>
   </body>
 </html>
