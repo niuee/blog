@@ -1152,6 +1152,24 @@ function copySharedCSS(distDir) {
       console.warn(`Warning: Could not copy dark-mode.css:`, err.message);
     }
   }
+
+  const templateDir = join(blogDir, '_template');
+  const sharedBlogScripts = [
+    'blog-dark-mode-boot.js',
+    'blog-dark-mode.js',
+    'blog-language-selector.js'
+  ];
+  for (const name of sharedBlogScripts) {
+    const srcPath = join(templateDir, name);
+    if (existsSync(srcPath)) {
+      try {
+        copyFileSync(srcPath, join(distDir, name));
+        console.log(`✓ Copied ${name} to dist`);
+      } catch (err) {
+        console.warn(`Warning: Could not copy ${name}:`, err.message);
+      }
+    }
+  }
   
   // Copy resume CSS
   const resumeDir = resolve(process.cwd(), 'resume');
@@ -1973,8 +1991,12 @@ export function markdownPlugin() {
       const blogDir = resolve(process.cwd(), 'articles');
       const resumeDir = resolve(process.cwd(), 'resume');
       const templateHTMLPath = join(blogDir, '_template', 'index.html');
-      const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
-      const darkModeCSSPath = join(blogDir, '_template', 'dark-mode.css');
+      const templateDir = join(blogDir, '_template');
+      const templateCSSPath = join(templateDir, 'blog-styles.css');
+      const darkModeCSSPath = join(templateDir, 'dark-mode.css');
+      const darkModeBootJsPath = join(templateDir, 'blog-dark-mode-boot.js');
+      const darkModeJsPath = join(templateDir, 'blog-dark-mode.js');
+      const languageSelectorJsPath = join(templateDir, 'blog-language-selector.js');
       const publicFaviconPath = resolve(process.cwd(), 'public', 'favicon.ico');
       
       // Set up HMR for markdown files
@@ -2262,6 +2284,15 @@ export function markdownPlugin() {
           } else {
             next();
           }
+        } else if (req.url === '/blog-dark-mode-boot.js' && existsSync(darkModeBootJsPath)) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          res.end(readFileSync(darkModeBootJsPath, 'utf-8'));
+        } else if (req.url === '/blog-dark-mode.js' && existsSync(darkModeJsPath)) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          res.end(readFileSync(darkModeJsPath, 'utf-8'));
+        } else if (req.url === '/blog-language-selector.js' && existsSync(languageSelectorJsPath)) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          res.end(readFileSync(languageSelectorJsPath, 'utf-8'));
         } else if (req.url === '/resume/resume-styles.css') {
           if (existsSync(resumeCSSPath)) {
             const cssContent = readFileSync(resumeCSSPath, 'utf-8');

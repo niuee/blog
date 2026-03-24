@@ -53,22 +53,14 @@
       .series-detail-header { margin-bottom: 1.5rem; color: var(--text-meta-color); }
     </style>
   </head>
-  <body>
+  <body data-blog-lang-mode="series">
     <div class="font-size-controls">
       <button class="font-size-btn" id="font-size-medium" aria-label="Medium font size">A</button>
       <button class="font-size-btn" id="font-size-large" aria-label="Large font size">A</button>
       <button class="font-size-btn" id="font-size-xl" aria-label="Extra large font size">A</button>
     </div>
     <input type="checkbox" id="dark-mode-toggle" class="dark-mode-toggle" />
-    <script>
-      (function() {
-        const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
-        if (savedDarkMode) {
-          const darkModeToggle = document.getElementById('dark-mode-toggle');
-          if (darkModeToggle) darkModeToggle.checked = true;
-        }
-      })();
-    </script>
+    <script src="/blog-dark-mode-boot.js"></script>
     <label for="dark-mode-toggle" class="dark-mode-label" aria-label="Toggle dark mode">
       <span class="switch-plate"><span class="switch-toggle"></span></span>
     </label>
@@ -93,33 +85,10 @@
         <!-- Injected: series list or series detail -->
       </div>
     </div>
+    <script src="/blog-dark-mode.js"></script>
+    <script src="/blog-language-selector.js"></script>
     <script>
       (function() {
-        // Dark mode: restore and persist
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const darkModeLabel = document.querySelector('.dark-mode-label');
-        const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
-        if (savedDarkMode && darkModeToggle) darkModeToggle.checked = true;
-        if (darkModeToggle && darkModeLabel) {
-          let scrollPosition = 0;
-          darkModeLabel.addEventListener('mousedown', function() {
-            scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-          });
-          darkModeLabel.addEventListener('click', function(e) {
-            e.preventDefault();
-            darkModeToggle.checked = !darkModeToggle.checked;
-            localStorage.setItem('blog-dark-mode', darkModeToggle.checked ? 'true' : 'false');
-            setTimeout(function() { window.scrollTo(0, scrollPosition); }, 0);
-          });
-          darkModeToggle.addEventListener('focus', function(e) {
-            e.preventDefault();
-            darkModeToggle.blur();
-          });
-          darkModeToggle.addEventListener('change', function(e) {
-            localStorage.setItem('blog-dark-mode', e.target.checked ? 'true' : 'false');
-          });
-        }
-
         // Font size: restore and persist
         const fontSizeButtons = {
           medium: document.getElementById('font-size-medium'),
@@ -146,57 +115,6 @@
             fontSizeButtons[size].addEventListener('click', function() {
               updateFontSize(size);
             });
-          }
-        });
-
-        // Language selector
-        const languageSelector = document.getElementById('language-selector');
-        const languageNames = { 'en': 'English', 'zh-tw': '繁體中文', 'zh-cn': '简体中文', 'zh': '中文', 'ja': '日本語', 'ko': '한국어', 'es': 'Español', 'fr': 'Français', 'de': 'Deutsch', 'it': 'Italiano', 'pt': 'Português', 'ru': 'Русский', 'ar': 'العربية', 'hi': 'हिन्दी' };
-        const btn = document.getElementById('language-selector-btn');
-        const dropdown = document.getElementById('language-dropdown');
-        const textEl = document.getElementById('language-selector-text');
-        if (!btn || !dropdown || !languageSelector) return;
-        const path = window.location.pathname.replace(/\/$/, '');
-        const pathAfterSeries = path.replace(/^\/series\/?/, '') || '';
-        const parts = pathAfterSeries.split('/').filter(Boolean);
-        const knownLangCodes = ['en', 'zh', 'zh-tw', 'zh-cn', 'ja', 'ko', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ar', 'hi'];
-        const currentLang = (parts.length === 1 && knownLangCodes.includes(parts[0])) ? parts[0] : (parts.length === 2 && knownLangCodes.includes(parts[1])) ? parts[1] : null;
-        const seriesSlug = (parts.length >= 1 && !knownLangCodes.includes(parts[0])) ? parts[0] : null;
-        var navArticlesEl = document.getElementById('nav-link-articles');
-        var navSeriesEl = document.getElementById('nav-link-series');
-        if (navArticlesEl) navArticlesEl.href = currentLang ? '/articles/' + currentLang : '/articles';
-        if (navSeriesEl) navSeriesEl.href = currentLang ? '/series/' + currentLang : '/series';
-        function baseUrl(lang) {
-          if (!seriesSlug) return lang ? '/series/' + lang : '/series';
-          return lang ? '/series/' + seriesSlug + '/' + lang : '/series/' + seriesSlug;
-        }
-        function getLangs() {
-          try {
-            const el = document.getElementById('available-languages');
-            if (el) return JSON.parse(el.textContent);
-          } catch (e) {}
-          return [null];
-        }
-        const langs = getLangs();
-        langs.forEach(function(l) {
-          const a = document.createElement('a');
-          a.href = baseUrl(l);
-          a.className = 'language-option';
-          a.textContent = l ? (languageNames[l] || l) : 'English';
-          a.setAttribute('role', 'menuitem');
-          dropdown.appendChild(a);
-        });
-        if (textEl) textEl.textContent = currentLang ? (languageNames[currentLang] || currentLang) : 'English';
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          const expanded = btn.getAttribute('aria-expanded') === 'true';
-          btn.setAttribute('aria-expanded', !expanded);
-          dropdown.classList.toggle('show', !expanded);
-        });
-        document.addEventListener('click', function(e) {
-          if (!languageSelector.contains(e.target)) {
-            btn.setAttribute('aria-expanded', 'false');
-            dropdown.classList.remove('show');
           }
         });
       })();

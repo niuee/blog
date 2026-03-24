@@ -323,7 +323,7 @@ html[data-font-size="xl"] {
   }
 }
 
-/* Language selector */
+/* Language selector (separate component from dark-mode label) */
 .language-selector {
   position: fixed;
   top: 1.5rem;
@@ -427,6 +427,13 @@ html:has(#dark-mode-toggle:checked) .language-option:hover {
   background-color: var(--font-size-active-bg);
   color: var(--font-size-active-color);
   font-weight: 600;
+}
+
+a.language-option {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  box-sizing: border-box;
 }
 
 /* Responsive styles for language selector */

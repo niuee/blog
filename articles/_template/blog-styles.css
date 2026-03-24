@@ -131,6 +131,45 @@ html:lang(ko) #blog-content article h6 {
     serif;
 }
 
+/*
+ * Articles index: body stays sans for CJK (excerpt/preview reads comfortably).
+ * Page title, subtitle, site nav, and list item titles use serif for CJK like article headings.
+ */
+html:lang(zh) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
+html:lang(zh-tw) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
+html:lang(zh-cn) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
+html:lang(ja) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
+html:lang(ko) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
+html:lang(zh) body[data-blog-lang-mode="articles-listing"] .articles-header h1,
+html:lang(zh-tw) body[data-blog-lang-mode="articles-listing"] .articles-header h1,
+html:lang(zh-cn) body[data-blog-lang-mode="articles-listing"] .articles-header h1,
+html:lang(ja) body[data-blog-lang-mode="articles-listing"] .articles-header h1,
+html:lang(ko) body[data-blog-lang-mode="articles-listing"] .articles-header h1,
+html:lang(zh) body[data-blog-lang-mode="articles-listing"] .articles-header .subtitle,
+html:lang(zh-tw) body[data-blog-lang-mode="articles-listing"] .articles-header .subtitle,
+html:lang(zh-cn) body[data-blog-lang-mode="articles-listing"] .articles-header .subtitle,
+html:lang(ja) body[data-blog-lang-mode="articles-listing"] .articles-header .subtitle,
+html:lang(ko) body[data-blog-lang-mode="articles-listing"] .articles-header .subtitle,
+html:lang(zh) body[data-blog-lang-mode="articles-listing"] .article-title,
+html:lang(zh-tw) body[data-blog-lang-mode="articles-listing"] .article-title,
+html:lang(zh-cn) body[data-blog-lang-mode="articles-listing"] .article-title,
+html:lang(ja) body[data-blog-lang-mode="articles-listing"] .article-title,
+html:lang(ko) body[data-blog-lang-mode="articles-listing"] .article-title {
+  font-family:
+    'Iowan Old Style',
+    'Noto Serif TC',
+    'Noto Serif SC',
+    'Noto Serif JP',
+    'Noto Serif KR',
+    'Noto Serif',
+    'Palatino Linotype',
+    'Palatino',
+    'Book Antiqua',
+    Georgia,
+    'Times New Roman',
+    serif;
+}
+
 /* Only enable font-size transition after initial load */
 body.font-size-transition-enabled {
   transition: background-color 0.3s ease, color 0.3s ease, font-size 0.3s ease;
