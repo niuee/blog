@@ -418,16 +418,142 @@
       parts.length >= 1 && !knownLangCodes.includes(parts[0])
         ? parts[0]
         : null;
+    var isListPage = seriesSlug == null;
 
-    var navArticlesEl = document.getElementById('nav-link-articles');
-    var navSeriesEl = document.getElementById('nav-link-series');
-    if (navArticlesEl) {
-      navArticlesEl.href = currentLang
-        ? '/articles/' + currentLang
-        : '/articles';
+    var translations = {
+      en: {
+        home: 'Home',
+        articles: 'Articles',
+        series: 'Series',
+        seriesPageTitle: 'Series',
+        seriesListSubtitle: 'Article series',
+        seriesEmpty: 'No series yet.',
+        seriesDetailEmpty: 'No articles in this series.',
+        seriesArticleCountOne: '{n} article',
+        seriesArticleCountMany: '{n} articles',
+        seriesPartLabel: 'Part {n}'
+      },
+      'zh-tw': {
+        home: '首頁',
+        articles: '文章',
+        series: '系列',
+        seriesPageTitle: '系列',
+        seriesListSubtitle: '文章系列',
+        seriesEmpty: '目前還沒有系列。',
+        seriesDetailEmpty: '此系列尚無文章。',
+        seriesArticleCountOne: '{n} 篇文章',
+        seriesArticleCountMany: '{n} 篇文章',
+        seriesPartLabel: '第 {n} 篇'
+      },
+      'zh-cn': {
+        home: '首页',
+        articles: '文章',
+        series: '系列',
+        seriesPageTitle: '系列',
+        seriesListSubtitle: '文章系列',
+        seriesEmpty: '目前还没有系列。',
+        seriesDetailEmpty: '此系列尚无文章。',
+        seriesArticleCountOne: '{n} 篇文章',
+        seriesArticleCountMany: '{n} 篇文章',
+        seriesPartLabel: '第 {n} 篇'
+      },
+      ja: {
+        home: 'ホーム',
+        articles: '記事',
+        series: 'シリーズ',
+        seriesPageTitle: 'シリーズ',
+        seriesListSubtitle: '記事シリーズ',
+        seriesEmpty: 'シリーズはまだありません。',
+        seriesDetailEmpty: 'このシリーズに記事はありません。',
+        seriesArticleCountOne: '記事 {n} 件',
+        seriesArticleCountMany: '記事 {n} 件',
+        seriesPartLabel: '第 {n} 回'
+      },
+      ko: {
+        home: '홈',
+        articles: '글',
+        series: '시리즈',
+        seriesPageTitle: '시리즈',
+        seriesListSubtitle: '글 시리즈',
+        seriesEmpty: '아직 시리즈가 없습니다.',
+        seriesDetailEmpty: '이 시리즈에 글이 없습니다.',
+        seriesArticleCountOne: '글 {n}개',
+        seriesArticleCountMany: '글 {n}개',
+        seriesPartLabel: '{n}편'
+      }
+    };
+
+    function translationLangCode() {
+      if (currentLang) {
+        if (translations[currentLang]) return currentLang;
+        if (currentLang === 'zh' && translations['zh-tw']) return 'zh-tw';
+        return 'en';
+      }
+      var h = (document.documentElement.lang || 'en').toLowerCase();
+      if (translations[h]) return h;
+      if (h === 'zh' && translations['zh-tw']) return 'zh-tw';
+      var short = h.split('-')[0];
+      if (short === 'zh' && translations['zh-tw']) return 'zh-tw';
+      return 'en';
     }
-    if (navSeriesEl) {
-      navSeriesEl.href = currentLang ? '/series/' + currentLang : '/series';
+
+    function fmt(str, map) {
+      return str.replace(/\{(\w+)\}/g, function (_, k) {
+        return map[k] != null ? String(map[k]) : '';
+      });
+    }
+
+    window.getTranslation = function (key) {
+      var lang = translationLangCode();
+      var pack = translations[lang] || translations.en;
+      return pack[key] != null ? pack[key] : translations.en[key] || key;
+    };
+
+    function applySeriesPageTranslations() {
+      var t = window.getTranslation;
+      var navHome = document.getElementById('nav-link-home');
+      var navArticles = document.getElementById('nav-link-articles');
+      var navSeries = document.getElementById('nav-link-series');
+      if (navHome) navHome.textContent = t('home');
+      if (navArticles) {
+        navArticles.textContent = t('articles');
+        navArticles.href = currentLang ? '/articles/' + currentLang : '/articles';
+      }
+      if (navSeries) {
+        navSeries.textContent = t('series');
+        navSeries.href = currentLang ? '/series/' + currentLang : '/series';
+      }
+
+      if (isListPage) {
+        var pageTitle = document.getElementById('series-page-title');
+        var pageSub = document.getElementById('series-page-subtitle');
+        if (pageTitle) pageTitle.textContent = t('seriesPageTitle');
+        if (pageSub) pageSub.textContent = t('seriesListSubtitle');
+        document.title = t('seriesPageTitle');
+      }
+
+      document.querySelectorAll('[data-i18n="seriesEmpty"]').forEach(function (el) {
+        el.textContent = t('seriesEmpty');
+      });
+      document.querySelectorAll('[data-i18n="seriesDetailEmpty"]').forEach(function (el) {
+        el.textContent = t('seriesDetailEmpty');
+      });
+      document.querySelectorAll('[data-i18n-article-count]').forEach(function (el) {
+        var n = parseInt(el.getAttribute('data-i18n-article-count'), 10);
+        if (isNaN(n)) return;
+        var key = n === 1 ? 'seriesArticleCountOne' : 'seriesArticleCountMany';
+        el.textContent = fmt(t(key), { n: n });
+      });
+      document.querySelectorAll('[data-i18n-part]').forEach(function (el) {
+        var n = el.getAttribute('data-i18n-part');
+        if (n == null || n === '') return;
+        el.textContent = fmt(t('seriesPartLabel'), { n: n });
+      });
+    }
+
+    var availableLanguages = getAvailableFromScript();
+    if (availableLanguages.length <= 1) {
+      languageSelector.style.display = 'none';
     }
 
     function baseUrl(lang) {
@@ -437,29 +563,71 @@
         : '/series/' + seriesSlug;
     }
 
-    var langs = getAvailableFromScript();
-    langs.forEach(function (l) {
-      var a = document.createElement('a');
-      a.href = baseUrl(l);
-      a.className = 'language-option';
-      a.textContent = l ? languageNames[l] || l : 'English';
-      a.setAttribute('role', 'menuitem');
-      languageDropdown.appendChild(a);
-    });
-    if (languageSelectorText) {
-      languageSelectorText.textContent = currentLang
-        ? languageNames[currentLang] || currentLang
-        : 'English';
+    function storageLangForUrl(savedRaw) {
+      if (!savedRaw || savedRaw === 'en') return null;
+      return savedRaw;
     }
 
-    languageSelectorBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      var expanded = languageSelectorBtn.getAttribute('aria-expanded') === 'true';
-      languageSelectorBtn.setAttribute('aria-expanded', (!expanded).toString());
-      languageDropdown.classList.toggle('show', !expanded);
-    });
-    bindDocumentClose();
+    if (currentLang === null && availableLanguages.length > 1) {
+      var rawPref = localStorage.getItem('blog-language');
+      // Default English is stored as "en" but the URL has no /en segment (null in available-languages).
+      if (rawPref === 'en') {
+        /* keep /series or /series/{slug} */
+      } else {
+        var savedForUrl = storageLangForUrl(rawPref);
+        if (savedForUrl && availableLanguages.indexOf(savedForUrl) !== -1) {
+          window.location.replace(baseUrl(savedForUrl));
+          return;
+        }
+        var preferred = inferPreferredLang(availableLanguages);
+        if (preferred) {
+          window.location.replace(baseUrl(preferred));
+          return;
+        }
+      }
+    } else if (currentLang != null) {
+      var pref = localStorage.getItem('blog-language');
+      if (pref !== currentLang) {
+        localStorage.setItem('blog-language', currentLang);
+      }
+    }
+
+    applySeriesPageTranslations();
+
+    if (availableLanguages.length > 1) {
+      languageDropdown.innerHTML = '';
+      availableLanguages.forEach(function (l) {
+        var a = document.createElement('a');
+        a.href = baseUrl(l);
+        a.className = 'language-option';
+        a.textContent = l ? languageNames[l] || l : 'English';
+        a.setAttribute('role', 'menuitem');
+        a.addEventListener('click', function () {
+          localStorage.setItem('blog-language', l != null ? l : 'en');
+        });
+        if (
+          (l === null && currentLang === null) ||
+          l === currentLang
+        ) {
+          a.classList.add('active');
+        }
+        languageDropdown.appendChild(a);
+      });
+      var langForLabel = currentLang || 'en';
+      if (languageSelectorText) {
+        languageSelectorText.textContent =
+          languageNames[langForLabel] || langForLabel;
+      }
+
+      languageSelectorBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var expanded = languageSelectorBtn.getAttribute('aria-expanded') === 'true';
+        languageSelectorBtn.setAttribute('aria-expanded', (!expanded).toString());
+        languageDropdown.classList.toggle('show', !expanded);
+      });
+      bindDocumentClose();
+    }
   }
 
   function initResume() {

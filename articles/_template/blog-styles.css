@@ -132,6 +132,30 @@ html:lang(ko) #blog-content article h6 {
 }
 
 /*
+ * Article view: the main title lives in <header><h1>, not inside #blog-content article.
+ * Match in-article heading serif stack for CJK.
+ */
+html:lang(zh) body[data-blog-lang-mode="article"] header h1,
+html:lang(zh-tw) body[data-blog-lang-mode="article"] header h1,
+html:lang(zh-cn) body[data-blog-lang-mode="article"] header h1,
+html:lang(ja) body[data-blog-lang-mode="article"] header h1,
+html:lang(ko) body[data-blog-lang-mode="article"] header h1 {
+  font-family:
+    'Iowan Old Style',
+    'Noto Serif TC',
+    'Noto Serif SC',
+    'Noto Serif JP',
+    'Noto Serif KR',
+    'Noto Serif',
+    'Palatino Linotype',
+    'Palatino',
+    'Book Antiqua',
+    Georgia,
+    'Times New Roman',
+    serif;
+}
+
+/*
  * Articles index: body stays sans for CJK (excerpt/preview reads comfortably).
  * Page title, subtitle, site nav, and list item titles use serif for CJK like article headings.
  */
@@ -168,6 +192,50 @@ html:lang(ko) body[data-blog-lang-mode="articles-listing"] .article-title {
     Georgia,
     'Times New Roman',
     serif;
+}
+
+/*
+ * English: sans for post body copy and excerpt/previews on listings & series.
+ * Page chrome, post titles (header h1), nav, and in-article headings stay serif.
+ */
+html:lang(en) #blog-content article {
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+html:lang(en) #blog-content article h1,
+html:lang(en) #blog-content article h2,
+html:lang(en) #blog-content article h3,
+html:lang(en) #blog-content article h4,
+html:lang(en) #blog-content article h5,
+html:lang(en) #blog-content article h6 {
+  font-family:
+    'Iowan Old Style',
+    'Noto Serif TC',
+    'Noto Serif',
+    'Palatino Linotype',
+    'Palatino',
+    'Book Antiqua',
+    Georgia,
+    'Times New Roman',
+    serif;
+}
+
+html:lang(en) .article-excerpt {
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
 }
 
 /* Only enable font-size transition after initial load */
