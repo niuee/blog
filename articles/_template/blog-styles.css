@@ -16,7 +16,10 @@ body {
   overflow-x: hidden;
 }
 
-/* CJK (Chinese, Japanese, Korean) typography adjustments */
+/*
+ * CJK (Chinese, Japanese, Korean): Latin stays serif; body/UI text uses sans for CJK glyphs.
+ * Generic `sans-serif` last avoids the UA mapping CJK to a serif Songti/Ming-style fallback.
+ */
 html:lang(zh) body,
 html:lang(zh-tw) body,
 html:lang(zh-cn) body,
@@ -24,34 +27,108 @@ html:lang(ja) body,
 html:lang(ko) body {
   letter-spacing: 0.09em;
   line-height: 1.9;
+  font-family:
+    'Iowan Old Style',
+    'Noto Serif',
+    'Palatino Linotype',
+    'Palatino',
+    'Book Antiqua',
+    Georgia,
+    'Times New Roman',
+    'Noto Sans TC',
+    'Noto Sans SC',
+    'Noto Sans JP',
+    'Noto Sans KR',
+    'PingFang TC',
+    'PingFang SC',
+    'Hiragino Sans GB',
+    'Microsoft YaHei',
+    'Microsoft JhengHei',
+    'Hiragino Sans',
+    'Hiragino Kaku Gothic ProN',
+    'Apple SD Gothic Neo',
+    'Malgun Gothic',
+    'Meiryo',
+    'Yu Gothic',
+    sans-serif;
 }
 
-/* CJK: article content — Latin/Roman in serif, CJK in sans-serif (stack order: serif first for Latin, then CJK sans) */
+/* CJK: article body text — same stack as body (serif Latin, sans CJK); headings override below */
 html:lang(zh) #blog-content,
 html:lang(zh-tw) #blog-content,
 html:lang(zh-cn) #blog-content,
 html:lang(ja) #blog-content,
 html:lang(ko) #blog-content {
-  font-family: 'Iowan Old Style', 'Noto Serif', 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, 'Times New Roman', 'PingFang TC', 'PingFang SC', 'Microsoft JhengHei', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Malgun Gothic', serif;
+  font-family:
+    'Iowan Old Style',
+    'Noto Serif',
+    'Palatino Linotype',
+    'Palatino',
+    'Book Antiqua',
+    Georgia,
+    'Times New Roman',
+    'Noto Sans TC',
+    'Noto Sans SC',
+    'Noto Sans JP',
+    'Noto Sans KR',
+    'PingFang TC',
+    'PingFang SC',
+    'Hiragino Sans GB',
+    'Microsoft YaHei',
+    'Microsoft JhengHei',
+    'Hiragino Sans',
+    'Hiragino Kaku Gothic ProN',
+    'Apple SD Gothic Neo',
+    'Malgun Gothic',
+    'Meiryo',
+    'Yu Gothic',
+    sans-serif;
 }
 
-/* CJK: headings in article content use serif for both Latin and CJK */
+/* CJK: article headings — serif for Latin and CJK */
 html:lang(zh) #blog-content article h1,
 html:lang(zh) #blog-content article h2,
 html:lang(zh) #blog-content article h3,
+html:lang(zh) #blog-content article h4,
+html:lang(zh) #blog-content article h5,
+html:lang(zh) #blog-content article h6,
 html:lang(zh-tw) #blog-content article h1,
 html:lang(zh-tw) #blog-content article h2,
 html:lang(zh-tw) #blog-content article h3,
+html:lang(zh-tw) #blog-content article h4,
+html:lang(zh-tw) #blog-content article h5,
+html:lang(zh-tw) #blog-content article h6,
 html:lang(zh-cn) #blog-content article h1,
 html:lang(zh-cn) #blog-content article h2,
 html:lang(zh-cn) #blog-content article h3,
+html:lang(zh-cn) #blog-content article h4,
+html:lang(zh-cn) #blog-content article h5,
+html:lang(zh-cn) #blog-content article h6,
 html:lang(ja) #blog-content article h1,
 html:lang(ja) #blog-content article h2,
 html:lang(ja) #blog-content article h3,
+html:lang(ja) #blog-content article h4,
+html:lang(ja) #blog-content article h5,
+html:lang(ja) #blog-content article h6,
 html:lang(ko) #blog-content article h1,
 html:lang(ko) #blog-content article h2,
-html:lang(ko) #blog-content article h3 {
-  font-family: 'Iowan Old Style', 'Noto Serif TC', 'Noto Serif SC', 'Noto Serif JP', 'Noto Serif KR', 'Noto Serif', 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, 'Times New Roman', serif;
+html:lang(ko) #blog-content article h3,
+html:lang(ko) #blog-content article h4,
+html:lang(ko) #blog-content article h5,
+html:lang(ko) #blog-content article h6 {
+  font-family:
+    'Iowan Old Style',
+    'Noto Serif TC',
+    'Noto Serif SC',
+    'Noto Serif JP',
+    'Noto Serif KR',
+    'Noto Serif',
+    'Palatino Linotype',
+    'Palatino',
+    'Book Antiqua',
+    Georgia,
+    'Times New Roman',
+    serif;
 }
 
 /* Only enable font-size transition after initial load */
