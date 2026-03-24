@@ -765,17 +765,18 @@ function generateArticlesListHtml(articles) {
  */
 function generateSeriesListHtml(seriesList, lang = null) {
   if (!seriesList || seriesList.length === 0) {
-    return '<p class="no-articles">No series yet.</p>';
+    return '<p class="no-articles" data-i18n="seriesEmpty">No series yet.</p>';
   }
   let html = '<ul class="article-list series-list">';
   for (const series of seriesList) {
     const url = lang ? `/series/${escapeHtml(series.slug)}/${lang}` : `/series/${escapeHtml(series.slug)}`;
+    const ac = series.articles.length;
     html += `
       <li class="article-item series-item">
         <a href="${url}" class="article-link">
           <h2 class="article-title">${escapeHtml(series.title)}</h2>
           ${series.description ? `<p class="article-excerpt">${escapeHtml(series.description)}</p>` : ''}
-          <div class="article-meta">${series.articles.length} article${series.articles.length !== 1 ? 's' : ''}</div>
+          <div class="article-meta" data-i18n-article-count="${ac}">${ac} article${ac !== 1 ? 's' : ''}</div>
         </a>
       </li>
     `;
@@ -821,17 +822,21 @@ function generateSeriesNavHtml(seriesSlug, articleName, blogDir, lang) {
  */
 function generateSeriesDetailHtml(series) {
   if (!series || !series.articles || series.articles.length === 0) {
-    return '<p class="no-articles">No articles in this series.</p>';
+    return '<p class="no-articles" data-i18n="seriesDetailEmpty">No articles in this series.</p>';
   }
   let html = `<div class="series-detail-header"><p class="article-excerpt">${escapeHtml(series.description || '')}</p></div>`;
   html += '<ul class="article-list">';
   for (const article of series.articles) {
-    const partLabel = article.seriesOrder != null ? `Part ${article.seriesOrder}` : '';
+    const ord = article.seriesOrder != null ? article.seriesOrder : '';
+    const partMeta =
+      article.seriesOrder != null
+        ? `<div class="article-meta" data-i18n-part="${escapeHtml(String(ord))}">Part ${escapeHtml(String(ord))}</div>`
+        : '';
     html += `
       <li class="article-item" data-series-order="${article.seriesOrder != null ? article.seriesOrder : ''}">
         <a href="${escapeHtml(article.url)}" class="article-link">
           <h2 class="article-title">${escapeHtml(article.title)}</h2>
-          ${partLabel ? `<div class="article-meta">${escapeHtml(partLabel)}</div>` : ''}
+          ${partMeta}
           ${article.formattedDate || article.author ? `
           <div class="article-meta">
             ${article.formattedDate ? `<time datetime="${article.date}">${article.formattedDate}</time>` : ''}
@@ -1150,6 +1155,24 @@ function copySharedCSS(distDir) {
       console.log(`✓ Copied dark-mode.css to dist`);
     } catch (err) {
       console.warn(`Warning: Could not copy dark-mode.css:`, err.message);
+    }
+  }
+
+  const templateDir = join(blogDir, '_template');
+  const sharedBlogScripts = [
+    'blog-dark-mode-boot.js',
+    'blog-dark-mode.js',
+    'blog-language-selector.js'
+  ];
+  for (const name of sharedBlogScripts) {
+    const srcPath = join(templateDir, name);
+    if (existsSync(srcPath)) {
+      try {
+        copyFileSync(srcPath, join(distDir, name));
+        console.log(`✓ Copied ${name} to dist`);
+      } catch (err) {
+        console.warn(`Warning: Could not copy ${name}:`, err.message);
+      }
     }
   }
   
@@ -1973,8 +1996,12 @@ export function markdownPlugin() {
       const blogDir = resolve(process.cwd(), 'articles');
       const resumeDir = resolve(process.cwd(), 'resume');
       const templateHTMLPath = join(blogDir, '_template', 'index.html');
-      const templateCSSPath = join(blogDir, '_template', 'blog-styles.css');
-      const darkModeCSSPath = join(blogDir, '_template', 'dark-mode.css');
+      const templateDir = join(blogDir, '_template');
+      const templateCSSPath = join(templateDir, 'blog-styles.css');
+      const darkModeCSSPath = join(templateDir, 'dark-mode.css');
+      const darkModeBootJsPath = join(templateDir, 'blog-dark-mode-boot.js');
+      const darkModeJsPath = join(templateDir, 'blog-dark-mode.js');
+      const languageSelectorJsPath = join(templateDir, 'blog-language-selector.js');
       const publicFaviconPath = resolve(process.cwd(), 'public', 'favicon.ico');
       
       // Set up HMR for markdown files
@@ -2262,6 +2289,15 @@ export function markdownPlugin() {
           } else {
             next();
           }
+        } else if (req.url === '/blog-dark-mode-boot.js' && existsSync(darkModeBootJsPath)) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          res.end(readFileSync(darkModeBootJsPath, 'utf-8'));
+        } else if (req.url === '/blog-dark-mode.js' && existsSync(darkModeJsPath)) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          res.end(readFileSync(darkModeJsPath, 'utf-8'));
+        } else if (req.url === '/blog-language-selector.js' && existsSync(languageSelectorJsPath)) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          res.end(readFileSync(languageSelectorJsPath, 'utf-8'));
         } else if (req.url === '/resume/resume-styles.css') {
           if (existsSync(resumeCSSPath)) {
             const cssContent = readFileSync(resumeCSSPath, 'utf-8');

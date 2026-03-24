@@ -92,15 +92,7 @@
 
 <body>
   <input type="checkbox" id="dark-mode-toggle" class="dark-mode-toggle" />
-  <script>
-    (function () {
-      const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
-      if (savedDarkMode) {
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        if (darkModeToggle) darkModeToggle.checked = true;
-      }
-    })();
-  </script>
+  <script src="/blog-dark-mode-boot.js"></script>
   <label for="dark-mode-toggle" class="dark-mode-label" aria-label="Toggle dark mode">
     <span class="switch-plate"><span class="switch-toggle"></span></span>
   </label>
@@ -109,9 +101,7 @@
       <h1 class="intro-name">vee</h1>
       <p class="intro-subtitle">Software Developer and a little bit of everything I'm interested in.</p>
       <div class="intro-description">
-        <a href="#" class="intro-link">Developing</a>, <a href="#" class="intro-link">Papercrafting</a>, <a href="#"
-          class="intro-link">Reading</a>, and <a href="#" class="intro-link">Gaming</a>.
-        <br>Currently working on <a href="https://banana.vntchang.dev" class="intro-link">banana</a>.
+        Currently working on <a href="https://banana.vntchang.dev" class="intro-link" target="_blank" rel="noopener">banana</a>.
       </div>
       <nav class="intro-nav">
         <a href="/articles" class="intro-nav-link">Articles</a>
@@ -120,34 +110,7 @@
       </nav>
     </div>
   </div>
-  <script>
-    (function () {
-      // Dark mode: restore and persist
-      const darkModeToggle = document.getElementById('dark-mode-toggle');
-      const darkModeLabel = document.querySelector('.dark-mode-label');
-      const savedDarkMode = localStorage.getItem('blog-dark-mode') === 'true';
-      if (savedDarkMode && darkModeToggle) darkModeToggle.checked = true;
-      if (darkModeToggle && darkModeLabel) {
-        let scrollPosition = 0;
-        darkModeLabel.addEventListener('mousedown', function () {
-          scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-        });
-        darkModeLabel.addEventListener('click', function (e) {
-          e.preventDefault();
-          darkModeToggle.checked = !darkModeToggle.checked;
-          localStorage.setItem('blog-dark-mode', darkModeToggle.checked ? 'true' : 'false');
-          setTimeout(function () {window.scrollTo(0, scrollPosition);}, 0);
-        });
-        darkModeToggle.addEventListener('focus', function (e) {
-          e.preventDefault();
-          darkModeToggle.blur();
-        });
-        darkModeToggle.addEventListener('change', function (e) {
-          localStorage.setItem('blog-dark-mode', e.target.checked ? 'true' : 'false');
-        });
-      }
-    })();
-  </script>
+  <script src="/blog-dark-mode.js"></script>
 </body>
 
 </html>
