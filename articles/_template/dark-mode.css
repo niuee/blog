@@ -45,7 +45,8 @@
 }
 
 /* Dark mode variables */
-html:has(#dark-mode-toggle:checked) {
+html:has(#dark-mode-toggle:checked),
+html[data-blog-dark] {
   color-scheme: dark;
   --bg-color: #1a1a1a;
   --text-color: #e0e0e0;
@@ -150,7 +151,8 @@ html:has(#dark-mode-toggle:checked) {
 }
 
 /* When checked, move toggle down (flip switch down) */
-html:has(#dark-mode-toggle:checked) .switch-toggle {
+html:has(#dark-mode-toggle:checked) .switch-toggle,
+html[data-blog-dark] .switch-toggle {
   top: 1.8rem;
 }
 
@@ -175,7 +177,8 @@ html:has(#dark-mode-toggle:checked) .switch-toggle {
     top: 0.45rem;
   }
 
-  html:has(#dark-mode-toggle:checked) .switch-toggle {
+  html:has(#dark-mode-toggle:checked) .switch-toggle,
+  html[data-blog-dark] .switch-toggle {
     top: 1.55rem;
   }
 }
@@ -240,7 +243,8 @@ html:has(#dark-mode-toggle:checked) .switch-toggle {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-html:has(#dark-mode-toggle:checked) .font-size-btn:hover {
+html:has(#dark-mode-toggle:checked) .font-size-btn:hover,
+html[data-blog-dark] .font-size-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -252,7 +256,8 @@ html:has(#dark-mode-toggle:checked) .font-size-btn:hover {
     0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-html:has(#dark-mode-toggle:checked) .font-size-btn.active {
+html:has(#dark-mode-toggle:checked) .font-size-btn.active,
+html[data-blog-dark] .font-size-btn.active {
   background-color: var(--font-size-active-bg);
   color: var(--font-size-active-color);
   box-shadow: 
@@ -419,7 +424,8 @@ html[data-font-size="xl"] {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-html:has(#dark-mode-toggle:checked) .language-option:hover {
+html:has(#dark-mode-toggle:checked) .language-option:hover,
+html[data-blog-dark] .language-option:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 

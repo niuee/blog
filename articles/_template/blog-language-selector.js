@@ -94,34 +94,86 @@
   }
 
   function initArticle() {
+    var knownLangCodes = [
+      'en',
+      'zh',
+      'zh-tw',
+      'zh-cn',
+      'ja',
+      'ko',
+      'es',
+      'fr',
+      'de',
+      'it',
+      'pt',
+      'ru',
+      'ar',
+      'hi'
+    ];
+
+    function isLangCode(s) {
+      return s && knownLangCodes.indexOf(String(s).toLowerCase()) !== -1;
+    }
+
+    /**
+     * Standalone: /articles/{slug}, /articles/{slug}/{lang}
+     * Series: /articles/{series}/{article}, /articles/{series}/{article}/{lang}
+     * (Aligned with vite-plugin-markdown articleMatch + disambiguation when only two segments.)
+     */
     function getCurrentUrlInfo() {
       var path = window.location.pathname;
-      var match = path.match(/^\/articles\/([^\/]+)(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i);
-      if (match) {
+      var match = path.match(
+        /^\/articles\/([^/]+)(?:\/([^/]+))?(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i
+      );
+      if (!match) {
         return {
-          postName: match[1],
-          currentLang: match[2] ? match[2].toLowerCase() : null
+          seriesSlug: null,
+          articleSlug: null,
+          currentLang: null
         };
       }
-      return { postName: null, currentLang: null };
+      var seg1 = match[1];
+      var seg2 = match[2] ? match[2].toLowerCase() : null;
+      var seg3 = match[3] ? match[3].toLowerCase() : null;
+
+      if (!seg2) {
+        return { seriesSlug: null, articleSlug: seg1, currentLang: null };
+      }
+      if (seg3) {
+        return {
+          seriesSlug: seg1,
+          articleSlug: seg2,
+          currentLang: isLangCode(seg3) ? seg3 : null
+        };
+      }
+      if (isLangCode(seg2)) {
+        return { seriesSlug: null, articleSlug: seg1, currentLang: seg2 };
+      }
+      return { seriesSlug: seg1, articleSlug: seg2, currentLang: null };
+    }
+
+    function articleBasePath(info) {
+      if (!info.articleSlug) return null;
+      return info.seriesSlug
+        ? '/articles/' + info.seriesSlug + '/' + info.articleSlug
+        : '/articles/' + info.articleSlug;
     }
 
     function switchLanguage(lang, savePreference) {
       if (savePreference === undefined) savePreference = true;
       var info = getCurrentUrlInfo();
-      if (!info.postName) return;
+      var base = articleBasePath(info);
+      if (!base) return;
       var langCode = lang || 'en';
       document.documentElement.lang = langCode;
       if (savePreference) localStorage.setItem('blog-language', langCode);
-      var newUrl = lang
-        ? '/articles/' + info.postName + '/' + lang
-        : '/articles/' + info.postName;
+      var newUrl = lang ? base + '/' + lang : base;
       window.location.href = newUrl;
     }
 
     function initLanguageSelector() {
       var info = getCurrentUrlInfo();
-      if (!info.postName) {
+      if (!info.articleSlug) {
         languageSelector.style.display = 'none';
         return;
       }

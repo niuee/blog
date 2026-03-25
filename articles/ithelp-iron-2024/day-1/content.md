@@ -1,14 +1,11 @@
 ---
-title: 無限...寶石？畫布啦！ | Day 01
+title: "Day 01 | 從原點開始"
 published: 2024-09-15
 author: vee
 seriesOrder: 1
 ---
 
-> 這是從鐵人賽那邊搬運過來的文章，作者是 2 年前的我。
-
-<img src="day1-banner.png" alt="Day 1 Banner" class="image-shadow image-rounded" style="object-fit: contain; width: 100%; height: 100%;"/>
-
+<img src="day1-banner.png" alt="day 1 banner" class="image-shadow image-rounded" style="max-width: 100%; height: auto;" />
 ## 前言
 
 嗨，大家好！其實從蠻久以前就有耳聞鐵人賽，身邊也有一些朋友參加過了，本來想說去年要參加，但是計劃趕不上變化，忙著找工作腦袋就完全忘記這件事情了。xD
@@ -114,3 +111,4 @@ seriesOrder: 1
 那就讓我們開始吧！
 
 明天啦，明天開始。
+

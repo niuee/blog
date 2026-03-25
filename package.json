@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "ithelp:sync": "node scripts/sync-ithelp-series.mjs",
+    "ithelp:fix-images": "node scripts/fix-ithelp-repo-images.mjs"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
