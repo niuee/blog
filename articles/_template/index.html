@@ -11,9 +11,84 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github.min.css" id="hljs-light-theme" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github-dark.min.css" id="hljs-dark-theme" disabled />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('blog-dark-mode') === 'true') {
+            document.documentElement.setAttribute('data-blog-dark', '');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="stylesheet" href="/dark-mode.css" />
     <link rel="stylesheet" href="/blog-styles.css" />
-    <style>.series-nav { margin-bottom: 1.5rem; font-size: 0.95rem; color: var(--text-meta-color, #6b7280); }.series-nav a { color: var(--link-color, #2563eb); text-decoration: none; }.series-nav a:hover { text-decoration: underline; }</style>
+    <style>
+      .series-nav { margin-bottom: 1.5rem; font-size: 0.95rem; color: var(--text-meta-color, #6b7280); }
+      .series-nav a {
+        color: var(--link-unvisited-color, var(--link-color));
+        text-decoration: none;
+        border-bottom: 1px solid var(--link-decoration-unvisited-color, var(--link-decoration-color));
+        padding-bottom: 1px;
+        transition: color 0.2s ease, border-color 0.2s ease;
+      }
+      .series-nav a:hover {
+        color: var(--link-hover-color);
+        border-bottom-color: var(--link-decoration-hover-color);
+      }
+      .series-nav a:visited {
+        color: var(--link-visited-color);
+        border-bottom-color: var(--link-decoration-visited-color);
+      }
+      .series-nav a:visited:hover {
+        color: var(--link-hover-color);
+        border-bottom-color: var(--link-decoration-hover-color);
+      }
+      .series-nav-bottom { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--table-border-color, rgba(0, 0, 0, 0.1)); }
+      .series-nav-bottom-row { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: stretch; }
+      /* Kill UA blue/purple on <a>: children set their own colors via spans */
+      .series-nav-bottom-card:any-link,
+      .series-nav-bottom-card:any-link:visited,
+      .series-nav-bottom-card:any-link:hover,
+      .series-nav-bottom-card:any-link:active {
+        color: inherit;
+      }
+      .series-nav-bottom-card {
+        flex: 1 1 220px;
+        max-width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid var(--table-border-color, rgba(0, 0, 0, 0.1));
+        border-radius: 8px;
+        text-decoration: none;
+        color: inherit;
+        background: transparent;
+        transition: border-color 0.2s ease, background-color 0.2s ease;
+        box-sizing: border-box;
+      }
+      /* Match article links + table row hover (blog-styles / dark-mode tokens), not TLDR blue */
+      .series-nav-bottom-card:hover {
+        border-color: var(--link-decoration-hover-color);
+        background-color: var(--table-row-hover-bg);
+      }
+      .series-nav-bottom-next { text-align: right; margin-left: auto; }
+      .series-nav-bottom-spacer { flex: 1 1 220px; min-width: 0; }
+      .series-nav-bottom-label { display: block; font-size: 0.8rem; color: var(--text-meta-color, #6b7280); margin-bottom: 0.35rem; }
+      .series-nav-bottom-title {
+        display: block;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--link-unvisited-color, var(--link-color));
+        transition: color 0.2s ease;
+      }
+      .series-nav-bottom-card:visited .series-nav-bottom-title {
+        color: var(--link-visited-color);
+      }
+      .series-nav-bottom-card:hover .series-nav-bottom-title,
+      .series-nav-bottom-card:visited:hover .series-nav-bottom-title {
+        color: var(--link-hover-color);
+        text-decoration: underline;
+        text-decoration-color: var(--link-decoration-hover-color);
+      }
+    </style>
     <script>
       // Set font size attribute immediately before body renders to prevent animation
       (function() {
@@ -111,6 +186,7 @@
       </header>
       <div id="series-nav"></div>
       <div id="blog-content"></div>
+      <div id="series-nav-bottom"></div>
     </div>
     <script src="/blog-dark-mode.js"></script>
     <script src="/blog-language-selector.js"></script>

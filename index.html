@@ -6,6 +6,15 @@
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>blog</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('blog-dark-mode') === 'true') {
+          document.documentElement.setAttribute('data-blog-dark', '');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="/dark-mode.css" />
   <link rel="stylesheet" href="/blog-styles.css" />
   <script>

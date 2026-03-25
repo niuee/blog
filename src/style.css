@@ -23,8 +23,9 @@
   background-color: var(--bg-color);
 }
 
-/* Dark mode variables - using :has() to detect checked state */
-html:has(#dark-mode-toggle:checked) {
+/* Dark mode variables - :has() + data-blog-dark (set in <head> before paint) */
+html:has(#dark-mode-toggle:checked),
+html[data-blog-dark] {
   color-scheme: dark;
   --bg-color: #242424;
   --text-color: rgba(255, 255, 255, 0.87);
@@ -147,7 +148,8 @@ h1 {
   border-color: rgba(33, 53, 71, 0.15);
 }
 
-html:has(#dark-mode-toggle:checked) .intro-nav {
+html:has(#dark-mode-toggle:checked) .intro-nav,
+html[data-blog-dark] .intro-nav {
   border-color: rgba(255, 255, 255, 0.15);
 }
 
@@ -164,11 +166,13 @@ html:has(#dark-mode-toggle:checked) .intro-nav {
   color: #666666;
 }
 
-html:has(#dark-mode-toggle:checked) .intro-nav-link {
+html:has(#dark-mode-toggle:checked) .intro-nav-link,
+html[data-blog-dark] .intro-nav-link {
   color: #b3b3b3;
 }
 
-html:has(#dark-mode-toggle:checked) .intro-nav-link:hover {
+html:has(#dark-mode-toggle:checked) .intro-nav-link:hover,
+html[data-blog-dark] .intro-nav-link:hover {
   color: #d9d9d9;
 }
 
@@ -312,7 +316,8 @@ button:focus-visible {
 }
 
 /* When checked, move toggle down (flip switch down) */
-html:has(#dark-mode-toggle:checked) .switch-toggle {
+html:has(#dark-mode-toggle:checked) .switch-toggle,
+html[data-blog-dark] .switch-toggle {
   top: 1.85rem;
 }
 
@@ -336,7 +341,8 @@ html:has(#dark-mode-toggle:checked) .switch-toggle {
     top: 0.45rem;
   }
 
-  html:has(#dark-mode-toggle:checked) .switch-toggle {
+  html:has(#dark-mode-toggle:checked) .switch-toggle,
+  html[data-blog-dark] .switch-toggle {
     top: 1.85rem;
   }
 }

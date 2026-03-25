@@ -786,6 +786,28 @@ function generateSeriesListHtml(seriesList, lang = null) {
 }
 
 /**
+ * Resolve current article position within a series (for top/bottom nav)
+ * @param {string} seriesSlug
+ * @param {string} articleName
+ * @param {string} blogDir
+ * @param {string|null} lang
+ * @returns {{ series: object, seriesSlug: string, idx: number, total: number, partNum: number, prevArticle: object|null, nextArticle: object|null, seriesUrl: string }|null}
+ */
+function getSeriesArticleNavContext(seriesSlug, articleName, blogDir, lang) {
+  const seriesList = getSeriesMetadata(blogDir, lang);
+  const series = seriesList.find(s => s.slug === seriesSlug);
+  if (!series || !series.articles || series.articles.length === 0) return null;
+  const idx = series.articles.findIndex(a => a.name === articleName);
+  if (idx < 0) return null;
+  const total = series.articles.length;
+  const partNum = idx + 1;
+  const prevArticle = idx > 0 ? series.articles[idx - 1] : null;
+  const nextArticle = idx < total - 1 ? series.articles[idx + 1] : null;
+  const seriesUrl = lang ? `/series/${escapeHtml(seriesSlug)}/${lang}` : `/series/${escapeHtml(seriesSlug)}`;
+  return { series, seriesSlug, idx, total, partNum, prevArticle, nextArticle, seriesUrl };
+}
+
+/**
  * Generate series navigation HTML for an article page (Part X of Y, Prev, Next, link to series)
  * @param {string} seriesSlug
  * @param {string} articleName
@@ -794,16 +816,9 @@ function generateSeriesListHtml(seriesList, lang = null) {
  * @returns {string}
  */
 function generateSeriesNavHtml(seriesSlug, articleName, blogDir, lang) {
-  const seriesList = getSeriesMetadata(blogDir, lang);
-  const series = seriesList.find(s => s.slug === seriesSlug);
-  if (!series || !series.articles || series.articles.length === 0) return '';
-  const idx = series.articles.findIndex(a => a.name === articleName);
-  if (idx < 0) return '';
-  const total = series.articles.length;
-  const partNum = idx + 1;
-  const prevArticle = idx > 0 ? series.articles[idx - 1] : null;
-  const nextArticle = idx < total - 1 ? series.articles[idx + 1] : null;
-  const seriesUrl = lang ? `/series/${escapeHtml(seriesSlug)}/${lang}` : `/series/${escapeHtml(seriesSlug)}`;
+  const ctx = getSeriesArticleNavContext(seriesSlug, articleName, blogDir, lang);
+  if (!ctx) return '';
+  const { series, total, partNum, prevArticle, nextArticle, seriesUrl } = ctx;
   let html = '<nav class="series-nav" aria-label="Series navigation">';
   html += `<span class="series-nav-label">Part ${partNum} of ${total}</span>`;
   html += ` · <a href="${seriesUrl}" class="series-nav-link">${escapeHtml(series.title)}</a>`;
@@ -814,6 +829,36 @@ function generateSeriesNavHtml(seriesSlug, articleName, blogDir, lang) {
     html += ` · <a href="${escapeHtml(nextArticle.url)}" class="series-nav-link series-nav-next">Next →</a>`;
   }
   html += '</nav>';
+  return html;
+}
+
+/**
+ * Previous/next cards below the article body (series articles only)
+ * @param {string} seriesSlug
+ * @param {string} articleName
+ * @param {string} blogDir
+ * @param {string|null} lang
+ * @returns {string}
+ */
+function generateSeriesNavBottomHtml(seriesSlug, articleName, blogDir, lang) {
+  const ctx = getSeriesArticleNavContext(seriesSlug, articleName, blogDir, lang);
+  if (!ctx) return '';
+  const { prevArticle, nextArticle } = ctx;
+  if (!prevArticle && !nextArticle) return '';
+
+  let html = '<nav class="series-nav-bottom" aria-label="Series article navigation">';
+  html += '<div class="series-nav-bottom-row">';
+  if (prevArticle) {
+    html += `<a href="${escapeHtml(prevArticle.url)}" class="series-nav-bottom-card series-nav-bottom-prev" rel="prev"><span class="series-nav-bottom-label">← Previous</span><span class="series-nav-bottom-title">${escapeHtml(prevArticle.title)}</span></a>`;
+  } else {
+    html += '<span class="series-nav-bottom-spacer" aria-hidden="true"></span>';
+  }
+  if (nextArticle) {
+    html += `<a href="${escapeHtml(nextArticle.url)}" class="series-nav-bottom-card series-nav-bottom-next" rel="next"><span class="series-nav-bottom-label">Next →</span><span class="series-nav-bottom-title">${escapeHtml(nextArticle.title)}</span></a>`;
+  } else {
+    html += '<span class="series-nav-bottom-spacer" aria-hidden="true"></span>';
+  }
+  html += '</div></nav>';
   return html;
 }
 
@@ -1429,6 +1474,8 @@ function injectMarkdownToHtml(distDir) {
 
     const seriesNavHtml = seriesName ? generateSeriesNavHtml(seriesName, name, blogDir, lang) : '';
     htmlContent = htmlContent.replace('<div id="series-nav"></div>', `<div id="series-nav">${seriesNavHtml}</div>`);
+    const seriesNavBottomHtml = seriesName ? generateSeriesNavBottomHtml(seriesName, name, blogDir, lang) : '';
+    htmlContent = htmlContent.replace('<div id="series-nav-bottom"></div>', `<div id="series-nav-bottom">${seriesNavBottomHtml}</div>`);
 
     // Process and copy images
     htmlContent = processImages(htmlContent, dir, distHtmlPath, distDir);
@@ -1764,11 +1811,6 @@ export function markdownPlugin() {
       // Handle markdown file changes via Vite's file watcher
       const file = ctx.file;
       
-      // Debug: log all file changes
-      if (file && file.includes('content.md')) {
-        console.log(`[HMR DEBUG] handleHotUpdate called for: ${file}`);
-      }
-      
       // Handle both content.md and content.{lang}.md files
       if (file && (file.endsWith('content.md') || file.match(/content\.[a-z]{2}(-[a-z]{2})?\.md$/i))) {
         const blogDir = resolve(process.cwd(), 'articles');
@@ -1801,62 +1843,13 @@ export function markdownPlugin() {
             }
           }
           
-          console.log(`[HMR] Resume markdown file changed: ${relative(process.cwd(), file)}`);
-          console.log(`[HMR] Attempting to reload: ${htmlUrls.join(', ')}`);
-          
-          // Invalidate modules and force reload for all affected URLs
-          const modulesToInvalidate = [];
+          console.log(`[HMR] Resume markdown changed: ${relative(process.cwd(), file)}`);
+
+          // Send full-reload for each affected URL
           htmlUrls.forEach(htmlUrl => {
-            ctx.server.moduleGraph.idToModuleMap.forEach((module) => {
-              if (module.url && module.url.includes(htmlUrl)) {
-                modulesToInvalidate.push(module);
-              }
-            });
+            ctx.server.ws.send({ type: 'full-reload', path: htmlUrl });
           });
-          
-          modulesToInvalidate.forEach((module) => {
-            ctx.server.moduleGraph.invalidateModule(module);
-          });
-          
-          // Send reload message via WebSocket for all URLs
-          try {
-            if (ctx.server.ws) {
-              const wsClients = ctx.server.ws.clients;
-              if (wsClients && wsClients.size > 0) {
-                htmlUrls.forEach(htmlUrl => {
-                  const message = JSON.stringify({
-                    type: 'full-reload',
-                    path: htmlUrl
-                  });
-                  wsClients.forEach((client) => {
-                    if (client.readyState === 1) {
-                      try {
-                        client.send(message);
-                        console.log(`[HMR] Sent reload message to client for: ${htmlUrl}`);
-                      } catch (err) {
-                        console.error(`[HMR] Error sending to client:`, err);
-                      }
-                    }
-                  });
-                });
-              } else {
-                htmlUrls.forEach(htmlUrl => {
-                  try {
-                    ctx.server.ws.send({
-                      type: 'full-reload',
-                      path: htmlUrl
-                    });
-                    console.log(`[HMR] Sent reload message via send():`, { type: 'full-reload', path: htmlUrl });
-                  } catch (err) {
-                    console.error(`[HMR] Error using send():`, err);
-                  }
-                });
-              }
-            }
-          } catch (err) {
-            console.error(`[HMR] Error sending reload message:`, err);
-          }
-          
+
           return [];
         }
         
@@ -1869,122 +1862,11 @@ export function markdownPlugin() {
         const lang = langMatch ? langMatch[1].toLowerCase() : null;
         const htmlUrl = lang ? `/articles/${postName}/${lang}` : `/articles/${postName}`;
         
-        console.log(`[HMR] Markdown file changed: ${relative(process.cwd(), file)}`);
-        console.log(`[HMR] Attempting to reload: ${htmlUrl}`);
-        
-        // Since HTML is dynamically generated via middleware, we need to force a full reload
-        // Try multiple approaches to ensure it works
-        
-        // Approach 1: Try to find and invalidate the HTML module
-        const postDir = dirname(file);
-        const htmlFilePath = join(postDir, 'index.html');
-        const templateHTMLPath = join(blogDir, '_template', 'index.html');
-        
-        const fileToReload = existsSync(htmlFilePath) ? htmlFilePath : templateHTMLPath;
-        let htmlModule = null;
-        
-        if (existsSync(fileToReload)) {
-          // Try to get module by file path
-          htmlModule = ctx.server.moduleGraph.getModuleById(fileToReload);
-          
-          // If not found, try to get by URL
-          if (!htmlModule) {
-            const allModules = ctx.server.moduleGraph.idToModuleMap;
-            for (const [id, module] of allModules) {
-              if (id.includes(htmlUrl) || id.includes(postName)) {
-                htmlModule = module;
-                break;
-              }
-            }
-          }
-          
-          if (htmlModule) {
-            console.log(`[HMR] Found HTML module, invalidating...`);
-            ctx.server.moduleGraph.invalidateModule(htmlModule);
-            return [htmlModule];
-          }
-        }
-        
-        // Approach 2: Force full reload using WebSocket
-        console.log(`[HMR] Triggering full page reload...`);
-        
-        // Invalidate all modules and force reload
-        const modulesToInvalidate = [];
-        ctx.server.moduleGraph.idToModuleMap.forEach((module) => {
-          if (module.url && (module.url.includes(htmlUrl) || module.url.includes(postName))) {
-            modulesToInvalidate.push(module);
-          }
-        });
-        
-        modulesToInvalidate.forEach((module) => {
-          ctx.server.moduleGraph.invalidateModule(module);
-        });
-        
-        // Send reload message via WebSocket
-        try {
-          // Check if WebSocket server exists and has clients
-          const wsClients = ctx.server.ws?.clients;
-          const clientCount = wsClients?.size || 0;
-          
-          console.log(`[HMR] WebSocket clients connected: ${clientCount}`);
-          
-          if (clientCount === 0) {
-            console.warn(`[HMR] No WebSocket clients connected. Make sure the page is open in the browser.`);
-            // Still try to send - clients might connect
-          }
-          
-          // Use Vite's WebSocket send method
-          if (ctx.server.ws) {
-            // Try to send directly to each client if send() doesn't broadcast
-            const wsClients = ctx.server.ws.clients;
-            
-            if (wsClients && wsClients.size > 0) {
-              // Send to each client individually
-              const message = JSON.stringify({
-                type: 'full-reload',
-                path: htmlUrl
-              });
-              
-              wsClients.forEach((client) => {
-                if (client.readyState === 1) { // WebSocket.OPEN
-                  try {
-                    client.send(message);
-                    console.log(`[HMR] Sent reload message to client`);
-                  } catch (err) {
-                    console.error(`[HMR] Error sending to client:`, err);
-                  }
-                }
-              });
-            } else {
-              // Try using the send method (might work even with 0 clients)
-              try {
-                const message = {
-                  type: 'full-reload',
-                  path: htmlUrl
-                };
-                
-                ctx.server.ws.send(message);
-                console.log(`[HMR] Sent reload message via send():`, message);
-                
-                // Also try without path
-                setTimeout(() => {
-                  ctx.server.ws.send({
-                    type: 'full-reload'
-                  });
-                }, 100);
-              } catch (err) {
-                console.error(`[HMR] Error using send():`, err);
-              }
-            }
-          } else {
-            console.error(`[HMR] WebSocket server not available`);
-          }
-        } catch (err) {
-          console.error(`[HMR] Error sending reload message:`, err);
-          console.error(`[HMR] Error details:`, err.stack);
-        }
-        
-        // Return empty array to prevent default handling
+        console.log(`[HMR] Markdown changed: ${relative(process.cwd(), file)} -> ${htmlUrl}`);
+
+        // Force full-reload for the affected page
+        ctx.server.ws.send({ type: 'full-reload', path: htmlUrl });
+
         return [];
       }
       
@@ -2004,250 +1886,52 @@ export function markdownPlugin() {
       const languageSelectorJsPath = join(templateDir, 'blog-language-selector.js');
       const publicFaviconPath = resolve(process.cwd(), 'public', 'favicon.ico');
       
-      // Set up HMR for markdown files
-      const markdownWatchers = new Map();
-      
-      // Function to get the HTML URL for a markdown file
-      function getHtmlUrlForMarkdown(mdPath) {
-        const absoluteMdPath = resolve(mdPath);
-        
-        // Check if it's a resume file
-        if (absoluteMdPath.startsWith(resumeDir)) {
-          const fileName = basename(mdPath);
-          // Extract language from filename if present
-          const langMatch = fileName.match(/content\.([a-z]{2}(-[a-z]{2})?)\.md$/i);
-          const lang = langMatch ? langMatch[1].toLowerCase() : null;
-          return lang ? `/resume/${lang}` : '/resume';
-        }
-        
-        const relativePath = relative(blogDir, absoluteMdPath);
-        const postName = dirname(relativePath);
-        const fileName = basename(mdPath);
-        
-        // Extract language from filename if present
-        const langMatch = fileName.match(/content\.([a-z]{2}(-[a-z]{2})?)\.md$/i);
-        const lang = langMatch ? langMatch[1].toLowerCase() : null;
-        
-        // Return the URL that would be used to access this blog post
-        return lang ? `/articles/${postName}/${lang}` : `/articles/${postName}`;
-      }
-      
-      // Function to set up watcher for a markdown file
-      function setupMarkdownWatcher(mdPath) {
-        if (markdownWatchers.has(mdPath)) {
-          return; // Already watching
-        }
-        
-        const watcher = watch(mdPath, { persistent: true }, (eventType, filename) => {
-          // Handle both 'change' and 'rename' events (some editors trigger rename)
-          if (eventType === 'change' || eventType === 'rename') {
-            // Small delay to ensure file write is complete
-            setTimeout(() => {
-              if (!existsSync(mdPath)) {
-                return; // File was deleted, skip
-              }
-              
-              const htmlUrl = getHtmlUrlForMarkdown(mdPath);
-              const relativeMdPath = relative(process.cwd(), mdPath);
-              
-              console.log(`[HMR] Markdown changed: ${relativeMdPath} -> reloading ${htmlUrl}`);
-              
-              // Invalidate any modules that might be cached
-              const postDir = dirname(mdPath);
-              const htmlFilePath = join(postDir, 'index.html');
-              
-              // Try to invalidate the HTML module in Vite's module graph
-              if (server.moduleGraph) {
-                // Try both the actual HTML file and the template
-                const htmlModule = server.moduleGraph.getModuleById(htmlFilePath);
-                if (htmlModule) {
-                  server.moduleGraph.invalidateModule(htmlModule);
-                }
-                
-                // Also try the template if HTML doesn't exist
-                if (!existsSync(htmlFilePath) && existsSync(templateHTMLPath)) {
-                  const templateModule = server.moduleGraph.getModuleById(templateHTMLPath);
-                  if (templateModule) {
-                    server.moduleGraph.invalidateModule(templateModule);
-                  }
-                }
-              }
-              
-              // Send full-reload using WebSocket
-              try {
-                const wsClients = server.ws?.clients;
-                const clientCount = wsClients?.size || 0;
-                
-                console.log(`[HMR] Custom watcher - WebSocket clients: ${clientCount}`);
-                
-                if (clientCount === 0) {
-                  console.warn(`[HMR] No WebSocket clients connected. Refresh the page in your browser.`);
-                }
-                
-                if (server.ws) {
-                  // Send reload message
-                  const message = {
-                    type: 'full-reload',
-                    path: htmlUrl
-                  };
-                  
-                  server.ws.send(message);
-                  console.log(`[HMR] Custom watcher sent reload message:`, message);
-                  
-                  // Also try without path as fallback
-                  setTimeout(() => {
-                    server.ws.send({
-                      type: 'full-reload'
-                    });
-                  }, 100);
-                } else {
-                  console.error(`[HMR] WebSocket server not available in custom watcher`);
-                }
-              } catch (err) {
-                console.error(`[HMR] Failed to send reload message:`, err);
-                console.error(`[HMR] Error details:`, err.stack);
-              }
-            }, 100); // Small delay to ensure file write is complete
-          }
-        });
-        
-        watcher.on('error', (err) => {
-          console.warn(`[HMR] Error watching markdown file ${mdPath}:`, err.message);
-        });
-        
-        markdownWatchers.set(mdPath, watcher);
-      }
-      
-      // Set up watchers for all existing markdown files (including language variants)
-      // Add them to Vite's watcher so handleHotUpdate gets called
+      // Add markdown files to Vite's watcher so handleHotUpdate gets called
       const blogPosts = findBlogPosts(blogDir);
       for (const post of blogPosts) {
         // Ensure we use absolute path
         const absoluteMdPath = resolve(post.mdPath);
         
-        // Add to Vite's watcher (this is critical for handleHotUpdate to work)
         try {
           server.watcher.add(absoluteMdPath);
-          const langSuffix = post.lang ? ` (${post.lang})` : '';
-          console.log(`[HMR] Added to Vite watcher: ${relative(process.cwd(), absoluteMdPath)}${langSuffix}`);
         } catch (err) {
           console.warn(`[HMR] Failed to add ${absoluteMdPath} to watcher:`, err.message);
         }
-        
-        // Also set up our custom watcher as backup
-        setupMarkdownWatcher(absoluteMdPath);
       }
       
       // Add resume markdown files to watcher (including language variants)
       const resumeMdPath = join(resumeDir, 'content.md');
-      let resumeCount = 0;
       if (existsSync(resumeMdPath)) {
-        const absoluteResumeMdPath = resolve(resumeMdPath);
-        try {
-          server.watcher.add(absoluteResumeMdPath);
-          console.log(`[HMR] Added to Vite watcher: ${relative(process.cwd(), absoluteResumeMdPath)}`);
-        } catch (err) {
-          console.warn(`[HMR] Failed to add ${absoluteResumeMdPath} to watcher:`, err.message);
-        }
-        setupMarkdownWatcher(absoluteResumeMdPath);
-        resumeCount++;
+        try { server.watcher.add(resolve(resumeMdPath)); } catch (err) { /* ignore */ }
       }
-      
-      // Check for language-specific resume files
       try {
         const resumeFiles = readdirSync(resumeDir);
         const langPattern = /^content\.([a-z]{2}(-[a-z]{2})?)\.md$/i;
         for (const file of resumeFiles) {
-          const match = file.match(langPattern);
-          if (match) {
-            const langMdPath = join(resumeDir, file);
-            const absoluteLangMdPath = resolve(langMdPath);
-            try {
-              server.watcher.add(absoluteLangMdPath);
-              console.log(`[HMR] Added to Vite watcher: ${relative(process.cwd(), absoluteLangMdPath)}`);
-            } catch (err) {
-              console.warn(`[HMR] Failed to add ${absoluteLangMdPath} to watcher:`, err.message);
-            }
-            setupMarkdownWatcher(absoluteLangMdPath);
-            resumeCount++;
+          if (langPattern.test(file)) {
+            try { server.watcher.add(resolve(join(resumeDir, file))); } catch (err) { /* ignore */ }
           }
         }
       } catch (err) {
         // Ignore errors
       }
-      
-      console.log(`[HMR] Watching ${blogPosts.length} markdown file(s) for changes${resumeCount > 0 ? ` + ${resumeCount} resume file(s)` : ''}`);
-      
-      // Test: Log WebSocket info
-      console.log(`[HMR DEBUG] WebSocket server:`, server.ws ? 'exists' : 'missing');
-      if (server.ws) {
-        const initialClients = server.ws.clients?.size || 0;
-        console.log(`[HMR DEBUG] Initial WebSocket clients: ${initialClients}`);
-        console.log(`[HMR DEBUG] Note: Clients will connect when you open the page in your browser`);
-        
-        // Monitor client connections
-        if (server.ws.clients) {
-          const checkClients = () => {
-            const currentClients = server.ws.clients?.size || 0;
-            // if (currentClients > 0) {
-            //   console.log(`[HMR DEBUG] WebSocket clients now connected: ${currentClients}`);
-            // }
-          };
-          
-          // Check periodically
-          setInterval(checkClients, 5000);
-        }
-      }
+
+      console.log(`[HMR] Watching ${blogPosts.length} markdown file(s) for changes`);
       
       // Watch for new markdown files by watching the blog directory
-      // Note: recursive option may not be available in older Node versions
-      let blogDirWatcher;
       try {
-        blogDirWatcher = watch(blogDir, { recursive: true, persistent: true }, (eventType, filename) => {
-          // Match both content.md and content.{lang}.md files
-          if (filename && typeof filename === 'string' && 
+        watch(blogDir, { recursive: true, persistent: true }, (eventType, filename) => {
+          if (filename && typeof filename === 'string' &&
               (filename.endsWith('content.md') || filename.match(/content\.[a-z]{2}(-[a-z]{2})?\.md$/i))) {
             const mdPath = join(blogDir, filename);
             if (existsSync(mdPath)) {
-              // Add to Vite's watcher
               server.watcher.add(mdPath);
-              // Also set up our custom watcher as backup
-              setupMarkdownWatcher(mdPath);
-              console.log(`[HMR] Added new markdown file to watcher: ${relative(process.cwd(), mdPath)}`);
             }
           }
         });
       } catch (err) {
-        // Fallback: watch individual directories if recursive is not supported
-        console.warn('[HMR] Recursive directory watching not supported, watching individual post directories');
-        const blogPosts = findBlogPosts(blogDir);
-        for (const post of blogPosts) {
-          const postDir = dirname(post.mdPath);
-          try {
-            watch(postDir, { persistent: true }, (eventType, filename) => {
-              if (filename === 'content.md') {
-                // Add to Vite's watcher
-                server.watcher.add(post.mdPath);
-                // Also set up our custom watcher as backup
-                setupMarkdownWatcher(post.mdPath);
-              }
-            });
-          } catch (e) {
-            // Ignore errors for individual watchers
-          }
-        }
+        // Recursive watching not supported — Vite's watcher handles existing files
       }
-      
-      // Clean up watchers on server close
-      server.httpServer?.once('close', () => {
-        for (const watcher of markdownWatchers.values()) {
-          watcher.close();
-        }
-        markdownWatchers.clear();
-        if (blogDirWatcher) {
-          blogDirWatcher.close();
-        }
-      });
       
       // Serve favicon
       server.middlewares.use((req, res, next) => {
@@ -3051,6 +2735,8 @@ export function markdownPlugin() {
 
           const seriesNavHtml = seriesName ? generateSeriesNavHtml(seriesName, postName, blogDir, lang) : '';
           htmlContent = htmlContent.replace('<div id="series-nav"></div>', `<div id="series-nav">${seriesNavHtml}</div>`);
+          const seriesNavBottomHtml = seriesName ? generateSeriesNavBottomHtml(seriesName, postName, blogDir, lang) : '';
+          htmlContent = htmlContent.replace('<div id="series-nav-bottom"></div>', `<div id="series-nav-bottom">${seriesNavBottomHtml}</div>`);
 
           // Process images for dev mode (update paths to absolute)
           if (blogPostName) {

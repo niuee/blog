@@ -8,6 +8,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&family=Noto+Sans+KR:wght@400&family=Noto+Sans+SC:wght@400&family=Noto+Sans+TC:wght@400&family=Noto+Serif+SC:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('blog-dark-mode') === 'true') {
+            document.documentElement.setAttribute('data-blog-dark', '');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="stylesheet" href="/dark-mode.css" />
     <link rel="stylesheet" href="/blog-styles.css" />
     <script>
@@ -120,7 +129,8 @@
         overflow: hidden;
       }
       
-      :root:has(#dark-mode-toggle:checked) .articles-controls {
+      :root:has(#dark-mode-toggle:checked) .articles-controls,
+      :root[data-blog-dark] .articles-controls {
         border-color: #444;
       }
       
@@ -134,7 +144,8 @@
         user-select: none;
       }
       
-      :root:has(#dark-mode-toggle:checked) .controls-header {
+      :root:has(#dark-mode-toggle:checked) .controls-header,
+      :root[data-blog-dark] .controls-header {
         --bg-secondary: transparent;
       }
       
@@ -142,7 +153,8 @@
         background: var(--bg-hover, #f0f0f0);
       }
       
-      :root:has(#dark-mode-toggle:checked) .controls-header:hover {
+      :root:has(#dark-mode-toggle:checked) .controls-header:hover,
+      :root[data-blog-dark] .controls-header:hover {
         --bg-hover: #2a2a2a;
       }
       
@@ -173,7 +185,8 @@
         opacity: 1;
       }
       
-      :root:has(#dark-mode-toggle:checked) .controls-body {
+      :root:has(#dark-mode-toggle:checked) .controls-body,
+      :root[data-blog-dark] .controls-body {
         border-top-color: #444;
       }
       
@@ -230,14 +243,18 @@
       }
       
       :root:has(#dark-mode-toggle:checked) .tag-filter-select,
-      :root:has(#dark-mode-toggle:checked) .sort-order-select {
+      :root[data-blog-dark] .tag-filter-select,
+      :root:has(#dark-mode-toggle:checked) .sort-order-select,
+      :root[data-blog-dark] .sort-order-select {
         background: transparent;
         border-color: #555;
         color: #ccc;
       }
       
       :root:has(#dark-mode-toggle:checked) .tag-filter-select option,
-      :root:has(#dark-mode-toggle:checked) .sort-order-select option {
+      :root[data-blog-dark] .tag-filter-select option,
+      :root:has(#dark-mode-toggle:checked) .sort-order-select option,
+      :root[data-blog-dark] .sort-order-select option {
         background: #1a1a1a;
         color: #ccc;
       }
@@ -292,7 +309,8 @@
         font-weight: 500;
       }
       
-      :root:has(#dark-mode-toggle:checked) .article-tag {
+      :root:has(#dark-mode-toggle:checked) .article-tag,
+      :root[data-blog-dark] .article-tag {
         --tag-bg: #333;
         --tag-color: #bbb;
       }
@@ -333,13 +351,15 @@
         cursor: not-allowed;
       }
       
-      :root:has(#dark-mode-toggle:checked) .pagination-btn {
+      :root:has(#dark-mode-toggle:checked) .pagination-btn,
+      :root[data-blog-dark] .pagination-btn {
         background: transparent;
         border-color: #555;
         color: #ccc;
       }
       
-      :root:has(#dark-mode-toggle:checked) .pagination-btn:hover:not(:disabled) {
+      :root:has(#dark-mode-toggle:checked) .pagination-btn:hover:not(:disabled),
+      :root[data-blog-dark] .pagination-btn:hover:not(:disabled) {
         border-color: #888;
         color: #fff;
       }
@@ -377,18 +397,21 @@
         border-color: #333;
       }
       
-      :root:has(#dark-mode-toggle:checked) .page-btn {
+      :root:has(#dark-mode-toggle:checked) .page-btn,
+      :root[data-blog-dark] .page-btn {
         background: transparent;
         border-color: #555;
         color: #ccc;
       }
       
-      :root:has(#dark-mode-toggle:checked) .page-btn:hover:not(.active) {
+      :root:has(#dark-mode-toggle:checked) .page-btn:hover:not(.active),
+      :root[data-blog-dark] .page-btn:hover:not(.active) {
         border-color: #888;
         color: #fff;
       }
       
-      :root:has(#dark-mode-toggle:checked) .page-btn.active {
+      :root:has(#dark-mode-toggle:checked) .page-btn.active,
+      :root[data-blog-dark] .page-btn.active {
         background: #555;
         border-color: #555;
         color: #fff;

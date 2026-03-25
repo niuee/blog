@@ -1200,7 +1200,8 @@ img[data-zoomable]:hover {
   color: var(--text-color);
 }
 
-html:has(#dark-mode-toggle:checked) .toc-mobile-link:hover {
+html:has(#dark-mode-toggle:checked) .toc-mobile-link:hover,
+html[data-blog-dark] .toc-mobile-link:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
