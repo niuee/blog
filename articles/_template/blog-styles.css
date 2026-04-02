@@ -194,6 +194,42 @@ html:lang(ko) body[data-blog-lang-mode="articles-listing"] .article-title {
     serif;
 }
 
+/* Series index/detail: match articles listing — titles and chrome use serif for CJK */
+html:lang(zh) body[data-blog-lang-mode="series"] .site-nav-link,
+html:lang(zh-tw) body[data-blog-lang-mode="series"] .site-nav-link,
+html:lang(zh-cn) body[data-blog-lang-mode="series"] .site-nav-link,
+html:lang(ja) body[data-blog-lang-mode="series"] .site-nav-link,
+html:lang(ko) body[data-blog-lang-mode="series"] .site-nav-link,
+html:lang(zh) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(zh-tw) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(zh-cn) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(ja) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(ko) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(zh) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(zh-tw) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(zh-cn) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(ja) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(ko) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(zh) body[data-blog-lang-mode="series"] .article-title,
+html:lang(zh-tw) body[data-blog-lang-mode="series"] .article-title,
+html:lang(zh-cn) body[data-blog-lang-mode="series"] .article-title,
+html:lang(ja) body[data-blog-lang-mode="series"] .article-title,
+html:lang(ko) body[data-blog-lang-mode="series"] .article-title {
+  font-family:
+    'Iowan Old Style',
+    'Noto Serif TC',
+    'Noto Serif SC',
+    'Noto Serif JP',
+    'Noto Serif KR',
+    'Noto Serif',
+    'Palatino Linotype',
+    'Palatino',
+    'Book Antiqua',
+    Georgia,
+    'Times New Roman',
+    serif;
+}
+
 /*
  * English: sans for post body copy and excerpt/previews on listings & series.
  * Page chrome, post titles (header h1), nav, and in-article headings stay serif.
