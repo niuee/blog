@@ -75,7 +75,7 @@ published: 2025-01-01
 <div class="resume-meta">
   <span class="resume-date">Jan. 2021 - Jul. 2022</span>
   <span class="separator">•</span>
-  <span class="resume-duration">1 year, 7 Months</span>
+  <span class="resume-duration">1 year, 7 months</span>
   <span class="separator">•</span>
   <span class="resume-location">Tainan, Taiwan</span>
 </div>
@@ -102,7 +102,7 @@ published: 2025-01-01
   <span class="resume-location">West Lafayette, IN</span>
 </div>
 
-Started taking courses within the CS curriculum as technical electives. Followed the track for CS minor including data structure and algorithms, discrete math, etc. This is where I built a solid foundation for future endeavor in the CS field.
+Started taking courses within the CS curriculum as technical electives. Followed the track for CS minor including data structure and algorithms, discrete math, etc. This is where I built a solid foundation for future endeavors in the CS field.
 
 </div>
 
@@ -153,7 +153,7 @@ Package list:
 <div class="resume-section">
 
 ### <a href="https://github.com/ue-too/ue-too/tree/main/apps/banana" target="_blank"><strong>banana</strong></a>
-This is what I currently devoted most of my time to in terms of side projects. This is a city builder simulation that focuses on the railroad system.
+This is what I currently devote most of my time to in terms of side projects. This is a city builder simulation that focuses on the railroad system.
 
 </div>
 
