@@ -20,6 +20,11 @@ body {
  * CJK (Chinese, Japanese, Korean): Latin stays serif; body/UI text uses sans for CJK glyphs.
  * Generic `sans-serif` last avoids the UA mapping CJK to a serif Songti/Ming-style fallback.
  */
+/* CJK letter-spacing applied only to CJK character runs via JS (blog-cjk-spacing.js) */
+.cjk-spaced {
+  letter-spacing: 0.09em;
+}
+
 html:lang(zh) body,
 html:lang(zh-tw) body,
 html:lang(zh-cn) body,

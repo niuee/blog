@@ -1206,7 +1206,8 @@ function copySharedCSS(distDir) {
   const sharedBlogScripts = [
     'blog-dark-mode-boot.js',
     'blog-dark-mode.js',
-    'blog-language-selector.js'
+    'blog-language-selector.js',
+    'blog-cjk-spacing.js'
   ];
   for (const name of sharedBlogScripts) {
     const srcPath = join(templateDir, name);
@@ -1883,6 +1884,7 @@ export function markdownPlugin() {
       const darkModeBootJsPath = join(templateDir, 'blog-dark-mode-boot.js');
       const darkModeJsPath = join(templateDir, 'blog-dark-mode.js');
       const languageSelectorJsPath = join(templateDir, 'blog-language-selector.js');
+      const cjkSpacingJsPath = join(templateDir, 'blog-cjk-spacing.js');
       const publicFaviconPath = resolve(process.cwd(), 'public', 'favicon.ico');
       
       // Add markdown files to Vite's watcher so handleHotUpdate gets called
@@ -1981,6 +1983,9 @@ export function markdownPlugin() {
         } else if (req.url === '/blog-language-selector.js' && existsSync(languageSelectorJsPath)) {
           res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
           res.end(readFileSync(languageSelectorJsPath, 'utf-8'));
+        } else if (req.url === '/blog-cjk-spacing.js' && existsSync(cjkSpacingJsPath)) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          res.end(readFileSync(cjkSpacingJsPath, 'utf-8'));
         } else if (req.url === '/resume/resume-styles.css') {
           if (existsSync(resumeCSSPath)) {
             const cssContent = readFileSync(resumeCSSPath, 'utf-8');
