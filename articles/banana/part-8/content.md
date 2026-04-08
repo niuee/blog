@@ -2,6 +2,7 @@
 title: "Banana — Part 8 — Camera & Navigation"
 published: 2026-03-31
 author: vee
+tags: [wip]
 seriesOrder: 8
 ---
 

@@ -2,6 +2,7 @@
 title: "Banana — Part 6 — 車站與建築"
 published: 2026-03-31
 author: vee
+tags: [wip]
 seriesOrder: 6
 ---
 

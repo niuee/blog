@@ -453,6 +453,23 @@ function readArticleMeta(mdPath, entryName, url, seriesSlug = null) {
 function getArticlesMetadata(blogDir, lang = null) {
   const articles = [];
 
+  // Pre-read series titles so badges can show the localised name
+  const seriesTitles = {};
+  try {
+    for (const entry of readdirSync(blogDir)) {
+      const sjPath = join(blogDir, entry, 'series.json');
+      if (!existsSync(sjPath)) continue;
+      try {
+        const data = JSON.parse(readFileSync(sjPath, 'utf-8'));
+        if (lang && data.i18n && data.i18n[lang] && data.i18n[lang].title) {
+          seriesTitles[entry] = data.i18n[lang].title;
+        } else if (data.title) {
+          seriesTitles[entry] = data.title;
+        }
+      } catch (_) {}
+    }
+  } catch (_) {}
+
   try {
     const entries = readdirSync(blogDir);
 
@@ -500,6 +517,7 @@ function getArticlesMetadata(blogDir, lang = null) {
             const meta = readArticleMeta(mdPath, subEntry, url, seriesSlug);
             if (meta) {
               meta.hasLangVariant = hasLangVariant;
+              meta.seriesTitle = seriesTitles[seriesSlug] || null;
               articles.push(meta);
             }
           }
@@ -667,6 +685,7 @@ function generateArticlesListHtml(articles) {
     excerpt: a.excerpt,
     url: a.url,
     series: a.series ?? null,
+    seriesTitle: a.seriesTitle ?? null,
     seriesOrder: a.seriesOrder ?? null
   })));
   
@@ -722,8 +741,9 @@ function generateArticlesListHtml(articles) {
       ? `data-tags="${escapeHtml(article.tags.join(','))}"` 
       : 'data-tags=""';
     const dateAttr = article.date ? `data-date="${article.date}"` : 'data-date=""';
+    const seriesDisplayName = article.seriesTitle || article.series?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
     const seriesBadge = article.series
-      ? `<div class="article-meta"><a href="/series/${escapeHtml(article.series)}" class="article-series-badge">Series: ${escapeHtml(article.series.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</a></div>`
+      ? `<div class="article-meta"><a href="/series/${escapeHtml(article.series)}" class="article-series-badge" data-i18n-series="${escapeHtml(article.series)}"><span class="series-badge-prefix" data-i18n="seriesBadgePrefix">Series: </span>${escapeHtml(seriesDisplayName)}</a></div>`
       : '';
 
     html += `

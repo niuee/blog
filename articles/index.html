@@ -315,7 +315,28 @@
         --tag-bg: #333;
         --tag-color: #bbb;
       }
-      
+
+      .article-series-badge {
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        font-size: 0.75rem;
+        background: var(--tag-bg, #f0f0f0);
+        color: var(--tag-color, #555);
+        border-radius: 4px;
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      .article-series-badge:hover {
+        opacity: 0.8;
+      }
+
+      :root:has(#dark-mode-toggle:checked) .article-series-badge,
+      :root[data-blog-dark] .article-series-badge {
+        --tag-bg: #333;
+        --tag-color: #bbb;
+      }
+
       /* Pagination */
       .articles-pagination {
         display: flex;
