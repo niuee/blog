@@ -303,6 +303,48 @@ function findLanguageVariants(postDir) {
 function findBlogPosts(blogDir) {
   const posts = [];
 
+  // Get all languages available across the blog so we can generate
+  // fallback pages for articles that only have content.md (no lang variants).
+  // This mirrors the dev server behaviour which falls back content.{lang}.md → content.md.
+  const allLangs = getAvailableArticlesLanguages(blogDir).filter(l => l !== null);
+
+  function pushPostWithFallbackLangs(dir, name, seriesName, variants) {
+    if (variants.length === 0) return;
+
+    // Always emit entries for explicit variants
+    for (const variant of variants) {
+      const langSuffix = variant.lang ? `.${variant.lang}` : '';
+      posts.push({
+        dir,
+        name,
+        seriesName,
+        lang: variant.lang,
+        htmlPath: join(dir, `index${langSuffix}.html`),
+        mdPath: variant.mdPath
+      });
+    }
+
+    // If the only variant is the default (no lang), also emit fallback entries
+    // for every other known language so the build generates /{lang}/index.html pages.
+    const hasDefault = variants.some(v => v.lang === null);
+    const explicitLangs = new Set(variants.filter(v => v.lang !== null).map(v => v.lang));
+    if (hasDefault) {
+      const defaultMdPath = variants.find(v => v.lang === null).mdPath;
+      for (const lang of allLangs) {
+        if (!explicitLangs.has(lang)) {
+          posts.push({
+            dir,
+            name,
+            seriesName,
+            lang,
+            htmlPath: join(dir, `index.${lang}.html`),
+            mdPath: defaultMdPath
+          });
+        }
+      }
+    }
+  }
+
   try {
     const entries = readdirSync(blogDir);
 
@@ -320,28 +362,7 @@ function findBlogPosts(blogDir) {
       if (hasOwnContent) {
         // Standalone article
         const variants = findLanguageVariants(fullPath);
-        if (variants.length === 1 && variants[0].lang === null) {
-          posts.push({
-            dir: fullPath,
-            name: entry,
-            seriesName: null,
-            lang: null,
-            htmlPath: join(fullPath, 'index.html'),
-            mdPath: variants[0].mdPath
-          });
-        } else {
-          for (const variant of variants) {
-            const langSuffix = variant.lang ? `.${variant.lang}` : '';
-            posts.push({
-              dir: fullPath,
-              name: entry,
-              seriesName: null,
-              lang: variant.lang,
-              htmlPath: join(fullPath, `index${langSuffix}.html`),
-              mdPath: variant.mdPath
-            });
-          }
-        }
+        pushPostWithFallbackLangs(fullPath, entry, null, variants);
       } else {
         // Possibly a series folder: subdirs with content.md
         try {
@@ -351,29 +372,7 @@ function findBlogPosts(blogDir) {
             if (!statSync(subPath).isDirectory()) continue;
             const variants = findLanguageVariants(subPath);
             if (variants.length === 0) continue;
-            const seriesName = entry;
-            if (variants.length === 1 && variants[0].lang === null) {
-              posts.push({
-                dir: subPath,
-                name: subEntry,
-                seriesName,
-                lang: null,
-                htmlPath: join(subPath, 'index.html'),
-                mdPath: variants[0].mdPath
-              });
-            } else {
-              for (const variant of variants) {
-                const langSuffix = variant.lang ? `.${variant.lang}` : '';
-                posts.push({
-                  dir: subPath,
-                  name: subEntry,
-                  seriesName,
-                  lang: variant.lang,
-                  htmlPath: join(subPath, `index${langSuffix}.html`),
-                  mdPath: variant.mdPath
-                });
-              }
-            }
+            pushPostWithFallbackLangs(subPath, subEntry, entry, variants);
           }
         } catch (err) {
             // Ignore

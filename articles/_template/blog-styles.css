@@ -25,7 +25,6 @@ html:lang(zh-tw) body,
 html:lang(zh-cn) body,
 html:lang(ja) body,
 html:lang(ko) body {
-  letter-spacing: 0.09em;
   line-height: 1.9;
   font-family:
     'Iowan Old Style',
@@ -159,11 +158,11 @@ html:lang(ko) body[data-blog-lang-mode="article"] header h1 {
  * Articles index: body stays sans for CJK (excerpt/preview reads comfortably).
  * Page title, subtitle, site nav, and list item titles use serif for CJK like article headings.
  */
-html:lang(zh) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
-html:lang(zh-tw) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
-html:lang(zh-cn) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
-html:lang(ja) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
-html:lang(ko) body[data-blog-lang-mode="articles-listing"] .site-nav-link,
+html:lang(zh) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .site-nav-link,
+html:lang(zh-tw) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .site-nav-link,
+html:lang(zh-cn) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .site-nav-link,
+html:lang(ja) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .site-nav-link,
+html:lang(ko) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .site-nav-link,
 html:lang(zh) body[data-blog-lang-mode="articles-listing"] .articles-header h1,
 html:lang(zh-tw) body[data-blog-lang-mode="articles-listing"] .articles-header h1,
 html:lang(zh-cn) body[data-blog-lang-mode="articles-listing"] .articles-header h1,
@@ -174,11 +173,21 @@ html:lang(zh-tw) body[data-blog-lang-mode="articles-listing"] .articles-header .
 html:lang(zh-cn) body[data-blog-lang-mode="articles-listing"] .articles-header .subtitle,
 html:lang(ja) body[data-blog-lang-mode="articles-listing"] .articles-header .subtitle,
 html:lang(ko) body[data-blog-lang-mode="articles-listing"] .articles-header .subtitle,
-html:lang(zh) body[data-blog-lang-mode="articles-listing"] .article-title,
-html:lang(zh-tw) body[data-blog-lang-mode="articles-listing"] .article-title,
-html:lang(zh-cn) body[data-blog-lang-mode="articles-listing"] .article-title,
-html:lang(ja) body[data-blog-lang-mode="articles-listing"] .article-title,
-html:lang(ko) body[data-blog-lang-mode="articles-listing"] .article-title {
+html:lang(zh) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(zh-tw) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(zh-cn) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(ja) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(ko) body[data-blog-lang-mode="series"] .series-header h1,
+html:lang(zh) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(zh-tw) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(zh-cn) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(ja) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(ko) body[data-blog-lang-mode="series"] .series-header .subtitle,
+html:lang(zh) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .article-title,
+html:lang(zh-tw) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .article-title,
+html:lang(zh-cn) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .article-title,
+html:lang(ja) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .article-title,
+html:lang(ko) body:is([data-blog-lang-mode="articles-listing"], [data-blog-lang-mode="series"]) .article-title {
   font-family:
     'Iowan Old Style',
     'Noto Serif TC',
