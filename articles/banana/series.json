@@ -1,0 +1,10 @@
+{
+  "title": "All Aboard the Banana!",
+  "description": "A feature walkthrough of Banana, a 2D top-down railway simulator built with React and PixiJS.",
+  "i18n": {
+    "zh-tw": {
+      "title": "全員上車！Banana 鐵道模擬器",
+      "description": "Banana 2D 俯視角鐵道模擬器的功能導覽，使用 React 與 PixiJS 打造。"
+    }
+  }
+}

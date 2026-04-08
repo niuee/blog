@@ -303,6 +303,48 @@ function findLanguageVariants(postDir) {
 function findBlogPosts(blogDir) {
   const posts = [];
 
+  // Get all languages available across the blog so we can generate
+  // fallback pages for articles that only have content.md (no lang variants).
+  // This mirrors the dev server behaviour which falls back content.{lang}.md → content.md.
+  const allLangs = getAvailableArticlesLanguages(blogDir).filter(l => l !== null);
+
+  function pushPostWithFallbackLangs(dir, name, seriesName, variants) {
+    if (variants.length === 0) return;
+
+    // Always emit entries for explicit variants
+    for (const variant of variants) {
+      const langSuffix = variant.lang ? `.${variant.lang}` : '';
+      posts.push({
+        dir,
+        name,
+        seriesName,
+        lang: variant.lang,
+        htmlPath: join(dir, `index${langSuffix}.html`),
+        mdPath: variant.mdPath
+      });
+    }
+
+    // If the only variant is the default (no lang), also emit fallback entries
+    // for every other known language so the build generates /{lang}/index.html pages.
+    const hasDefault = variants.some(v => v.lang === null);
+    const explicitLangs = new Set(variants.filter(v => v.lang !== null).map(v => v.lang));
+    if (hasDefault) {
+      const defaultMdPath = variants.find(v => v.lang === null).mdPath;
+      for (const lang of allLangs) {
+        if (!explicitLangs.has(lang)) {
+          posts.push({
+            dir,
+            name,
+            seriesName,
+            lang,
+            htmlPath: join(dir, `index.${lang}.html`),
+            mdPath: defaultMdPath
+          });
+        }
+      }
+    }
+  }
+
   try {
     const entries = readdirSync(blogDir);
 
@@ -320,28 +362,7 @@ function findBlogPosts(blogDir) {
       if (hasOwnContent) {
         // Standalone article
         const variants = findLanguageVariants(fullPath);
-        if (variants.length === 1 && variants[0].lang === null) {
-          posts.push({
-            dir: fullPath,
-            name: entry,
-            seriesName: null,
-            lang: null,
-            htmlPath: join(fullPath, 'index.html'),
-            mdPath: variants[0].mdPath
-          });
-        } else {
-          for (const variant of variants) {
-            const langSuffix = variant.lang ? `.${variant.lang}` : '';
-            posts.push({
-              dir: fullPath,
-              name: entry,
-              seriesName: null,
-              lang: variant.lang,
-              htmlPath: join(fullPath, `index${langSuffix}.html`),
-              mdPath: variant.mdPath
-            });
-          }
-        }
+        pushPostWithFallbackLangs(fullPath, entry, null, variants);
       } else {
         // Possibly a series folder: subdirs with content.md
         try {
@@ -351,29 +372,7 @@ function findBlogPosts(blogDir) {
             if (!statSync(subPath).isDirectory()) continue;
             const variants = findLanguageVariants(subPath);
             if (variants.length === 0) continue;
-            const seriesName = entry;
-            if (variants.length === 1 && variants[0].lang === null) {
-              posts.push({
-                dir: subPath,
-                name: subEntry,
-                seriesName,
-                lang: null,
-                htmlPath: join(subPath, 'index.html'),
-                mdPath: variants[0].mdPath
-              });
-            } else {
-              for (const variant of variants) {
-                const langSuffix = variant.lang ? `.${variant.lang}` : '';
-                posts.push({
-                  dir: subPath,
-                  name: subEntry,
-                  seriesName,
-                  lang: variant.lang,
-                  htmlPath: join(subPath, `index${langSuffix}.html`),
-                  mdPath: variant.mdPath
-                });
-              }
-            }
+            pushPostWithFallbackLangs(subPath, subEntry, entry, variants);
           }
         } catch (err) {
             // Ignore
@@ -454,6 +453,23 @@ function readArticleMeta(mdPath, entryName, url, seriesSlug = null) {
 function getArticlesMetadata(blogDir, lang = null) {
   const articles = [];
 
+  // Pre-read series titles so badges can show the localised name
+  const seriesTitles = {};
+  try {
+    for (const entry of readdirSync(blogDir)) {
+      const sjPath = join(blogDir, entry, 'series.json');
+      if (!existsSync(sjPath)) continue;
+      try {
+        const data = JSON.parse(readFileSync(sjPath, 'utf-8'));
+        if (lang && data.i18n && data.i18n[lang] && data.i18n[lang].title) {
+          seriesTitles[entry] = data.i18n[lang].title;
+        } else if (data.title) {
+          seriesTitles[entry] = data.title;
+        }
+      } catch (_) {}
+    }
+  } catch (_) {}
+
   try {
     const entries = readdirSync(blogDir);
 
@@ -501,6 +517,7 @@ function getArticlesMetadata(blogDir, lang = null) {
             const meta = readArticleMeta(mdPath, subEntry, url, seriesSlug);
             if (meta) {
               meta.hasLangVariant = hasLangVariant;
+              meta.seriesTitle = seriesTitles[seriesSlug] || null;
               articles.push(meta);
             }
           }
@@ -668,6 +685,7 @@ function generateArticlesListHtml(articles) {
     excerpt: a.excerpt,
     url: a.url,
     series: a.series ?? null,
+    seriesTitle: a.seriesTitle ?? null,
     seriesOrder: a.seriesOrder ?? null
   })));
   
@@ -723,8 +741,9 @@ function generateArticlesListHtml(articles) {
       ? `data-tags="${escapeHtml(article.tags.join(','))}"` 
       : 'data-tags=""';
     const dateAttr = article.date ? `data-date="${article.date}"` : 'data-date=""';
+    const seriesDisplayName = article.seriesTitle || article.series?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
     const seriesBadge = article.series
-      ? `<div class="article-meta"><a href="/series/${escapeHtml(article.series)}" class="article-series-badge">Series: ${escapeHtml(article.series.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</a></div>`
+      ? `<div class="article-meta"><a href="/series/${escapeHtml(article.series)}" class="article-series-badge" data-i18n-series="${escapeHtml(article.series)}"><span class="series-badge-prefix" data-i18n="seriesBadgePrefix">Series: </span>${escapeHtml(seriesDisplayName)}</a></div>`
       : '';
 
     html += `
@@ -1207,7 +1226,8 @@ function copySharedCSS(distDir) {
   const sharedBlogScripts = [
     'blog-dark-mode-boot.js',
     'blog-dark-mode.js',
-    'blog-language-selector.js'
+    'blog-language-selector.js',
+    'blog-cjk-spacing.js'
   ];
   for (const name of sharedBlogScripts) {
     const srcPath = join(templateDir, name);
@@ -1884,6 +1904,7 @@ export function markdownPlugin() {
       const darkModeBootJsPath = join(templateDir, 'blog-dark-mode-boot.js');
       const darkModeJsPath = join(templateDir, 'blog-dark-mode.js');
       const languageSelectorJsPath = join(templateDir, 'blog-language-selector.js');
+      const cjkSpacingJsPath = join(templateDir, 'blog-cjk-spacing.js');
       const publicFaviconPath = resolve(process.cwd(), 'public', 'favicon.ico');
       
       // Add markdown files to Vite's watcher so handleHotUpdate gets called
@@ -1982,6 +2003,9 @@ export function markdownPlugin() {
         } else if (req.url === '/blog-language-selector.js' && existsSync(languageSelectorJsPath)) {
           res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
           res.end(readFileSync(languageSelectorJsPath, 'utf-8'));
+        } else if (req.url === '/blog-cjk-spacing.js' && existsSync(cjkSpacingJsPath)) {
+          res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          res.end(readFileSync(cjkSpacingJsPath, 'utf-8'));
         } else if (req.url === '/resume/resume-styles.css') {
           if (existsSync(resumeCSSPath)) {
             const cssContent = readFileSync(resumeCSSPath, 'utf-8');

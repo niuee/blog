@@ -21,7 +21,7 @@ published: 2025-01-01
 
 <div class="resume-section">
 
-### <span class="resume-company">ViewSonic</span> — Frontend Engineer
+### <span class="resume-company"><a href="https://www.viewsonic.com" target="_blank">ViewSonic</a></span> — Frontend Engineer
 <div class="resume-meta">
   <span class="resume-date">Nov. 2024 - Present</span>
   <span class="separator">•</span>
@@ -75,7 +75,7 @@ published: 2025-01-01
 <div class="resume-meta">
   <span class="resume-date">Jan. 2021 - Jul. 2022</span>
   <span class="separator">•</span>
-  <span class="resume-duration">1 year, 7 Months</span>
+  <span class="resume-duration">1 year, 7 months</span>
   <span class="separator">•</span>
   <span class="resume-location">Tainan, Taiwan</span>
 </div>
@@ -102,7 +102,7 @@ published: 2025-01-01
   <span class="resume-location">West Lafayette, IN</span>
 </div>
 
-Started taking courses within the CS curriculum as technical electives. Followed the track for CS minor including data structure and algorithms, discrete math, etc. This is where I built a solid foundation for future endeavor in the CS field.
+Took CS curriculum courses as technical electives — data structures, algorithms, discrete math — and followed the CS minor track. The mechanical engineering background carries over directly: physics simulation, coordinate transforms, and computational geometry are at the core of the canvas and game projects I build today.
 
 </div>
 
@@ -113,15 +113,19 @@ Started taking courses within the CS curriculum as technical electives. Followed
 <div class="resume-skills">
 
 <div class="resume-skill-category">
-  <strong>Languages:</strong> Java, C/C++, JavaScript/TypeScript, Golang, Python, PHP, HTML, CSS
+  <strong>Core:</strong> TypeScript/JavaScript, React, Next.js, PixiJS, HTML Canvas, WebGL
 </div>
 
 <div class="resume-skill-category">
-  <strong>Libraries & Frameworks:</strong> Express.js, Django, React, Vue, Electron.js, GraphQL
+  <strong>Graphics & Simulation:</strong> 2D rendering pipelines, Bézier curves, coordinate transforms, viewport management, physics simulation
 </div>
 
 <div class="resume-skill-category">
-  <strong>Tools & Technologies:</strong> Git, Mocha, JUnit, Jest, PostgreSQL, MongoDB
+  <strong>Also proficient in:</strong> Golang, C/C++, Python, Vue, Electron.js, Node.js, GraphQL, PostgreSQL, MongoDB
+</div>
+
+<div class="resume-skill-category">
+  <strong>Tools:</strong> Git, Jest, Mocha, Vite, pnpm monorepos
 </div>
 
 <div class="resume-skill-category">
@@ -138,7 +142,7 @@ Started taking courses within the CS curriculum as technical electives. Followed
 
 ### <a href="https://github.com/ue-too/ue-too" target="_blank">ue-too</a>
 
-A set of tools for rapidly developing HTML canvas applications; all packages live in a single monorepo on [GitHub](https://github.com/ue-too/ue-too), and each package is published to npm.
+A modular toolkit for building interactive HTML canvas applications — born from production experience on collaboration whiteboards and simulation games. All packages live in a single monorepo on [GitHub](https://github.com/ue-too/ue-too), and each is published to npm.
 
 Package list:
 
@@ -153,7 +157,15 @@ Package list:
 <div class="resume-section">
 
 ### <a href="https://github.com/ue-too/ue-too/tree/main/apps/banana" target="_blank"><strong>banana</strong></a>
-This is what I currently devoted most of my time to in terms of side projects. This is a city builder simulation that focuses on the railroad system.
+A browser-based 2D top-down city builder simulation centered on railroad systems — track layout, train formations, physics-driven movement, timetable scheduling, and real-time rendering on an infinite canvas. Built with React, PixiJS, and the `@ue-too` toolkit. This is where I spend most of my side-project time; I'm writing a <a href="https://blog.vntchang.dev/series/banana/" target="_blank">10-part technical series</a> documenting its architecture and features.
+
+</div>
+
+<div class="resume-section">
+
+### iT邦幫忙 Iron Man 2024 — "Infinite Canvas and Beyond"
+
+Completed the 30-day writing challenge in the Modern Web category. The series dissects the internals of building an infinite canvas from scratch — coordinate systems, input handling, viewport transforms, and rendering. Read the full series on <a href="https://ithelp.ithome.com.tw/users/20162903/ironman/7089" target="_blank">iT邦幫忙</a> or on <a href="https://blog.vntchang.dev/series/ithelp-iron-2024/" target="_blank">my website</a>.
 
 </div>
 

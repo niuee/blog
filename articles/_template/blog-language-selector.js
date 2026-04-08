@@ -282,7 +282,8 @@
         noResults: 'No articles match your filter.',
         article: 'article',
         articles_count: 'articles',
-        tag: 'Tag:'
+        tag: 'Tag:',
+        seriesBadgePrefix: 'Series: '
       },
       'zh-tw': {
         home: '首頁',
@@ -294,7 +295,8 @@
         noResults: '沒有符合篩選條件的文章。',
         article: '篇文章',
         articles_count: '篇文章',
-        tag: '標籤：'
+        tag: '標籤：',
+        seriesBadgePrefix: '系列：'
       },
       ja: {
         home: 'ホーム',
@@ -306,7 +308,8 @@
         noResults: 'フィルターに一致する記事がありません。',
         article: '件の記事',
         articles_count: '件の記事',
-        tag: 'タグ：'
+        tag: 'タグ：',
+        seriesBadgePrefix: 'シリーズ：'
       },
       ko: {
         home: '홈',
@@ -318,7 +321,8 @@
         noResults: '필터와 일치하는 글이 없습니다.',
         article: '개의 글',
         articles_count: '개의 글',
-        tag: '태그:'
+        tag: '태그:',
+        seriesBadgePrefix: '시리즈: '
       },
       'zh-cn': {
         home: '首页',
@@ -330,7 +334,8 @@
         noResults: '没有符合筛选条件的文章。',
         article: '篇文章',
         articles_count: '篇文章',
-        tag: '标签：'
+        tag: '标签：',
+        seriesBadgePrefix: '系列：'
       }
     };
 
@@ -374,6 +379,16 @@
       }
       if (pageTitle) pageTitle.textContent = t('articles');
       if (pageSubtitle) pageSubtitle.textContent = t('subtitle');
+
+      // Translate series badge prefixes
+      document.querySelectorAll('[data-i18n="seriesBadgePrefix"]').forEach(function (el) {
+        el.textContent = t('seriesBadgePrefix');
+      });
+      // Update series badge links to include language
+      document.querySelectorAll('[data-i18n-series]').forEach(function (el) {
+        var slug = el.getAttribute('data-i18n-series');
+        el.href = info.currentLang ? '/series/' + slug + '/' + info.currentLang : '/series/' + slug;
+      });
     }
 
     function initLanguageSelector() {
