@@ -1,9 +1,9 @@
 /* Dark Mode Toggle - CSS Variables */
 :root {
   /* Light mode (default) */
-  --bg-color: #fff;
-  --text-color: #333;
-  --text-meta-color: #666;
+  --bg-color: #f5f3ec;
+  --text-color: #2e2e2e;
+  --text-meta-color: #636363;
   --link-color: #777;
   --link-unvisited-color: #666;
   --link-hover-color: #222;
@@ -14,8 +14,8 @@
   --link-decoration-visited-color: rgba(0, 0, 0, 0.15);
   --code-border-color: #000;
   --code-label-color: #666;
-  --code-label-bg: rgba(255, 255, 255, 0.9);
-  --inline-code-bg: #f5f5f5;
+  --code-label-bg: rgba(248, 245, 240, 0.9);
+  --inline-code-bg: #eeebe5;
   --emphasis-bg: rgba(255, 215, 0, 0.35);
   --emphasis-text-color: #8a4b00;
   --remark-bg: rgba(0, 0, 0, 0.04);
@@ -27,21 +27,25 @@
   --tldr-text-color: var(--text-color);
   --tldr-title-color: #2563eb;
   --tldr-inline-code-bg: rgba(59, 130, 246, 0.12);
-  --table-header-bg: #f5f5f5;
+  --table-header-bg: #eeebe5;
   --table-border-color: rgba(0, 0, 0, 0.1);
-  --table-row-hover-bg: #f9f9f9;
+  --table-row-hover-bg: #f3f0ea;
   --blockquote-border-color: #999;
-  --blockquote-bg: #f5f5f5;
-  --blockquote-text-color: #333;
-  --toggle-button-bg: #f9f9f9;
+  --blockquote-bg: #eeebe5;
+  --blockquote-text-color: #2e2e2e;
+  --toggle-button-bg: #f3f0ea;
   --toggle-button-border: #646cff;
   --font-size-active-bg: #333;
   --font-size-active-color: #fff;
-  --switch-plate-bg: #f5f5f5;
+  --switch-plate-bg: #eeebe5;
   --switch-toggle-bg: #e0e0e0;
   --switch-shadow: rgba(0, 0, 0, 0.15);
   --image-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
   --font-size-scale: 1.125;
+  --tag-bg: #eae7e0;
+  --tag-color: #555;
+  --bg-secondary: #f0ede6;
+  --bg-hover: #eae7e0;
 }
 
 /* Dark mode variables */
