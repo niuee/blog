@@ -21,7 +21,7 @@ published: 2025-01-01
 
 <div class="resume-section">
 
-### <span class="resume-company">ViewSonic 優派科技</span> — 前端工程師
+### <span class="resume-company"><a href="https://www.viewsonic.com/tw/" target="_blank">ViewSonic 優派科技</a></span> — 前端工程師
 <div class="resume-meta">
   <span class="resume-date">2024年11月 - 至今</span>
   <span class="separator">•</span>
@@ -106,7 +106,7 @@ published: 2025-01-01
   <span class="resume-location">印第安納州 西拉法葉, 美國</span>
 </div>
 
-因為系選修誤打誤撞，選了許多資工系的課程，之後照著資工系的輔系學程修了：資料結構、演算法、離散數學等課程，奠定了未來在資訊相關領域探索的基礎。
+因為系選修誤打誤撞，選了許多資工系的課程，之後照著資工系的輔系學程修了：資料結構、演算法、離散數學等課程。機械工程的背景直接延伸到現在的工作：物理模擬、座標轉換、計算幾何，正是我在 Canvas 與遊戲專案中的核心技能。
 
 </div>
 
@@ -117,15 +117,19 @@ published: 2025-01-01
 <div class="resume-skills">
 
 <div class="resume-skill-category">
-  <strong>程式語言相關:</strong> Java, C/C++, JavaScript/TypeScript, Golang, Python, PHP, HTML, CSS
+  <strong>核心技術:</strong> TypeScript/JavaScript, React, Next.js, PixiJS, HTML Canvas, WebGL
 </div>
 
 <div class="resume-skill-category">
-  <strong>框架 & 函式庫:</strong> Express.js, Django, React, Vue, Electron.js, GraphQL
+  <strong>圖像 & 模擬:</strong> 2D 渲染管線、貝茲曲線、座標轉換、視窗管理、物理模擬
 </div>
 
 <div class="resume-skill-category">
-  <strong>工具 & 技術:</strong> Git, Mocha, JUnit, Jest, PostgreSQL, MongoDB
+  <strong>其他:</strong> Golang, C/C++, Python, Vue, Electron.js, Node.js, GraphQL, PostgreSQL, MongoDB
+</div>
+
+<div class="resume-skill-category">
+  <strong>工具:</strong> Git, Jest, Mocha, Vite, pnpm monorepos
 </div>
 
 <div class="resume-skill-category">
@@ -142,7 +146,7 @@ published: 2025-01-01
 
 ### <a href="https://github.com/ue-too/ue-too" target="_blank">ue-too</a>
 
-一系列用來快速開發 HTML canvas 應用程式的工具，全部的套件都放在同一個 monorepo 裡面，原始碼放在 [GitHub](https://github.com/ue-too/ue-too)。每個套件也都有發佈到 npm 上，如果有興趣可以去看看。 
+一套模組化的 HTML canvas 互動應用程式工具組——源自協作白板和模擬遊戲的實戰經驗。全部的套件都放在同一個 monorepo 裡面，原始碼放在 [GitHub](https://github.com/ue-too/ue-too)，每個套件也都有發佈到 npm 上。
 
 套件列表:
 
@@ -158,7 +162,15 @@ published: 2025-01-01
 
 ### <a href="https://github.com/ue-too/ue-too/tree/main/apps/banana" target="_blank"><strong>banana</strong></a>
 
-目前這是我投入最多時間的 side project。目標是打造一個網頁版的都市建造遊戲，並且主要聚焦在鐵道系統的建設要素。
+一款網頁版 2D 俯視角都市建造模擬遊戲，聚焦在鐵道系統——軌道規劃、列車編組、物理驅動的列車移動、時刻表排程，全部即時渲染在無限畫布上。使用 React、PixiJS 和 `@ue-too` 工具組開發。目前正在撰寫<a href="https://blog.vntchang.dev/series/banana/" target="_blank">十篇系列技術文章</a>，詳細記錄架構和各項功能的實作。
+
+</div>
+
+<div class="resume-section">
+
+### iT邦幫忙 2024 鐵人賽 —「無限...寶石？畫布啦！」
+
+完成 Modern Web 組別 30 天鐵人挑戰。系列文章深入剖析如何從零打造無限畫布——座標系統、輸入處理、視窗轉換、渲染管線。完整系列可於 <a href="https://ithelp.ithome.com.tw/users/20162903/ironman/7089" target="_blank">iT邦幫忙</a> 或<a href="https://blog.vntchang.dev/series/ithelp-iron-2024/" target="_blank">我的網站</a>閱讀。
 
 </div>
 
