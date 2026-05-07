@@ -27,12 +27,12 @@ published: 2025-01-01
   <span class="separator">•</span>
   <span class="resume-location">Taipei, Taiwan</span>
 </div>
-<div class="resume-tech">React • TypeScript • PixiJS • HTML Canvas • WebGL</div>
+<div class="resume-tech">React • Next.js • TypeScript • PixiJS • HTML Canvas • WebGL • Tailwind • Android WebView</div>
 
 **<a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>: Real-time Online Collaboration Whiteboard Service**
 
-- Develop and maintain <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a> using **React**, **Next.js**, **TypeScript**, and **PixiJS**.
-- Optimized the eraser calculation algorithm, delivering at least 30% performance improvement, with UX on par with Miro's precision eraser.
+- Develop and maintain <a href="https://teamone.viewsonic.com" target="_blank">TeamOne</a>, a real-time collaborative whiteboard platform built with **React**, **Next.js**, **TypeScript**, and **PixiJS**.
+- Optimized the stroke eraser algorithm for at least 30% performance improvement, delivering UX on par with Miro's precision eraser.
   <div style="display: flex; gap: 10px; margin-top: 8px;">
     <figure style="flex: 1; margin: 0; text-align: center;">
       <img src="teamone.gif" alt="TeamOne Eraser" style="width: 100%;">
@@ -43,10 +43,16 @@ published: 2025-01-01
       <figcaption style="font-size: 0.85em; color: #666; margin-top: 4px;">Miro</figcaption>
     </figure>
   </div>
-- Refactored interactive elements by migrating 40+ DOM elements to canvas, resolving user operation sync issues and reducing main-thread blocking during pan/zoom by ~25%.
-- Reimplemented a custom mesh so that overlapping strokes within the same stroke do not add transparent colors, eliminating 100% of color blending artifacts.
-- Refactored the text editor from Slate.js to Lexical, cutting editor-related bugs by 50% at once and improving maintainability.
-- Collaborated with the backend team to implement share and collaborate without login, enabling one-click sharing for all board links with no signup required, improving BYOD (Bring Your Own Device) UX and driving higher usage.
+- Refactored the custom text editor from Slate.js to Lexical, improving flexibility and maintainability for future feature development.
+- Partnered with the backend team to ship anonymous share-and-collaborate, letting users co-edit whiteboards without an account — improving BYOD (Bring Your Own Device) UX and driving higher usage.
+- Implemented passive-stylus and multi-touch support for the Android WebView client, including a 4-stage gesture pipeline that routes finger input to lasso selection and pen input to drawing, with a multi-pen mode supporting up to 10 concurrent strokes.
+- Built a canvas-rendered comment pin system on **PixiJS** with custom hit-testing and opacity blending, so pins fade automatically when their anchored shapes are obscured.
+
+**SetupWizard: Android WebView Device Setup Wizard**
+
+- Bootstrapped a **React 19** + **Vite** + **TypeScript** + **TailwindCSS** application running inside Android WebView for ViewSonic display first-time setup; ported lint, i18n, and testing infrastructure from TeamOne.
+- Worked around an Android WebView constraint that blocks ES-module scripts on `file://` URLs by configuring Vite to emit a single self-contained bundle targeting ES2015.
+- Built a reusable infinite-scroll wheel component for the date/time/timezone picker (throttled wheel events, dynamic buffering, wrap-around index normalization) and wired it to native Android APIs for timezone, WiFi, and Ethernet configuration.
 
 </div>
 
@@ -63,9 +69,10 @@ published: 2025-01-01
 <div class="resume-tech">React • TypeScript • Golang • PostgreSQL • ASP.NET</div>
 
 - Maintained consumer-facing elderly care portal, [Jubo Care](https://www.jubo-care.com/), using **React**, **TypeScript**, and **Next.js**.
-- Replaced Azure Media Player with shaka-player for video playback on education platform.
-- Developed cross-platform screenshot feature for web app and mobile webview.
-- Built location-based data display feature; supported backend with **Golang** API development.
+- Replaced Azure Media Player with shaka-player for video playback on the education platform.
+- Developed cross-platform screenshot feature for the web app and mobile webview; collaborated with the mobile team to ensure UX consistency.
+- Contributed to the main care information system (**React** frontend, **Node.js**/**Express.js** backend).
+- Built location-based data display feature; supported the backend team with **Golang** API development.
 
 </div>
 
@@ -102,7 +109,7 @@ published: 2025-01-01
   <span class="resume-location">West Lafayette, IN</span>
 </div>
 
-Took CS curriculum courses as technical electives — data structures, algorithms, discrete math — and followed the CS minor track. The mechanical engineering background carries over directly: physics simulation, coordinate transforms, and computational geometry are at the core of the canvas and game projects I build today.
+Took CS curriculum courses as technical electives following the CS minor track (data structures, algorithms, discrete math), building the foundation for my software career. The mechanical engineering background carries over directly: physics simulation, coordinate transforms, and computational geometry are at the core of the canvas and game projects I build today.
 
 </div>
 
@@ -142,9 +149,9 @@ Took CS curriculum courses as technical electives — data structures, algorithm
 
 ### <a href="https://github.com/ue-too/ue-too" target="_blank">ue-too</a>
 
-A modular toolkit for building interactive HTML canvas applications — born from production experience on collaboration whiteboards and simulation games. All packages live in a single monorepo on [GitHub](https://github.com/ue-too/ue-too), and each is published to npm.
+A modular HTML canvas SDK organized as standalone packages in a pnpm monorepo on [GitHub](https://github.com/ue-too/ue-too), designed for drop-in integration into client applications. Powers <a href="https://banana.vntchang.dev" target="_blank">banana</a>, hidaka (horse racing game), and a knitting pattern editor.
 
-Package list:
+Packages:
 
 - <a href="https://github.com/ue-too/ue-too/tree/main/packages/board" target="_blank"><strong>board</strong></a>: HTML canvas viewport management (scale, pan, and rotate canvas).
 - <a href="https://github.com/ue-too/ue-too/tree/main/packages/being" target="_blank"><strong>being</strong></a>: finite state machine implementation.
@@ -156,27 +163,22 @@ Package list:
 
 <div class="resume-section">
 
-### <a href="https://github.com/ue-too/ue-too/tree/main/apps/banana" target="_blank"><strong>banana</strong></a>
-A browser-based 2D top-down city builder simulation centered on railroad systems — track layout, train formations, physics-driven movement, timetable scheduling, and real-time rendering on an infinite canvas. Built with React, PixiJS, and the `@ue-too` toolkit. This is where I spend most of my side-project time; I'm writing a <a href="https://blog.vntchang.dev/series/banana/" target="_blank">10-part technical series</a> documenting its architecture and features.
+### <a href="https://banana.vntchang.dev" target="_blank"><strong>banana</strong></a> — Railway City Builder (Active WIP)
+
+A browser-based 2D top-down city builder simulation centered on railroad systems. Built with React, PixiJS, and the `@ue-too` toolkit. I'm also writing a <a href="https://blog.vntchang.dev/series/banana/" target="_blank">10-part technical series</a> documenting its architecture.
+
+- Implemented a block-signaling system with cascading aspect logic and a 5-phase auto-driver state machine with proportional braking calibrated to arrival distance.
+- Built a dual-track laying tool with virtual-centerline interaction; snaps to joints by geometry and derives spacing per-duplication from segment width.
+- Migrated scene state to three Zustand stores, collapsing ~40 `useState` and 15+ `useEffect` calls into a single `subscribe()`-driven render-sync hook with periodic IndexedDB auto-save.
 
 </div>
 
 <div class="resume-section">
 
-### iT邦幫忙 Iron Man 2024 — "Infinite Canvas and Beyond"
+### hidaka — Web-Based Horse Racing Simulation Game
 
-Completed the 30-day writing challenge in the Modern Web category. The series dissects the internals of building an infinite canvas from scratch — coordinate systems, input handling, viewport transforms, and rendering. Read the full series on <a href="https://ithelp.ithome.com.tw/users/20162903/ironman/7089" target="_blank">iT邦幫忙</a> or on <a href="https://blog.vntchang.dev/series/ithelp-iron-2024/" target="_blank">my website</a>.
+- Graph-based track editor (bezier authoring, sessions, IndexedDB drafts, v2 JSON) consumed by the physics engine.
+- Race precomputation in a **Web Worker**; sigmoid-knee stamina curves with per-horse phase amplifiers, calibrated against real Tokyo turf race data.
+- Behavior-tree AI jockeys (3 archetypes) with pace-aware push and kick-shift mechanics; pixel-art rendering via custom `StripMesh`.
 
-</div>
-
-<div class="resume-section">
-
-### Web-based Horse Racing Simulation Game
-
-A series of projects that will ultimately be integrated into a web-based horse racing simulation game.
-
-- <a href="https://github.com/niuee/hrphysics-simulation" target="_blank"><strong>HR Physics Simulation</strong></a>: Simplified horse racing physics simulation.
-- <a href="https://github.com/niuee/hrGraphql" target="_blank"><strong>HR GraphQL Server</strong></a>: Horse racing data GraphQL API implemented with gqlgen.
-- <a href="https://github.com/niuee/hrcrawler" target="_blank"><strong>HR Crawler</strong></a>: Horse racing data crawler implemented with BeautifulSoup; some data feeds into the GraphQL API.
-- <a href="https://github.com/niuee/hrracetrack-maker" target="_blank"><strong>HR Racetrack Maker</strong></a>: Bezier-curve-based race track editor.
 </div>
