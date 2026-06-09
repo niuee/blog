@@ -9,7 +9,7 @@ export interface Props {
 const { items, locale = 'en' } = Astro.props;
 const localePrefix = locale === 'zh-tw' ? '/zh-tw' : '';
 ---
-<BlogLayout title="Series" lang={locale} bodyMode="series">
+<BlogLayout title="Series" lang={locale} bodyMode="series" availableLanguages={[null, 'zh-tw']}>
   <header class="series-header">
     <h1 id="series-page-title">Series</h1>
     <p class="subtitle" id="series-page-subtitle">Article series</p>

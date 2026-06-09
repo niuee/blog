@@ -23,7 +23,7 @@ const allTags = Array.from(new Set(cards.flatMap((a) => a.tags))).sort((x, y) =>
   x.localeCompare(y)
 );
 ---
-<BlogLayout title="Articles" lang={locale} bodyMode="articles-listing">
+<BlogLayout title="Articles" lang={locale} bodyMode="articles-listing" availableLanguages={[null, 'zh-tw']}>
   <header class="articles-header">
     <h1 id="page-title">Articles</h1>
     <p class="subtitle" id="page-subtitle">Thoughts, tutorials, and explorations</p>

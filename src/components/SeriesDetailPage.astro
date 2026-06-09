@@ -19,7 +19,7 @@ const dateFmt = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 ---
-<BlogLayout title={m.title} lang={locale} bodyMode="series">
+<BlogLayout title={m.title} lang={locale} bodyMode="series" availableLanguages={[null, 'zh-tw']}>
   <header class="series-header">
     <h1>{m.title}</h1>
     {m.description && <p class="subtitle">{m.description}</p>}
