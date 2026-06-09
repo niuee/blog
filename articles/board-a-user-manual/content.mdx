@@ -5,6 +5,9 @@ published: 2026-01-13
 tags: board, tutorial
 ---
 
+import RawCanvasDemo from '../../src/components/demos/RawCanvasDemo.astro';
+import BoardGraphDemo from '../../src/components/demos/BoardGraphDemo.astro';
+
 ## What is @ue-too/board?
 
 Have you ever tried to build an infinite canvas on the web before?
@@ -38,20 +41,14 @@ ctx.fillRect(10, 10, 150, 100);
 The result is as below. Inspect away! This is a real canvas not just a screen shot.
 
 <canvas id="raw-canvas">Your browser does not support HTML canvas!</canvas>
-<script module>
-    const canvas = document.getElementById("raw-canvas");
-    const ctx = canvas.getContext("2d");
-
-    ctx.fillStyle = "green";
-    ctx.fillRect(10, 10, 150, 100);
-</script>
+<RawCanvasDemo />
 
 
 Now if we let board take control of the viewport, the canvas would look like this:
 
 <canvas id="graph" class="example-canvas" style="width: 300px; height: 150px;">Your browser does not support HTML canvas!</canvas>
 <p class="image-caption">Not much of a difference visually, but the canvas is now interactive.</p>
-<script src="./main.ts" type="module"></script>
+<BoardGraphDemo />
 
 You can pan around and zoom in and out of the canvas now.
 

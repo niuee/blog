@@ -4,6 +4,9 @@ published: 2025-11-05
 author: vee
 ---
 
+import GreenRectangleDemo from '../../src/components/demos/GreenRectangleDemo.astro';
+import BoardGraphDemo from '../../src/components/demos/BoardGraphDemo.astro';
+
 <div class="remark">This is going to be a series of articles on disecting the source code and the design decisions of the infinite canvas tool kit library <a target="_blank" href="https://www.npmjs.com/package/@ue-too/board">@ue-too/board</a>.</div>
 
 # How I Built an Infinite Canvas
@@ -31,17 +34,7 @@ ctx.fillRect(10, 10, 150, 100);
 <canvas id="canvas" class="example-canvas">Your browser does not support the canvas element.</canvas>
 <p class="image-caption">This is an actual canvas element not a screenshot</p>
 
-<script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-
-    // canvas.style.width = canvas.offsetWidth;
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-
-    ctx.fillStyle = "green";
-    ctx.fillRect(10, 10, 150, 100);
-</script>
+<GreenRectangleDemo />
 
 You can see that the rectangle is drawn on the canvas. But it's just like a static image. There's no way to interact with the elements on the canvas. This is what canvas is essentially is, a static image.
 
@@ -84,4 +77,4 @@ I'll list out some of the libraries that I've surveyed and why I didn't choose t
 
 In the next article, I'll start to dissect the source code of @ue-too/board.
 
-<script src="./main.ts" type="module"></script>
+<BoardGraphDemo />
