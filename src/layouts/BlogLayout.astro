@@ -1,0 +1,67 @@
+---
+import '../styles/dark-mode.css';
+import '../styles/blog-styles.css';
+import SiteNav from '../components/SiteNav.astro';
+import DarkModeToggle from '../components/DarkModeToggle.astro';
+import FontSizeControls from '../components/FontSizeControls.astro';
+import LanguageSelector from '../components/LanguageSelector.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import ImageViewer from '../components/ImageViewer.astro';
+
+export interface Props {
+  title: string;
+  lang?: string;
+  bodyMode?: string; // e.g. "article"
+  availableLanguages?: (string | null)[];
+}
+
+const { title, lang = 'en', bodyMode, availableLanguages = [null] } = Astro.props;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="a6da2d78-28e4-4020-8b74-92c3de6a3a3d"></script>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&family=Noto+Sans+KR:wght@400&family=Noto+Sans+SC:wght@400&family=Noto+Sans+TC:wght@400&family=Noto+Serif+SC:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet" />
+    <!-- highlight.js themes (pinned to legacy 11.11.0); dark theme toggled via `disabled` by blog-dark-mode.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github.min.css" id="hljs-light-theme" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github-dark.min.css" id="hljs-dark-theme" disabled />
+    <!-- KaTeX CSS (pinned to legacy 0.16.25) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" />
+    <script is:inline>
+      (function () {
+        try {
+          if (localStorage.getItem('blog-dark-mode') === 'true') {
+            document.documentElement.setAttribute('data-blog-dark', '');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script is:inline>
+      (function () {
+        var savedFontSize = localStorage.getItem('blog-font-size') || 'large';
+        document.documentElement.setAttribute('data-font-size', savedFontSize);
+      })();
+    </script>
+  </head>
+  <body data-blog-lang-mode={bodyMode}>
+    <FontSizeControls />
+    <DarkModeToggle />
+    <LanguageSelector availableLanguages={availableLanguages} />
+    <ImageViewer />
+    <TableOfContents />
+    <div class="container">
+      <SiteNav />
+      <slot />
+    </div>
+    <script src="../scripts/blog-dark-mode.js"></script>
+    <script src="../scripts/blog-language-selector.js"></script>
+    <script src="../scripts/blog-cjk-spacing.js"></script>
+    <script src="../scripts/blog-ui.ts"></script>
+  </body>
+</html>
