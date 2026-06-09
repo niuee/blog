@@ -1,8 +1,8 @@
 ---
-import { buildArticlePaths } from '../../lib/article-build';
-import ArticlePage from '../../components/ArticlePage.astro';
+import { buildArticlePaths } from '../../../lib/article-build';
+import ArticlePage from '../../../components/ArticlePage.astro';
 export async function getStaticPaths() {
-  return buildArticlePaths('en');
+  return buildArticlePaths('zh-tw');
 }
 const { entry, locale, seriesContext, availableLanguages } = Astro.props;
 ---
