@@ -1,0 +1,48 @@
+---
+import '../styles/dark-mode.css';
+import '../styles/blog-styles.css';
+import DarkModeToggle from '../components/DarkModeToggle.astro';
+
+export interface Props {
+  title: string;
+  lang?: string;
+  bodyMode?: string;
+}
+
+const { title, lang = 'en', bodyMode } = Astro.props;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="a6da2d78-28e4-4020-8b74-92c3de6a3a3d"></script>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <script is:inline>
+      (function () {
+        try {
+          if (localStorage.getItem('blog-dark-mode') === 'true') {
+            document.documentElement.setAttribute('data-blog-dark', '');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script is:inline>
+      (function () {
+        var savedFontSize = localStorage.getItem('blog-font-size') || 'large';
+        document.documentElement.setAttribute('data-font-size', savedFontSize);
+      })();
+    </script>
+    <slot name="head" />
+  </head>
+  <body data-blog-lang-mode={bodyMode}>
+    <slot name="chrome" />
+    <DarkModeToggle />
+    <div class="container">
+      <slot />
+    </div>
+    <script src="../scripts/blog-dark-mode.js"></script>
+    <slot name="scripts" />
+  </body>
+</html>
