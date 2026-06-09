@@ -13,6 +13,7 @@
     "ithelp:fix-images": "node scripts/fix-ithelp-repo-images.mjs"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
     "@types/glob": "^8.1.0",
     "@types/highlight.js": "^9.12.4",
     "@types/katex": "^0.16.7",
