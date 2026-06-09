@@ -1,5 +1,5 @@
 ---
-title: How I Built an Infinite Canvas: the why
+title: "How I Built an Infinite Canvas: the why"
 published: 2025-11-05
 author: vee
 ---
