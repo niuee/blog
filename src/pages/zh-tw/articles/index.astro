@@ -1,0 +1,94 @@
+---
+import { getCollection } from 'astro:content';
+import ArticlesIndexPage from '../../../components/ArticlesIndexPage.astro';
+import { splitArticleId } from '../../../lib/article-paths';
+import { localizedSeriesMeta } from '../../../lib/series';
+import { seriesOf, seriesSlugFromId } from '../../../lib/series-membership';
+import { sortArticlesByNewest, excerptFromBody } from '../../../lib/article-index';
+import { articleHref } from '../../../lib/article-href';
+
+const seriesEntries = await getCollection('series');
+const articleEntries = await getCollection('articles');
+
+const seriesSlugs = new Set(seriesEntries.map((s) => seriesSlugFromId(s.id)));
+const seriesMetaBySlug = new Map(
+  seriesEntries.map((s) => [seriesSlugFromId(s.id), s.data])
+);
+
+const formattedDate = (d?: Date) =>
+  d
+    ? new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }).format(d)
+    : null;
+
+// Index by slug per locale so we can prefer the zh-tw variant when one exists.
+const enBySlug = new Map<string, any>();
+const zhBySlug = new Map<string, any>();
+for (const entry of articleEntries) {
+  const { slug, locale } = splitArticleId(entry.id);
+  if (locale === 'zh-tw') zhBySlug.set(slug, entry);
+  else if (locale === 'en') enBySlug.set(slug, entry);
+}
+const zhTwSlugs = new Set(zhBySlug.keys());
+
+// Same set of articles as the en index (keyed by en slug); for the 12 with a
+// zh-tw variant use the zh-tw title/excerpt + /zh-tw link, else en + /articles.
+const articles = Array.from(enBySlug.keys()).map((slug) => {
+  const hasZh = zhTwSlugs.has(slug);
+  const entry = hasZh ? zhBySlug.get(slug) : enBySlug.get(slug);
+  const seriesSlug = seriesOf(slug, seriesSlugs);
+  const series = seriesSlug
+    ? {
+        slug: seriesSlug,
+        title: localizedSeriesMeta(
+          seriesMetaBySlug.get(seriesSlug)!,
+          hasZh ? 'zh-tw' : 'en'
+        ).title,
+      }
+    : null;
+  const date = entry.data.published ?? entry.data.date;
+  return {
+    slug,
+    title: entry.data.title,
+    author: entry.data.author,
+    tags: entry.data.tags ?? [],
+    seriesOrder: entry.data.seriesOrder,
+    date,
+    excerpt: excerptFromBody(entry.body ?? ''),
+    series,
+    href: articleHref(slug, 'zh-tw', zhTwSlugs),
+    name: slug.split('/').pop() ?? slug,
+    data: entry.data,
+  };
+});
+
+const sorted = sortArticlesByNewest(articles);
+
+const articlesData = sorted.map((a) => ({
+  name: a.name,
+  title: a.title,
+  date: a.date ? a.date.toISOString().slice(0, 10) : null,
+  formattedDate: formattedDate(a.date),
+  author: a.author ?? null,
+  tags: a.tags,
+  excerpt: a.excerpt,
+  url: a.href,
+  series: a.series ? a.series.slug : null,
+  seriesTitle: a.series ? a.series.title : null,
+  seriesOrder: a.seriesOrder ?? null,
+}));
+
+const cards = sorted.map((a) => ({
+  href: a.href,
+  title: a.title,
+  date: a.date,
+  author: a.author,
+  excerpt: a.excerpt,
+  tags: a.tags,
+  series: a.series,
+}));
+---
+<ArticlesIndexPage cards={cards} articlesData={articlesData} locale="zh-tw" />

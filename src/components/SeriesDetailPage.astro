@@ -1,0 +1,97 @@
+---
+import BlogLayout from '../layouts/BlogLayout.astro';
+import { localizedSeriesMeta } from '../lib/series';
+import { articleHref } from '../lib/article-href';
+
+export interface Props {
+  meta: any;
+  members: any[];
+  locale?: string;
+  zhTwSlugs?: Set<string>;
+}
+
+const { meta, members, locale = 'en', zhTwSlugs = new Set<string>() } = Astro.props;
+const m = localizedSeriesMeta(meta, locale);
+
+const dateFmt = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+<BlogLayout title={m.title} lang={locale} bodyMode="series">
+  <header class="series-header">
+    <h1>{m.title}</h1>
+    {m.description && <p class="subtitle">{m.description}</p>}
+  </header>
+  <ul class="article-list series-article-list">
+    {
+      members.map((a, i) => {
+        const d = a.data.published ?? a.data.date;
+        return (
+          <li class="article-item" data-series-order={i + 1}>
+            <a href={articleHref(a.slug, locale, zhTwSlugs)} class="article-link">
+              <h2 class="article-title">{a.data.title}</h2>
+              <div class="article-meta" data-i18n-part={i + 1}>
+                Part {i + 1}
+              </div>
+              {(d || a.data.author) && (
+                <div class="article-meta">
+                  {d && <time datetime={d.toISOString().slice(0, 10)}>{dateFmt.format(d)}</time>}
+                  {d && a.data.author && ' • '}
+                  {a.data.author}
+                </div>
+              )}
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+  <style>
+    .series-header {
+      margin-bottom: 2rem;
+    }
+    .series-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .series-header .subtitle {
+      color: var(--text-meta-color);
+      font-size: 1.1rem;
+    }
+    .article-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .article-item {
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--table-border-color, #e5e7eb);
+    }
+    .article-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .article-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .article-link:hover .article-title {
+      color: var(--link-hover-color, #2563eb);
+    }
+    .article-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .article-meta {
+      color: var(--text-meta-color);
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+  </style>
+</BlogLayout>

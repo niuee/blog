@@ -1,0 +1,538 @@
+---
+import BlogLayout from '../layouts/BlogLayout.astro';
+import ArticleCard from './ArticleCard.astro';
+
+export interface Props {
+  cards: {
+    href: string;
+    title: string;
+    date?: Date;
+    author?: string;
+    excerpt: string;
+    tags: string[];
+    series: { slug: string; title: string } | null;
+  }[];
+  articlesData: any[];
+  locale?: string;
+}
+
+const { cards, articlesData, locale = 'en' } = Astro.props;
+
+// Unique tags for the filter <select>, alphabetically sorted (legacy order).
+const allTags = Array.from(new Set(cards.flatMap((a) => a.tags))).sort((x, y) =>
+  x.localeCompare(y)
+);
+---
+<BlogLayout title="Articles" lang={locale} bodyMode="articles-listing">
+  <header class="articles-header">
+    <h1 id="page-title">Articles</h1>
+    <p class="subtitle" id="page-subtitle">Thoughts, tutorials, and explorations</p>
+  </header>
+  <div id="articles-list">
+    <script
+      id="articles-data"
+      type="application/json"
+      set:html={JSON.stringify(articlesData).replace(/</g, '\\u003c')}
+    />
+    <div class="articles-controls collapsed" id="articles-controls">
+      <div class="controls-header" id="controls-header">
+        <span class="controls-title">
+          <span class="controls-toggle">▼</span>
+          Filter & Sort
+          <span class="controls-summary" id="controls-summary"></span>
+        </span>
+        <span id="articles-count" class="articles-count">{cards.length} articles</span>
+      </div>
+      <div class="controls-body">
+        <div class="articles-controls-row">
+          <div class="articles-filter">
+            <label for="tag-filter">Filter by tag:</label>
+            <select id="tag-filter" class="tag-filter-select">
+              <option value="">All tags</option>
+              {allTags.map((tag) => <option value={tag}>{tag}</option>)}
+            </select>
+          </div>
+          <div class="articles-sort">
+            <label for="sort-order">Sort:</label>
+            <select id="sort-order" class="sort-order-select">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="title-asc">Title A-Z</option>
+              <option value="title-desc">Title Z-A</option>
+            </select>
+          </div>
+        </div>
+        <div class="articles-info">
+          <span id="active-filter" class="active-filter" style="display: none;"></span>
+        </div>
+      </div>
+    </div>
+    <ul class="article-list" id="article-list">
+      {
+        cards.map((a) => (
+          <ArticleCard
+            href={a.href}
+            title={a.title}
+            date={a.date}
+            author={a.author}
+            excerpt={a.excerpt}
+            tags={a.tags}
+            series={a.series}
+          />
+        ))
+      }
+    </ul>
+    <div class="articles-pagination" id="articles-pagination"></div>
+  </div>
+  <script src="../scripts/blog-articles-index.ts"></script>
+</BlogLayout>
+<style is:global>
+  .articles-header {
+    margin-bottom: 2rem;
+  }
+
+  .articles-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .articles-header .subtitle {
+    color: var(--text-meta-color);
+    font-size: 1.1rem;
+  }
+
+  .article-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .article-item {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--table-border-color, #e5e7eb);
+  }
+
+  .article-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .article-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .article-link:hover .article-title {
+    color: var(--link-hover-color, #2563eb);
+  }
+
+  .article-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    transition: color 0.2s ease;
+  }
+
+  .article-meta {
+    color: var(--text-meta-color);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .article-excerpt {
+    color: var(--text-color);
+    line-height: 1.6;
+    opacity: 0.85;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 2rem;
+    color: var(--text-meta-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+  }
+
+  .back-link:hover {
+    color: var(--link-hover-color, #2563eb);
+  }
+
+  .back-link::before {
+    content: '← ';
+  }
+
+  .no-articles {
+    color: var(--text-meta-color);
+    font-style: italic;
+  }
+
+  /* Controls section */
+  .articles-controls {
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--table-border-color, #e5e7eb);
+    overflow: hidden;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .articles-controls,
+  :root[data-blog-dark] .articles-controls {
+    border-color: #444;
+  }
+
+  .controls-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary, #f8f9fa);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .controls-header,
+  :root[data-blog-dark] .controls-header {
+    --bg-secondary: transparent;
+  }
+
+  .controls-header:hover {
+    background: var(--bg-hover, #f0f0f0);
+  }
+
+  :root:has(#dark-mode-toggle:checked) .controls-header:hover,
+  :root[data-blog-dark] .controls-header:hover {
+    --bg-hover: #2a2a2a;
+  }
+
+  .controls-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-meta-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .controls-toggle {
+    font-size: 0.75rem;
+    color: var(--text-meta-color);
+    transition: transform 0.2s ease;
+  }
+
+  .articles-controls.collapsed .controls-toggle {
+    transform: rotate(-90deg);
+  }
+
+  .controls-body {
+    padding: 1rem;
+    border-top: 1px solid var(--table-border-color, #e5e7eb);
+    transition: max-height 0.2s ease, padding 0.2s ease, opacity 0.2s ease;
+    max-height: 200px;
+    opacity: 1;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .controls-body,
+  :root[data-blog-dark] .controls-body {
+    border-top-color: #444;
+  }
+
+  .articles-controls.collapsed .controls-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    border-top: none;
+    overflow: hidden;
+  }
+
+  .controls-summary {
+    font-size: 0.8rem;
+    color: var(--text-meta-color);
+    opacity: 0.7;
+  }
+
+  .articles-controls:not(.collapsed) .controls-summary {
+    display: none;
+  }
+
+  .articles-controls-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .articles-filter,
+  .articles-sort {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .articles-filter label,
+  .articles-sort label {
+    font-size: 0.9rem;
+    color: var(--text-meta-color);
+    white-space: nowrap;
+  }
+
+  .tag-filter-select,
+  .sort-order-select {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    border: 1px solid var(--table-border-color, #e5e7eb);
+    border-radius: 6px;
+    background: var(--bg-color, #fff);
+    color: var(--text-color);
+    cursor: pointer;
+    min-width: 120px;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .tag-filter-select,
+  :root[data-blog-dark] .tag-filter-select,
+  :root:has(#dark-mode-toggle:checked) .sort-order-select,
+  :root[data-blog-dark] .sort-order-select {
+    background: transparent;
+    border-color: #555;
+    color: #ccc;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .tag-filter-select option,
+  :root[data-blog-dark] .tag-filter-select option,
+  :root:has(#dark-mode-toggle:checked) .sort-order-select option,
+  :root[data-blog-dark] .sort-order-select option {
+    background: #1a1a1a;
+    color: #ccc;
+  }
+
+  .tag-filter-select:hover,
+  .sort-order-select:hover {
+    border-color: #888;
+  }
+
+  .articles-info {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-meta-color);
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .active-filter {
+    padding: 0.2rem 0.5rem;
+    background: #555;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+
+  .active-filter .clear-filter {
+    margin-left: 0.4rem;
+    cursor: pointer;
+    opacity: 0.8;
+  }
+
+  .active-filter .clear-filter:hover {
+    opacity: 1;
+  }
+
+  /* Tags */
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .article-tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    background: var(--tag-bg, #f0f0f0);
+    color: var(--tag-color, #555);
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .article-tag,
+  :root[data-blog-dark] .article-tag {
+    --tag-bg: #333;
+    --tag-color: #bbb;
+  }
+
+  .article-series-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    background: var(--tag-bg, #f0f0f0);
+    color: var(--tag-color, #555);
+    border-radius: 4px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .article-series-badge:hover {
+    opacity: 0.8;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .article-series-badge,
+  :root[data-blog-dark] .article-series-badge {
+    --tag-bg: #333;
+    --tag-color: #bbb;
+  }
+
+  /* Pagination */
+  .articles-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--table-border-color, #e5e7eb);
+  }
+
+  .articles-pagination:empty {
+    display: none;
+  }
+
+  .pagination-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border: 1px solid var(--table-border-color, #e5e7eb);
+    border-radius: 6px;
+    background: var(--bg-color, #fff);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .pagination-btn:hover:not(:disabled) {
+    border-color: #888;
+    color: #333;
+  }
+
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .pagination-btn,
+  :root[data-blog-dark] .pagination-btn {
+    background: transparent;
+    border-color: #555;
+    color: #ccc;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .pagination-btn:hover:not(:disabled),
+  :root[data-blog-dark] .pagination-btn:hover:not(:disabled) {
+    border-color: #888;
+    color: #fff;
+  }
+
+  .pagination-info {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text-meta-color);
+  }
+
+  .pagination-pages {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .page-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    border: 1px solid var(--table-border-color, #e5e7eb);
+    border-radius: 4px;
+    background: var(--bg-color, #fff);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 36px;
+  }
+
+  .page-btn:hover:not(.active) {
+    border-color: #888;
+  }
+
+  .page-btn.active {
+    background: #333;
+    color: white;
+    border-color: #333;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .page-btn,
+  :root[data-blog-dark] .page-btn {
+    background: transparent;
+    border-color: #555;
+    color: #ccc;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .page-btn:hover:not(.active),
+  :root[data-blog-dark] .page-btn:hover:not(.active) {
+    border-color: #888;
+    color: #fff;
+  }
+
+  :root:has(#dark-mode-toggle:checked) .page-btn.active,
+  :root[data-blog-dark] .page-btn.active {
+    background: #555;
+    border-color: #555;
+    color: #fff;
+  }
+
+  /* Hidden article */
+  .article-item.hidden {
+    display: none;
+  }
+
+  /* No results message */
+  .no-results {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-meta-color);
+    font-style: italic;
+  }
+
+  @media (max-width: 600px) {
+    .articles-controls-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+    }
+
+    .articles-filter,
+    .articles-sort {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .articles-filter label,
+    .articles-sort label {
+      flex-shrink: 0;
+      min-width: 50px;
+    }
+
+    .tag-filter-select,
+    .sort-order-select {
+      flex: 1;
+      min-width: 0;
+      max-width: none;
+    }
+
+    .pagination-pages {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .controls-body {
+      padding: 0.75rem;
+    }
+  }
+</style>

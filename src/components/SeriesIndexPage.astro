@@ -1,0 +1,92 @@
+---
+import BlogLayout from '../layouts/BlogLayout.astro';
+
+export interface Props {
+  items: { slug: string; title: string; description?: string; count: number }[];
+  locale?: string;
+}
+
+const { items, locale = 'en' } = Astro.props;
+const localePrefix = locale === 'zh-tw' ? '/zh-tw' : '';
+---
+<BlogLayout title="Series" lang={locale} bodyMode="series">
+  <header class="series-header">
+    <h1 id="series-page-title">Series</h1>
+    <p class="subtitle" id="series-page-subtitle">Article series</p>
+  </header>
+  <div id="series-content">
+    <ul class="article-list series-list">
+      {
+        items.map((s) => (
+          <li class="article-item series-item">
+            <a href={`${localePrefix}/series/${s.slug}`} class="article-link">
+              <h2 class="article-title">{s.title}</h2>
+              {s.description && <p class="article-excerpt">{s.description}</p>}
+              <div class="article-meta" data-i18n-article-count={s.count}>
+                {s.count} articles
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <style>
+    .series-header {
+      margin-bottom: 2rem;
+    }
+    .series-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .series-header .subtitle {
+      color: var(--text-meta-color);
+      font-size: 1.1rem;
+    }
+    .article-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .article-item {
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--table-border-color, #e5e7eb);
+    }
+    .article-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .article-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .article-link:hover .article-title {
+      color: var(--link-hover-color, #2563eb);
+    }
+    .article-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .article-meta {
+      color: var(--text-meta-color);
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+    .article-excerpt {
+      color: var(--text-color);
+      line-height: 1.6;
+      opacity: 0.85;
+    }
+    .series-list .series-item {
+      margin-bottom: 1.5rem;
+    }
+    .series-detail-header {
+      margin-bottom: 1.5rem;
+      color: var(--text-meta-color);
+    }
+  </style>
+</BlogLayout>

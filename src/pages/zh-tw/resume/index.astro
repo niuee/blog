@@ -1,0 +1,10 @@
+---
+import ResumePage from '../../../components/ResumePage.astro';
+import { Content, frontmatter } from '../../../../resume/content.zh-tw.md';
+---
+<ResumePage
+  Content={Content}
+  title={frontmatter.title ?? 'Résumé'}
+  locale="zh-tw"
+  availableLanguages={[null, 'zh-tw']}
+/>
