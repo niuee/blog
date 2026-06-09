@@ -19,6 +19,26 @@ declare global {
 }
 
 (function () {
+  // English fallback strings, used when window.getTranslation is not yet
+  // defined (blog-language-selector.js loads after this script). Without
+  // these, the identity fallback would briefly render raw i18n keys such as
+  // "articles_count" on initial load. Values mirror the en table in
+  // blog-language-selector.js.
+  const EN_FALLBACK: Record<string, string> = {
+    article: 'article',
+    articles_count: 'articles',
+    tag: 'Tag:',
+    prev: '← Prev',
+    next: 'Next →',
+    noResults: 'No articles match your filter.',
+  };
+
+  // Translate with a proper English fallback (never returns a raw key).
+  function translate(key: string): string {
+    if (window.getTranslation) return window.getTranslation(key);
+    return EN_FALLBACK[key] ?? key;
+  }
+
   const ITEMS_PER_PAGE = 10;
   let currentPage = 1;
   let currentTag = '';
@@ -246,8 +266,7 @@ declare global {
   // Show active filter badge
   function showActiveFilter(tag: string) {
     if (activeFilterEl) {
-      const t = window.getTranslation || ((k: string) => k);
-      activeFilterEl.innerHTML = `${t('tag')} ${escapeHtml(tag)} <span class="clear-filter" onclick="clearTagFilter()">×</span>`;
+      activeFilterEl.innerHTML = `${translate('tag')} ${escapeHtml(tag)} <span class="clear-filter" onclick="clearTagFilter()">×</span>`;
       activeFilterEl.style.display = 'inline-flex';
     }
   }
@@ -322,9 +341,7 @@ declare global {
       if (!noResultsEl) {
         noResultsEl = document.createElement('p');
         noResultsEl.className = 'no-results';
-        noResultsEl.textContent = window.getTranslation
-          ? window.getTranslation('noResults')
-          : 'No articles match your filter.';
+        noResultsEl.textContent = translate('noResults');
         articleList.appendChild(noResultsEl);
       }
     } else {
@@ -335,8 +352,7 @@ declare global {
 
     // Update count
     if (articlesCount) {
-      const t = window.getTranslation || ((k: string) => k);
-      const countText = `${totalItems} ${totalItems === 1 ? t('article') : t('articles_count')}`;
+      const countText = `${totalItems} ${totalItems === 1 ? translate('article') : translate('articles_count')}`;
       articlesCount.textContent = countText;
     }
 
@@ -357,10 +373,9 @@ declare global {
     }
 
     let html = '';
-    const t = window.getTranslation || ((k: string) => k);
 
     // Previous button
-    html += `<button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">${t('prev')}</button>`;
+    html += `<button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">${translate('prev')}</button>`;
 
     // Page numbers
     html += '<div class="pagination-pages">';
@@ -396,7 +411,7 @@ declare global {
     html += '</div>';
 
     // Next button
-    html += `<button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">${t('next')}</button>`;
+    html += `<button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">${translate('next')}</button>`;
 
     paginationContainer.innerHTML = html;
   }
