@@ -29,7 +29,7 @@ const series = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
-    i18n: z.record(z.object({ title: z.string(), description: z.string().optional() })).optional(),
+    i18n: z.record(z.string(), z.object({ title: z.string(), description: z.string().optional() })).optional(),
   }),
 });
 
