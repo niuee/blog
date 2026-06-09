@@ -42,6 +42,9 @@ importers:
       '@types/glob':
         specifier: ^8.1.0
         version: 8.1.0
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
       '@types/highlight.js':
         specifier: ^9.12.4
         version: 9.12.4
@@ -63,9 +66,15 @@ importers:
       marked:
         specifier: ^16.4.1
         version: 16.4.1
+      rehype:
+        specifier: ^13.0.2
+        version: 13.0.2
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
+      unist-util-visit:
+        specifier: ^5.1.0
+        version: 5.1.0
       vite:
         specifier: ^7.1.7
         version: 7.1.12(@types/node@24.10.0)(yaml@2.9.0)
