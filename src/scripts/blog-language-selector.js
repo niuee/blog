@@ -84,6 +84,28 @@
     return [null];
   }
 
+  // --- i18n PREFIX scheme helpers ---------------------------------------
+  // New URLs are prefix-based: zh-tw lives under /zh-tw/..., en is unprefixed.
+  // Current locale is 'zh-tw' when the path starts with /zh-tw (or equals it),
+  // otherwise the default locale, represented as null (en).
+  function detectPrefixLocale() {
+    var path = window.location.pathname;
+    if (path === '/zh-tw' || path.indexOf('/zh-tw/') === 0) {
+      return 'zh-tw';
+    }
+    return null;
+  }
+
+  // Strip a leading /zh-tw segment from a path, normalizing to the en path.
+  function stripLocalePrefix(path) {
+    if (path === '/zh-tw') return '/';
+    if (path.indexOf('/zh-tw/') === 0) {
+      var rest = path.slice('/zh-tw'.length);
+      return rest || '/';
+    }
+    return path;
+  }
+
   if (mode === 'series') {
     initSeries();
   } else {
@@ -94,62 +116,29 @@
   }
 
   function initArticle() {
-    var knownLangCodes = [
-      'en',
-      'zh',
-      'zh-tw',
-      'zh-cn',
-      'ja',
-      'ko',
-      'es',
-      'fr',
-      'de',
-      'it',
-      'pt',
-      'ru',
-      'ar',
-      'hi'
-    ];
-
-    function isLangCode(s) {
-      return s && knownLangCodes.indexOf(String(s).toLowerCase()) !== -1;
-    }
-
     /**
-     * Standalone: /articles/{slug}, /articles/{slug}/{lang}
-     * Series: /articles/{series}/{article}, /articles/{series}/{article}/{lang}
-     * (Aligned with vite-plugin-markdown articleMatch + disambiguation when only two segments.)
+     * PREFIX scheme. Locale comes from a leading /zh-tw segment.
+     * After stripping the prefix the en-shaped path is:
+     *   Standalone: /articles/{slug}
+     *   Series:     /articles/{series}/{article}
      */
     function getCurrentUrlInfo() {
-      var path = window.location.pathname;
-      var match = path.match(
-        /^\/articles\/([^/]+)(?:\/([^/]+))?(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i
-      );
+      var currentLang = detectPrefixLocale();
+      var path = stripLocalePrefix(window.location.pathname);
+      var match = path.match(/^\/articles\/([^/]+)(?:\/([^/]+))?(?:\/|\.html)?$/i);
       if (!match) {
         return {
           seriesSlug: null,
           articleSlug: null,
-          currentLang: null
+          currentLang: currentLang
         };
       }
       var seg1 = match[1];
       var seg2 = match[2] ? match[2].toLowerCase() : null;
-      var seg3 = match[3] ? match[3].toLowerCase() : null;
-
       if (!seg2) {
-        return { seriesSlug: null, articleSlug: seg1, currentLang: null };
+        return { seriesSlug: null, articleSlug: seg1, currentLang: currentLang };
       }
-      if (seg3) {
-        return {
-          seriesSlug: seg1,
-          articleSlug: seg2,
-          currentLang: isLangCode(seg3) ? seg3 : null
-        };
-      }
-      if (isLangCode(seg2)) {
-        return { seriesSlug: null, articleSlug: seg1, currentLang: seg2 };
-      }
-      return { seriesSlug: seg1, articleSlug: seg2, currentLang: null };
+      return { seriesSlug: seg1, articleSlug: seg2, currentLang: currentLang };
     }
 
     function articleBasePath(info) {
@@ -167,7 +156,7 @@
       var langCode = lang || 'en';
       document.documentElement.lang = langCode;
       if (savePreference) localStorage.setItem('blog-language', langCode);
-      var newUrl = lang ? base + '/' + lang : base;
+      var newUrl = lang ? '/' + lang + base : base;
       window.location.href = newUrl;
     }
 
@@ -184,10 +173,10 @@
       var savedFilterEarly = sessionStorage.getItem('articles-filter-state') || '';
       if (navEarlyArticles) {
         navEarlyArticles.href =
-          (urlLang ? '/articles/' + urlLang : '/articles') + savedFilterEarly;
+          (urlLang ? '/' + urlLang + '/articles' : '/articles') + savedFilterEarly;
       }
       if (navEarlySeries) {
-        navEarlySeries.href = urlLang ? '/series/' + urlLang : '/series';
+        navEarlySeries.href = urlLang ? '/' + urlLang + '/series' : '/series';
       }
 
       var availableLanguages = getAvailableFromScript();
@@ -212,10 +201,10 @@
       var navArticles = document.getElementById('nav-link-articles');
       var navSeries = document.getElementById('nav-link-series');
       var savedFilter = sessionStorage.getItem('articles-filter-state') || '';
-      var baseBackUrl = effectiveLang ? '/articles/' + effectiveLang : '/articles';
+      var baseBackUrl = effectiveLang ? '/' + effectiveLang + '/articles' : '/articles';
       if (navArticles) navArticles.href = baseBackUrl + savedFilter;
       if (navSeries) {
-        navSeries.href = effectiveLang ? '/series/' + effectiveLang : '/series';
+        navSeries.href = effectiveLang ? '/' + effectiveLang + '/series' : '/series';
       }
 
       languageDropdown.innerHTML = '';
@@ -260,12 +249,13 @@
 
   function initArticlesListing() {
     function getCurrentUrlInfo() {
-      var path = window.location.pathname;
-      var match = path.match(/^\/articles(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/)?$/i);
+      var currentLang = detectPrefixLocale();
+      var path = stripLocalePrefix(window.location.pathname);
+      var match = path.match(/^\/articles(?:\/)?$/i);
       if (match) {
         return {
           isArticles: true,
-          currentLang: match[1] ? match[1].toLowerCase() : null
+          currentLang: currentLang
         };
       }
       return { isArticles: false, currentLang: null };
@@ -351,7 +341,7 @@
       var langCode = lang || 'en';
       document.documentElement.lang = langCode;
       if (savePreference) localStorage.setItem('blog-language', langCode);
-      var newUrl = lang ? '/articles/' + lang : '/articles';
+      var newUrl = lang ? '/' + lang + '/articles' : '/articles';
       window.location.href = newUrl;
     }
 
@@ -368,13 +358,13 @@
       if (navArticles) {
         navArticles.textContent = t('articles');
         navArticles.href = info.currentLang
-          ? '/articles/' + info.currentLang
+          ? '/' + info.currentLang + '/articles'
           : '/articles';
       }
       if (navSeries) {
         navSeries.textContent = t('series');
         navSeries.href = info.currentLang
-          ? '/series/' + info.currentLang
+          ? '/' + info.currentLang + '/series'
           : '/series';
       }
       if (pageTitle) pageTitle.textContent = t('articles');
@@ -387,7 +377,7 @@
       // Update series badge links to include language
       document.querySelectorAll('[data-i18n-series]').forEach(function (el) {
         var slug = el.getAttribute('data-i18n-series');
-        el.href = info.currentLang ? '/series/' + slug + '/' + info.currentLang : '/series/' + slug;
+        el.href = info.currentLang ? '/' + info.currentLang + '/series/' + slug : '/series/' + slug;
       });
     }
 
@@ -456,35 +446,12 @@
 
   function initSeries() {
     var languageNames = LANGUAGE_NAMES;
-    var path = window.location.pathname.replace(/\/$/, '');
+    // PREFIX scheme: locale from leading /zh-tw, then parse the en-shaped path.
+    var currentLang = detectPrefixLocale();
+    var path = stripLocalePrefix(window.location.pathname).replace(/\/$/, '');
     var pathAfterSeries = path.replace(/^\/series\/?/, '') || '';
     var parts = pathAfterSeries.split('/').filter(Boolean);
-    var knownLangCodes = [
-      'en',
-      'zh',
-      'zh-tw',
-      'zh-cn',
-      'ja',
-      'ko',
-      'es',
-      'fr',
-      'de',
-      'it',
-      'pt',
-      'ru',
-      'ar',
-      'hi'
-    ];
-    var currentLang =
-      parts.length === 1 && knownLangCodes.includes(parts[0])
-        ? parts[0]
-        : parts.length === 2 && knownLangCodes.includes(parts[1])
-          ? parts[1]
-          : null;
-    var seriesSlug =
-      parts.length >= 1 && !knownLangCodes.includes(parts[0])
-        ? parts[0]
-        : null;
+    var seriesSlug = parts.length >= 1 ? parts[0] : null;
     var isListPage = seriesSlug == null;
 
     var translations = {
@@ -584,11 +551,11 @@
       if (navHome) navHome.textContent = t('home');
       if (navArticles) {
         navArticles.textContent = t('articles');
-        navArticles.href = currentLang ? '/articles/' + currentLang : '/articles';
+        navArticles.href = currentLang ? '/' + currentLang + '/articles' : '/articles';
       }
       if (navSeries) {
         navSeries.textContent = t('series');
-        navSeries.href = currentLang ? '/series/' + currentLang : '/series';
+        navSeries.href = currentLang ? '/' + currentLang + '/series' : '/series';
       }
 
       if (isListPage) {
@@ -624,10 +591,8 @@
     }
 
     function baseUrl(lang) {
-      if (!seriesSlug) return lang ? '/series/' + lang : '/series';
-      return lang
-        ? '/series/' + seriesSlug + '/' + lang
-        : '/series/' + seriesSlug;
+      var base = seriesSlug ? '/series/' + seriesSlug : '/series';
+      return lang ? '/' + lang + base : base;
     }
 
     function storageLangForUrl(savedRaw) {
@@ -699,12 +664,13 @@
 
   function initResume() {
     function getCurrentUrlInfo() {
-      var path = window.location.pathname;
-      var match = path.match(/^\/resume(?:\/([a-z]{2}(?:-[a-z]{2})?))?(?:\/|\.html)?$/i);
+      var currentLang = detectPrefixLocale();
+      var path = stripLocalePrefix(window.location.pathname);
+      var match = path.match(/^\/resume(?:\/|\.html)?$/i);
       if (match) {
         return {
           isResume: true,
-          currentLang: match[1] ? match[1].toLowerCase() : null
+          currentLang: currentLang
         };
       }
       return { isResume: false, currentLang: null };
@@ -722,7 +688,7 @@
         .then(function () {
           return Promise.all(
             languagesToCheck.map(function (lang) {
-              return fetch('/resume/' + lang, {
+              return fetch('/' + lang + '/resume', {
                 method: 'HEAD',
                 cache: 'no-cache'
               })
@@ -752,7 +718,7 @@
       var langCode = lang || 'en';
       document.documentElement.lang = langCode;
       if (savePreference) localStorage.setItem('blog-language', langCode);
-      window.location.href = lang ? '/resume/' + lang : '/resume';
+      window.location.href = lang ? '/' + lang + '/resume' : '/resume';
     }
 
     function initLanguageSelector() {
