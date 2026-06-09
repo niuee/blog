@@ -84,7 +84,7 @@ const articlesData = sorted.map((a) => ({
     <script
       id="articles-data"
       type="application/json"
-      set:html={JSON.stringify(articlesData)}
+      set:html={JSON.stringify(articlesData).replace(/</g, '\\u003c')}
     />
     <div class="articles-controls collapsed" id="articles-controls">
       <div class="controls-header" id="controls-header">
@@ -130,7 +130,6 @@ const articlesData = sorted.map((a) => ({
             excerpt={a.excerpt}
             tags={a.tags}
             series={a.series}
-            seriesOrder={a.seriesOrder}
           />
         ))
       }
