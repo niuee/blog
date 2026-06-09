@@ -1,0 +1,12 @@
+---
+export interface Props { availableLanguages?: (string | null)[]; }
+const { availableLanguages = [null] } = Astro.props;
+---
+<div class="language-selector" id="language-selector">
+  <button class="language-selector-btn" id="language-selector-btn" aria-label="Select language" aria-haspopup="true" aria-expanded="false">
+    <span class="language-selector-icon">Aa</span>
+    <span class="language-selector-text" id="language-selector-text">English</span>
+  </button>
+  <div class="language-dropdown" id="language-dropdown" role="menu"></div>
+</div>
+<script id="available-languages" type="application/json" set:html={JSON.stringify(availableLanguages)} is:inline></script>

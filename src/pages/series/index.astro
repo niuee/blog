@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content';
+import SeriesIndexPage from '../../components/SeriesIndexPage.astro';
+import { splitArticleId } from '../../lib/article-paths';
+import { localizedSeriesMeta } from '../../lib/series';
+import { seriesOf, seriesSlugFromId } from '../../lib/series-membership';
+
+const seriesEntries = await getCollection('series');
+const seriesSlugs = new Set(seriesEntries.map((s) => seriesSlugFromId(s.id)));
+const articles = (await getCollection('articles'))
+  .map((a) => splitArticleId(a.id))
+  .filter((a) => a.locale === 'en');
+
+const items = seriesEntries.map((s) => {
+  const slug = seriesSlugFromId(s.id);
+  const count = articles.filter((a) => seriesOf(a.slug, seriesSlugs) === slug).length;
+  const m = localizedSeriesMeta(s.data, 'en');
+  return { slug, title: m.title, description: m.description, count };
+});
+---
+<SeriesIndexPage items={items} locale="en" />

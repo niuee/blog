@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import SeriesDetailPage from '../../components/SeriesDetailPage.astro';
+import { splitArticleId } from '../../lib/article-paths';
+import { orderSeriesArticles } from '../../lib/series';
+import { seriesOf, seriesSlugFromId } from '../../lib/series-membership';
+
+export async function getStaticPaths() {
+  const seriesEntries = await getCollection('series');
+  const articles = await getCollection('articles');
+  const seriesSlugs = new Set(seriesEntries.map((s) => seriesSlugFromId(s.id)));
+  return seriesEntries.map((s) => {
+    const slug = seriesSlugFromId(s.id);
+    const members = orderSeriesArticles(
+      articles
+        .map((a) => ({ ...a, ...splitArticleId(a.id) }))
+        .filter((a) => a.locale === 'en' && seriesOf(a.slug, seriesSlugs) === slug)
+    );
+    return { params: { slug }, props: { meta: s.data, members } };
+  });
+}
+
+const { meta, members } = Astro.props;
+---
+<SeriesDetailPage meta={meta} members={members} locale="en" />

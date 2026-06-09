@@ -1,0 +1,27 @@
+---
+import { render } from 'astro:content';
+import BlogLayout from '../layouts/BlogLayout.astro';
+import ArticleHeader from './ArticleHeader.astro';
+import SeriesNav from './SeriesNav.astro';
+export interface Props {
+  entry: any;
+  locale: string;
+  seriesContext: any | null;
+  availableLanguages: (string | null)[];
+}
+const { entry, locale, seriesContext, availableLanguages } = Astro.props;
+const { Content } = await render(entry);
+const { title, published, date, author } = entry.data;
+---
+<BlogLayout title={title} lang={locale} bodyMode="article" availableLanguages={availableLanguages}>
+  <ArticleHeader title={title} date={published ?? date} author={author} />
+  <div id="blog-content">
+    <article>
+      {seriesContext ? (
+        <SeriesNav {...seriesContext}><Content /></SeriesNav>
+      ) : (
+        <Content />
+      )}
+    </article>
+  </div>
+</BlogLayout>

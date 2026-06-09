@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import SeriesDetailPage from '../../../components/SeriesDetailPage.astro';
+import { splitArticleId } from '../../../lib/article-paths';
+import { orderSeriesArticles } from '../../../lib/series';
+import { seriesOf, seriesSlugFromId } from '../../../lib/series-membership';
+
+export async function getStaticPaths() {
+  const seriesEntries = await getCollection('series');
+  const articles = await getCollection('articles');
+  const seriesSlugs = new Set(seriesEntries.map((s) => seriesSlugFromId(s.id)));
+
+  const parsed = articles.map((a) => ({ ...a, ...splitArticleId(a.id) }));
+  const zhTwSlugs = new Set(parsed.filter((a) => a.locale === 'zh-tw').map((a) => a.slug));
+
+  // List BOTH series so /zh-tw/series/{slug} exists for each.
+  return seriesEntries.map((s) => {
+    const slug = seriesSlugFromId(s.id);
+    const inSeries = parsed.filter((a) => seriesOf(a.slug, seriesSlugs) === slug);
+    // Prefer zh-tw member entries; if a series has none (e.g. ithelp), fall
+    // back to its EN members. articleHref then links zh-tw→/zh-tw, en→/articles.
+    const hasZh = inSeries.some((a) => a.locale === 'zh-tw');
+    const localeForMembers = hasZh ? 'zh-tw' : 'en';
+    const members = orderSeriesArticles(
+      inSeries.filter((a) => a.locale === localeForMembers)
+    );
+    return {
+      params: { slug },
+      props: { meta: s.data, members, zhTwSlugs },
+    };
+  });
+}
+
+const { meta, members, zhTwSlugs } = Astro.props;
+---
+<SeriesDetailPage meta={meta} members={members} locale="zh-tw" zhTwSlugs={zhTwSlugs} />

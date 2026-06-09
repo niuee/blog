@@ -1,0 +1,15 @@
+<script>
+  const canvas = document.getElementById('canvas') as HTMLCanvasElement | null;
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+
+    // canvas.style.width = canvas.offsetWidth;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    if (ctx) {
+      ctx.fillStyle = 'green';
+      ctx.fillRect(10, 10, 150, 100);
+    }
+  }
+</script>

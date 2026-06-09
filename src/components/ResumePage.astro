@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FontSizeControls from './FontSizeControls.astro';
+import LanguageSelector from './LanguageSelector.astro';
+import TableOfContents from './TableOfContents.astro';
+import resumeStyles from '../styles/resume-styles.css?raw';
+
+export interface Props {
+  Content: any;
+  title?: string;
+  locale?: string;
+  availableLanguages?: (string | null)[];
+}
+
+const {
+  Content,
+  title = 'Résumé',
+  locale = 'en',
+  availableLanguages = [null],
+} = Astro.props;
+---
+<BaseLayout title={title} lang={locale} bodyMode="resume">
+  <Fragment slot="head">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github.min.css" id="hljs-light-theme" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github-dark.min.css" id="hljs-dark-theme" disabled />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" />
+    <style is:global set:html={resumeStyles}></style>
+  </Fragment>
+  <Fragment slot="chrome">
+    <FontSizeControls />
+    <LanguageSelector availableLanguages={availableLanguages} />
+    <TableOfContents />
+  </Fragment>
+  <div id="blog-content"><article><Content /></article></div>
+  <Fragment slot="scripts">
+    <script src="../scripts/blog-language-selector.js"></script>
+    <script src="../scripts/blog-cjk-spacing.js"></script>
+    <script src="../scripts/blog-ui.ts"></script>
+  </Fragment>
+</BaseLayout>

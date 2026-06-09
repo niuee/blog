@@ -1,0 +1,14 @@
+---
+export interface Props { title: string; date?: Date; author?: string; }
+const { title, date, author } = Astro.props;
+const formatted = date
+  ? date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  : '';
+---
+<header>
+  <h1>{title}</h1>
+  <div class="meta">
+    {formatted && <span>{formatted}</span>}
+    {author && <span> · {author}</span>}
+  </div>
+</header>

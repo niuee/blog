@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FontSizeControls from '../components/FontSizeControls.astro';
+---
+<BaseLayout title="404 - Page Not Found" lang="en">
+  <Fragment slot="head">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github.min.css" id="hljs-light-theme" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github-dark.min.css" id="hljs-dark-theme" disabled />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" />
+  </Fragment>
+  <Fragment slot="chrome">
+    <FontSizeControls />
+  </Fragment>
+  <header>
+    <h1>404</h1>
+    <div class="meta">Page Not Found</div>
+  </header>
+  <div id="blog-content">
+    <article>
+      <p>The page you're looking for doesn't exist or has been moved.</p>
+      <p>
+        <a href="/">Return to homepage</a> or
+        <a href="/articles">browse articles</a>.
+      </p>
+    </article>
+  </div>
+  <Fragment slot="scripts">
+    <script src="../scripts/blog-ui.ts"></script>
+  </Fragment>
+</BaseLayout>

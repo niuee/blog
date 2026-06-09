@@ -1,0 +1,82 @@
+---
+import { getCollection } from 'astro:content';
+import ArticlesIndexPage from '../../components/ArticlesIndexPage.astro';
+import { splitArticleId } from '../../lib/article-paths';
+import { localizedSeriesMeta } from '../../lib/series';
+import { seriesOf, seriesSlugFromId } from '../../lib/series-membership';
+import { sortArticlesByNewest, excerptFromBody } from '../../lib/article-index';
+
+const seriesEntries = await getCollection('series');
+const articleEntries = await getCollection('articles');
+
+const seriesSlugs = new Set(seriesEntries.map((s) => seriesSlugFromId(s.id)));
+const seriesMetaBySlug = new Map(
+  seriesEntries.map((s) => [seriesSlugFromId(s.id), s.data])
+);
+
+const formattedDate = (d?: Date) =>
+  d
+    ? new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }).format(d)
+    : null;
+
+// English articles only.
+const articles = articleEntries
+  .map((entry) => {
+    const { slug, locale } = splitArticleId(entry.id);
+    const seriesSlug = seriesOf(slug, seriesSlugs);
+    const series = seriesSlug
+      ? {
+          slug: seriesSlug,
+          title: localizedSeriesMeta(seriesMetaBySlug.get(seriesSlug)!, 'en').title,
+        }
+      : null;
+    const date = entry.data.published ?? entry.data.date;
+    return {
+      slug,
+      locale,
+      title: entry.data.title,
+      author: entry.data.author,
+      tags: entry.data.tags ?? [],
+      seriesOrder: entry.data.seriesOrder,
+      date,
+      excerpt: excerptFromBody(entry.body ?? ''),
+      series,
+      href: `/articles/${slug}`,
+      name: slug.split('/').pop() ?? slug,
+      data: entry.data,
+    };
+  })
+  .filter((a) => a.locale === 'en');
+
+const sorted = sortArticlesByNewest(articles);
+
+// Embedded JSON data consumed by the client filter/sort script.
+const articlesData = sorted.map((a) => ({
+  name: a.name,
+  title: a.title,
+  date: a.date ? a.date.toISOString().slice(0, 10) : null,
+  formattedDate: formattedDate(a.date),
+  author: a.author ?? null,
+  tags: a.tags,
+  excerpt: a.excerpt,
+  url: a.href,
+  series: a.series ? a.series.slug : null,
+  seriesTitle: a.series ? a.series.title : null,
+  seriesOrder: a.seriesOrder ?? null,
+}));
+
+const cards = sorted.map((a) => ({
+  href: a.href,
+  title: a.title,
+  date: a.date,
+  author: a.author,
+  excerpt: a.excerpt,
+  tags: a.tags,
+  series: a.series,
+}));
+---
+<ArticlesIndexPage cards={cards} articlesData={articlesData} locale="en" />

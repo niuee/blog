@@ -144,3 +144,6 @@ README-for-docusaurus.md
 .github/instructions/nx.instructions.md
 
 .rollup.cache
+
+# Astro
+.astro/

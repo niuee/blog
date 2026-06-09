@@ -1,0 +1,77 @@
+---
+export interface Props {
+  href: string;
+  title: string;
+  date?: Date;
+  author?: string;
+  excerpt: string;
+  tags?: string[];
+  series?: { slug: string; title: string } | null;
+  localePrefix?: string;
+}
+
+const {
+  href,
+  title,
+  date,
+  author,
+  excerpt,
+  tags = [],
+  series = null,
+  localePrefix = '',
+} = Astro.props;
+
+const dateFmt = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const isoDate = date ? date.toISOString().slice(0, 10) : undefined;
+---
+<li
+  class="article-item"
+  data-tags={tags.join(',')}
+  data-date={isoDate}
+  data-title={title}
+  data-series={series ? series.slug : undefined}
+>
+  <a href={href} class="article-link">
+    <h2 class="article-title">{title}</h2>
+    {
+      series && (
+        <div class="article-meta">
+          <a
+            href={`${localePrefix}/series/${series.slug}`}
+            class="article-series-badge"
+            data-i18n-series={series.slug}
+          >
+            <span class="series-badge-prefix" data-i18n="seriesBadgePrefix">
+              Series:{' '}
+            </span>
+            {series.title}
+          </a>
+        </div>
+      )
+    }
+    {
+      (date || author) && (
+        <div class="article-meta">
+          {date && <time datetime={isoDate}>{dateFmt.format(date)}</time>}
+          {date && author && ' • '}
+          {author}
+        </div>
+      )
+    }
+    {
+      tags.length > 0 && (
+        <div class="article-tags">
+          {tags.map((tag) => (
+            <span class="article-tag">{tag}</span>
+          ))}
+        </div>
+      )
+    }
+    <p class="article-excerpt">{excerpt}</p>
+  </a>
+</li>

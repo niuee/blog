@@ -1,0 +1,10 @@
+---
+import ResumePage from '../../components/ResumePage.astro';
+import { Content, frontmatter } from '../../../resume/content.md';
+---
+<ResumePage
+  Content={Content}
+  title={frontmatter.title ?? 'Résumé'}
+  locale="en"
+  availableLanguages={[null, 'zh-tw']}
+/>

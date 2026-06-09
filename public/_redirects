@@ -1,0 +1,16 @@
+# Legacy zh-tw URLs were SUFFIX-based (/articles/{slug}/zh-tw).
+# The Astro i18n scheme is PREFIX-based (/zh-tw/articles/{slug}).
+# Cloudflare Pages / Netlify _redirects syntax: `*` captures a path segment(s),
+# `:splat` substitutes the captured value. This file is copied verbatim to
+# dist/_redirects at build time.
+#
+# NOTE: If deploying to Vercel instead, `_redirects` is ignored. An equivalent
+# `vercel.json` "redirects" array would be required, e.g.:
+#   { "source": "/articles/:slug*/zh-tw", "destination": "/zh-tw/articles/:slug*", "permanent": true }
+#   ...plus matching entries for /series and /resume.
+
+/articles/*/zh-tw    /zh-tw/articles/:splat    301
+/articles/zh-tw      /zh-tw/articles           301
+/series/*/zh-tw      /zh-tw/series/:splat      301
+/series/zh-tw        /zh-tw/series             301
+/resume/zh-tw        /zh-tw/resume             301
