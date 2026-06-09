@@ -1,0 +1,19 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import ArticleHeader from '../../components/ArticleHeader.astro';
+import resumeStyles from '../../styles/resume-styles.css?raw';
+import { Content, frontmatter } from '../../../resume/content.md';
+
+const title = frontmatter.title ?? 'Résumé';
+const published = frontmatter.published ? new Date(frontmatter.published) : undefined;
+const author = frontmatter.author;
+---
+<BlogLayout title={title} lang="en" bodyMode="resume">
+  <style is:global set:html={resumeStyles}></style>
+  <ArticleHeader title={title} date={published} author={author} />
+  <div id="blog-content">
+    <article>
+      <Content />
+    </article>
+  </div>
+</BlogLayout>

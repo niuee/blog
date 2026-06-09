@@ -35,11 +35,11 @@ published: 2025-01-01
 - Optimized the stroke eraser algorithm for at least 30% performance improvement, delivering UX on par with Miro's precision eraser.
   <div style="display: flex; gap: 10px; margin-top: 8px;">
     <figure style="flex: 1; margin: 0; text-align: center;">
-      <img src="teamone.gif" alt="TeamOne Eraser" style="width: 100%;">
+      <img src="/resume/teamone.gif" alt="TeamOne Eraser" style="width: 100%;">
       <figcaption style="font-size: 0.85em; color: #666; margin-top: 4px;">TeamOne</figcaption>
     </figure>
     <figure style="flex: 1; margin: 0; text-align: center;">
-      <img src="miro.gif" alt="Miro Eraser" style="width: 100%;">
+      <img src="/resume/miro.gif" alt="Miro Eraser" style="width: 100%;">
       <figcaption style="font-size: 0.85em; color: #666; margin-top: 4px;">Miro</figcaption>
     </figure>
   </div>
