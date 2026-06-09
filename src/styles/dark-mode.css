@@ -1,0 +1,480 @@
+/* Dark Mode Toggle - CSS Variables */
+:root {
+  /* Light mode (default) */
+  --bg-color: #f5f3ec;
+  --text-color: #2e2e2e;
+  --text-meta-color: #636363;
+  --link-color: #777;
+  --link-unvisited-color: #666;
+  --link-hover-color: #222;
+  --link-visited-color: #777;
+  --link-decoration-color: rgba(0, 0, 0, 0.2);
+  --link-decoration-unvisited-color: rgba(0, 0, 0, 0.5);
+  --link-decoration-hover-color: rgba(0, 0, 0, 0.4);
+  --link-decoration-visited-color: rgba(0, 0, 0, 0.15);
+  --code-border-color: #000;
+  --code-label-color: #666;
+  --code-label-bg: rgba(248, 245, 240, 0.9);
+  --inline-code-bg: #eeebe5;
+  --emphasis-bg: rgba(255, 215, 0, 0.35);
+  --emphasis-text-color: #8a4b00;
+  --remark-bg: rgba(0, 0, 0, 0.04);
+  --remark-border-color: rgba(0, 0, 0, 0.15);
+  --remark-text-color: var(--text-color);
+  --remark-inline-code-bg: rgba(0, 0, 0, 0.06);
+  --tldr-bg: rgba(59, 130, 246, 0.08);
+  --tldr-border-color: rgba(59, 130, 246, 0.3);
+  --tldr-text-color: var(--text-color);
+  --tldr-title-color: #2563eb;
+  --tldr-inline-code-bg: rgba(59, 130, 246, 0.12);
+  --table-header-bg: #eeebe5;
+  --table-border-color: rgba(0, 0, 0, 0.1);
+  --table-row-hover-bg: #f3f0ea;
+  --blockquote-border-color: #999;
+  --blockquote-bg: #eeebe5;
+  --blockquote-text-color: #2e2e2e;
+  --toggle-button-bg: #f3f0ea;
+  --toggle-button-border: #646cff;
+  --font-size-active-bg: #333;
+  --font-size-active-color: #fff;
+  --switch-plate-bg: #eeebe5;
+  --switch-toggle-bg: #e0e0e0;
+  --switch-shadow: rgba(0, 0, 0, 0.15);
+  --image-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
+  --font-size-scale: 1.125;
+  --tag-bg: #eae7e0;
+  --tag-color: #555;
+  --bg-secondary: #f0ede6;
+  --bg-hover: #eae7e0;
+}
+
+/* Dark mode variables */
+html:has(#dark-mode-toggle:checked),
+html[data-blog-dark] {
+  color-scheme: dark;
+  --bg-color: #1a1a1a;
+  --text-color: #e0e0e0;
+  --text-meta-color: #999;
+  --link-color: #bbb;
+  --link-unvisited-color: #f0f0f0;
+  --link-hover-color: #e0e0e0;
+  --link-visited-color: #999;
+  --link-decoration-color: rgba(255, 255, 255, 0.2);
+  --link-decoration-unvisited-color: rgba(255, 255, 255, 0.5);
+  --link-decoration-hover-color: rgba(255, 255, 255, 0.4);
+  --link-decoration-visited-color: rgba(255, 255, 255, 0.15);
+  --code-border-color: #444;
+  --code-label-color: #ccc;
+  --code-label-bg: rgba(26, 26, 26, 0.9);
+  --inline-code-bg: #4a4a4a;
+  --emphasis-bg: rgba(255, 183, 0, 0.25);
+  --emphasis-text-color: #ffd479;
+  --remark-bg: rgba(255, 255, 255, 0.05);
+  --remark-border-color: rgba(255, 255, 255, 0.18);
+  --remark-text-color: var(--text-color);
+  --remark-inline-code-bg: rgba(255, 255, 255, 0.08);
+  --tldr-bg: rgba(96, 165, 250, 0.1);
+  --tldr-border-color: rgba(96, 165, 250, 0.4);
+  --tldr-text-color: var(--text-color);
+  --tldr-title-color: #60a5fa;
+  --tldr-inline-code-bg: rgba(96, 165, 250, 0.15);
+  --table-header-bg: #2a2a2a;
+  --table-border-color: rgba(255, 255, 255, 0.1);
+  --table-row-hover-bg: #2a2a2a;
+  --blockquote-border-color: #666;
+  --blockquote-bg: #2a2a2a;
+  --blockquote-text-color: #e0e0e0;
+  --toggle-button-bg: #2a2a2a;
+  --toggle-button-border: #4a9eff;
+  --font-size-active-bg: rgba(255, 255, 255, 0.15);
+  --font-size-active-color: #e0e0e0;
+  --switch-plate-bg: #2a2a2a;
+  --switch-toggle-bg: #3a3a3a;
+  --switch-shadow: rgba(0, 0, 0, 0.3);
+  --image-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Dark mode toggle styles */
+.dark-mode-toggle {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.dark-mode-label {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  cursor: pointer;
+  padding: 0.5rem;
+  background: transparent;
+}
+
+/* Switch plate (outer frame) */
+.switch-plate {
+  position: relative;
+  display: block;
+  width: 2.5rem;
+  height: 3.5rem;
+  background-color: var(--switch-plate-bg);
+  border-radius: 0.4rem;
+  box-shadow: 
+    0 3px 6px var(--switch-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  padding: 0.35rem 0.3rem;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dark-mode-label:hover .switch-plate {
+  box-shadow: 
+    0 6px 12px var(--switch-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Switch toggle (the moving part) */
+.switch-toggle {
+  position: absolute;
+  left: 50%;
+  top: 0.5rem;
+  transform: translateX(-50%);
+  width: 1.9rem;
+  height: 1.2rem;
+  background-color: var(--switch-toggle-bg);
+  border-radius: 0.2rem;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+  transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+/* When checked, move toggle down (flip switch down) */
+html:has(#dark-mode-toggle:checked) .switch-toggle,
+html[data-blog-dark] .switch-toggle {
+  top: 1.8rem;
+}
+
+
+/* Responsive styles for toggle switch */
+@media (max-width: 600px) {
+  .dark-mode-label {
+    top: 1rem;
+    right: 1rem;
+    padding: 0.375rem;
+  }
+
+  .switch-plate {
+    width: 2.2rem;
+    height: 3rem;
+    padding: 0.3rem 0.25rem;
+  }
+
+  .switch-toggle {
+    width: 1.7rem;
+    height: 1rem;
+    top: 0.45rem;
+  }
+
+  html:has(#dark-mode-toggle:checked) .switch-toggle,
+  html[data-blog-dark] .switch-toggle {
+    top: 1.55rem;
+  }
+}
+
+/* Font size controls */
+.font-size-controls {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  gap: 0.25rem;
+  background-color: var(--switch-plate-bg);
+  padding: 0.35rem;
+  border-radius: 0.4rem;
+  box-shadow: 
+    0 3px 6px var(--switch-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.font-size-controls:hover {
+  box-shadow: 
+    0 6px 12px var(--switch-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.font-size-btn {
+  background-color: transparent;
+  border: none;
+  color: var(--text-color);
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 0.2rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  text-align: center;
+}
+
+#font-size-medium {
+  font-size: 0.75rem;
+}
+
+#font-size-large {
+  font-size: 0.95rem;
+}
+
+#font-size-xl {
+  font-size: 1.15rem;
+}
+
+.font-size-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+html:has(#dark-mode-toggle:checked) .font-size-btn:hover,
+html[data-blog-dark] .font-size-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.font-size-btn.active {
+  background-color: var(--font-size-active-bg);
+  color: var(--font-size-active-color);
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+html:has(#dark-mode-toggle:checked) .font-size-btn.active,
+html[data-blog-dark] .font-size-btn.active {
+  background-color: var(--font-size-active-bg);
+  color: var(--font-size-active-color);
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Font size scaling */
+html[data-font-size="medium"] {
+  --font-size-scale: 1.0;
+}
+
+html:not([data-font-size]) {
+  --font-size-scale: 1.2;
+}
+
+html[data-font-size="large"] {
+  --font-size-scale: 1.2;
+}
+
+html[data-font-size="xl"] {
+  --font-size-scale: 1.4;
+}
+
+/* Increase font sizes for 4K and high-resolution displays */
+@media (min-width: 2560px) {
+  html[data-font-size="medium"] {
+    --font-size-scale: 1.25;
+  }
+
+  html:not([data-font-size]) {
+    --font-size-scale: 1.5;
+  }
+
+  html[data-font-size="large"] {
+    --font-size-scale: 1.5;
+  }
+
+  html[data-font-size="xl"] {
+    --font-size-scale: 1.75;
+  }
+}
+
+/* Responsive styles for font size controls */
+@media (max-width: 600px) {
+  .font-size-controls {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.3rem;
+    gap: 0.2rem;
+  }
+
+  #font-size-medium {
+    font-size: 0.65rem;
+  }
+
+  #font-size-large {
+    font-size: 0.8rem;
+  }
+
+  #font-size-xl {
+    font-size: 0.95rem;
+  }
+
+  .font-size-btn {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+/* Language selector (separate component from dark-mode label) */
+.language-selector {
+  position: fixed;
+  top: 1.5rem;
+  right: 5.5rem;
+  z-index: 1000;
+  padding: 0.5rem;
+  background: transparent;
+}
+
+.language-selector-btn {
+  background-color: var(--switch-plate-bg);
+  border: none;
+  color: var(--text-color);
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 7rem;
+  box-shadow: 
+    0 3px 6px var(--switch-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.language-selector-btn:hover {
+  box-shadow: 
+    0 6px 12px var(--switch-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.language-selector-icon {
+  font-size: 0.875rem;
+  line-height: 1;
+  font-weight: 600;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.language-selector-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.language-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background-color: var(--switch-plate-bg);
+  border-radius: 0.4rem;
+  box-shadow: 
+    0 6px 20px var(--switch-shadow),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: none;
+  flex-direction: column;
+  padding: 0.25rem;
+  margin: 0;
+  list-style: none;
+}
+
+.language-dropdown.show {
+  display: flex;
+}
+
+.language-option {
+  background-color: transparent;
+  border: none;
+  color: var(--text-color);
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0.3rem;
+  font-size: 0.875rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  width: 100%;
+}
+
+.language-option:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+html:has(#dark-mode-toggle:checked) .language-option:hover,
+html[data-blog-dark] .language-option:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.language-option.active {
+  background-color: var(--font-size-active-bg);
+  color: var(--font-size-active-color);
+  font-weight: 600;
+}
+
+a.language-option {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* Responsive styles for language selector */
+@media (max-width: 600px) {
+  .language-selector {
+    top: 1rem;
+    right: 4rem;
+    padding: 0.375rem;
+  }
+
+  .language-selector-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .language-selector-icon {
+    font-size: 0.75rem;
+  }
+
+  .language-selector-text {
+    font-size: 0.8rem;
+  }
+
+  .language-dropdown {
+    min-width: 130px;
+    max-height: 250px;
+  }
+
+  .language-option {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+  }
+}
+
