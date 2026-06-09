@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import ArticleHeader from '../../components/ArticleHeader.astro';
+import { splitArticleId } from '../../lib/article-paths';
+
+export async function getStaticPaths() {
+  const all = await getCollection('articles');
+  return all
+    .map((entry) => ({ entry, ...splitArticleId(entry.id) }))
+    .filter((e) => e.locale === 'en')
+    .map((e) => ({ params: { slug: e.slug }, props: { entry: e.entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, published, date, author } = entry.data;
+---
+<BlogLayout title={title} lang="en" bodyMode="article">
+  <ArticleHeader title={title} date={published ?? date} author={author} />
+  <div id="blog-content">
+    <article><Content /></article>
+  </div>
+</BlogLayout>
