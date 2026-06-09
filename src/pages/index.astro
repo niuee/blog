@@ -1,4 +1,74 @@
 ---
+import BlogLayout from '../layouts/BlogLayout.astro';
 ---
-<html lang="en"><head><meta charset="utf-8" /><title>blog</title></head>
-<body><h1>scaffold</h1></body></html>
+<BlogLayout title="blog" lang="en">
+  <div class="intro-content">
+    <h1 class="intro-name">vee</h1>
+    <p class="intro-subtitle">Software Developer and a little bit of everything I'm interested in.</p>
+    <div class="intro-description">
+      Currently working on <a href="https://banana.vntchang.dev" class="intro-link" target="_blank" rel="noopener">banana</a>.
+    </div>
+    <nav class="intro-nav">
+      <a href="/articles" class="intro-nav-link">Articles</a>
+      <a href="/series" class="intro-nav-link">Series</a>
+      <a href="https://github.com/niuee" class="intro-nav-link" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+  <style>
+    .intro-content {
+      max-width: 600px;
+      width: 100%;
+      padding: 2rem 1rem;
+    }
+
+    .intro-name {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .intro-subtitle {
+      color: var(--text-meta-color);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .intro-description {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      margin: 0 0 2rem 0;
+      color: var(--text-color);
+      opacity: 0.85;
+    }
+
+    .intro-link {
+      color: var(--link-color);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .intro-link:hover {
+      color: var(--link-hover-color, #2563eb);
+    }
+
+    .intro-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--table-border-color, #e5e7eb);
+    }
+
+    .intro-nav-link {
+      color: var(--text-meta-color);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .intro-nav-link:hover {
+      color: var(--link-hover-color, #2563eb);
+    }
+  </style>
+</BlogLayout>
