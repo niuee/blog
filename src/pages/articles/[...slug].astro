@@ -2,23 +2,67 @@
 import { getCollection, render } from 'astro:content';
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import ArticleHeader from '../../components/ArticleHeader.astro';
+import SeriesNav from '../../components/SeriesNav.astro';
 import { splitArticleId } from '../../lib/article-paths';
+import { orderSeriesArticles, localizedSeriesMeta } from '../../lib/series';
+import { seriesOf, seriesSlugFromId } from '../../lib/series-membership';
 
 export async function getStaticPaths() {
+  const seriesEntries = await getCollection('series');
   const all = await getCollection('articles');
-  return all
+  const seriesSlugs = new Set(seriesEntries.map((s) => seriesSlugFromId(s.id)));
+
+  const en = all
     .map((entry) => ({ entry, ...splitArticleId(entry.id) }))
-    .filter((e) => e.locale === 'en')
-    .map((e) => ({ params: { slug: e.slug }, props: { entry: e.entry } }));
+    .filter((e) => e.locale === 'en');
+
+  return en.map((e) => {
+    const ss = seriesOf(e.slug, seriesSlugs);
+    let seriesContext = null;
+
+    if (ss) {
+      const ordered = orderSeriesArticles(
+        en
+          .filter((a) => seriesOf(a.slug, seriesSlugs) === ss)
+          .map((a) => ({ slug: a.slug, data: a.entry.data }))
+      );
+      const index = ordered.findIndex((a) => a.slug === e.slug);
+      const total = ordered.length;
+      const prevItem = index > 0 ? ordered[index - 1] : null;
+      const nextItem = index < total - 1 ? ordered[index + 1] : null;
+      const prev = prevItem ? { slug: prevItem.slug, title: prevItem.data.title } : null;
+      const next = nextItem ? { slug: nextItem.slug, title: nextItem.data.title } : null;
+      const seriesMeta = seriesEntries.find((s) => seriesSlugFromId(s.id) === ss)!.data;
+      const seriesTitle = localizedSeriesMeta(seriesMeta, 'en').title;
+
+      seriesContext = {
+        seriesSlug: ss,
+        seriesTitle,
+        index,
+        total,
+        prev,
+        next,
+        localePrefix: '',
+      };
+    }
+
+    return { params: { slug: e.slug }, props: { entry: e.entry, seriesContext } };
+  });
 }
 
-const { entry } = Astro.props;
+const { entry, seriesContext } = Astro.props;
 const { Content } = await render(entry);
 const { title, published, date, author } = entry.data;
 ---
 <BlogLayout title={title} lang="en" bodyMode="article">
   <ArticleHeader title={title} date={published ?? date} author={author} />
   <div id="blog-content">
-    <article><Content /></article>
+    <article>
+      {seriesContext ? (
+        <SeriesNav {...seriesContext}><Content /></SeriesNav>
+      ) : (
+        <Content />
+      )}
+    </article>
   </div>
 </BlogLayout>
