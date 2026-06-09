@@ -54,17 +54,54 @@ export function sortArticlesByNewest<T extends NewestArticle>(items: T[]): T[] {
   });
 }
 
+/**
+ * Derive a plain-text excerpt from an article body, matching the legacy
+ * behavior: take the FIRST REAL PROSE PARAGRAPH (skipping the H1 title,
+ * section headings, HTML blocks like `<div class="remark">` and `<img>`,
+ * images and fenced code), strip inline markdown/HTML, then truncate.
+ */
 export function excerptFromBody(body: string, max = 200): string {
-  const text = body
-    .replace(/^---[\s\S]*?---/, '')
+  const cleaned = body
+    // remove leading frontmatter
+    .replace(/^---\n[\s\S]*?\n---/, '')
     // strip MDX/ESM import & export statements
-    .replace(/^[ \t]*(?:import|export)\b[^\n]*$/gm, '')
-    .replace(/```[\s\S]*?```/g, '')
+    .replace(/^[ \t]*(?:import|export)\b[^\n]*$/gm, '');
+
+  const blocks = cleaned.split(/\n\s*\n/);
+  let paragraph = '';
+
+  for (const raw of blocks) {
+    // Drop leading ATX heading lines. Legacy treated a heading directly
+    // followed (no blank line) by prose as: heading skipped, prose kept.
+    const lines = raw.split('\n');
+    while (lines.length && /^\s*#/.test(lines[0])) lines.shift();
+    const block = lines.join('\n').trim();
+    if (!block) continue;
+    // HTML blocks (block starts with a tag)
+    if (block.startsWith('<')) continue;
+    // images
+    if (/^!\[[^\]]*\]\([^)]*\)/.test(block)) continue;
+    // fenced code
+    if (block.startsWith('```')) continue;
+    // First normal prose paragraph. Legacy used only the first line of the
+    // paragraph (it split on newlines, so soft-wrapped continuation lines
+    // were excluded from the excerpt).
+    paragraph = block.split('\n')[0].trim();
+    break;
+  }
+
+  const text = paragraph
+    // image markdown (defensive; inline images within prose)
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    // links -> text
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    // inline markdown markers
     .replace(/[#>*_`~]/g, '')
+    // inline HTML tags
     .replace(/<[^>]+>/g, '')
+    // collapse whitespace
     .replace(/\s+/g, ' ')
     .trim();
-  return text.length > max ? text.slice(0, max).trimEnd() : text;
+
+  return text.length > max ? text.slice(0, max).trimEnd() + '...' : text;
 }
