@@ -178,6 +178,10 @@
       if (navEarlySeries) {
         navEarlySeries.href = urlLang ? '/' + urlLang + '/series' : '/series';
       }
+      var navEarlySearch = document.getElementById('nav-link-search');
+      if (navEarlySearch) {
+        navEarlySearch.href = urlLang ? '/' + urlLang + '/search' : '/search';
+      }
 
       var availableLanguages = getAvailableFromScript();
       if (availableLanguages.length <= 1) {
@@ -205,6 +209,10 @@
       if (navArticles) navArticles.href = baseBackUrl + savedFilter;
       if (navSeries) {
         navSeries.href = effectiveLang ? '/' + effectiveLang + '/series' : '/series';
+      }
+      var navSearch = document.getElementById('nav-link-search');
+      if (navSearch) {
+        navSearch.href = effectiveLang ? '/' + effectiveLang + '/search' : '/search';
       }
 
       languageDropdown.innerHTML = '';
@@ -266,6 +274,7 @@
         home: 'Home',
         articles: 'Articles',
         series: 'Series',
+        search: 'Search',
         subtitle: 'Thoughts, tutorials, and explorations',
         prev: '← Prev',
         next: 'Next →',
@@ -279,6 +288,7 @@
         home: '首頁',
         articles: '文章',
         series: '系列',
+        search: '搜尋',
         subtitle: '想法、教學與探索',
         prev: '← 上一頁',
         next: '下一頁 →',
@@ -292,6 +302,7 @@
         home: 'ホーム',
         articles: '記事',
         series: 'シリーズ',
+        search: '検索',
         subtitle: '考え、チュートリアル、探求',
         prev: '← 前へ',
         next: '次へ →',
@@ -305,6 +316,7 @@
         home: '홈',
         articles: '글',
         series: '시리즈',
+        search: '검색',
         subtitle: '생각, 튜토리얼, 탐구',
         prev: '← 이전',
         next: '다음 →',
@@ -318,6 +330,7 @@
         home: '首页',
         articles: '文章',
         series: '系列',
+        search: '搜索',
         subtitle: '想法、教程与探索',
         prev: '← 上一页',
         next: '下一页 →',
@@ -366,6 +379,13 @@
         navSeries.href = info.currentLang
           ? '/' + info.currentLang + '/series'
           : '/series';
+      }
+      var navSearch = document.getElementById('nav-link-search');
+      if (navSearch) {
+        navSearch.textContent = t('search');
+        navSearch.href = info.currentLang
+          ? '/' + info.currentLang + '/search'
+          : '/search';
       }
       if (pageTitle) pageTitle.textContent = t('articles');
       if (pageSubtitle) pageSubtitle.textContent = t('subtitle');
@@ -459,6 +479,7 @@
         home: 'Home',
         articles: 'Articles',
         series: 'Series',
+        search: 'Search',
         seriesPageTitle: 'Series',
         seriesListSubtitle: 'Article series',
         seriesEmpty: 'No series yet.',
@@ -471,6 +492,7 @@
         home: '首頁',
         articles: '文章',
         series: '系列',
+        search: '搜尋',
         seriesPageTitle: '系列',
         seriesListSubtitle: '文章系列',
         seriesEmpty: '目前還沒有系列。',
@@ -483,6 +505,7 @@
         home: '首页',
         articles: '文章',
         series: '系列',
+        search: '搜索',
         seriesPageTitle: '系列',
         seriesListSubtitle: '文章系列',
         seriesEmpty: '目前还没有系列。',
@@ -495,6 +518,7 @@
         home: 'ホーム',
         articles: '記事',
         series: 'シリーズ',
+        search: '検索',
         seriesPageTitle: 'シリーズ',
         seriesListSubtitle: '記事シリーズ',
         seriesEmpty: 'シリーズはまだありません。',
@@ -507,6 +531,7 @@
         home: '홈',
         articles: '글',
         series: '시리즈',
+        search: '검색',
         seriesPageTitle: '시리즈',
         seriesListSubtitle: '글 시리즈',
         seriesEmpty: '아직 시리즈가 없습니다.',
@@ -556,6 +581,11 @@
       if (navSeries) {
         navSeries.textContent = t('series');
         navSeries.href = currentLang ? '/' + currentLang + '/series' : '/series';
+      }
+      var navSearch = document.getElementById('nav-link-search');
+      if (navSearch) {
+        navSearch.textContent = t('search');
+        navSearch.href = currentLang ? '/' + currentLang + '/search' : '/search';
       }
 
       if (isListPage) {

@@ -11,11 +11,16 @@ export interface Props {
 }
 const { entry, locale, seriesContext, availableLanguages } = Astro.props;
 const { Content } = await render(entry);
-const { title, published, date, author } = entry.data;
+const { title, published, date, author, tags } = entry.data;
 ---
 <BlogLayout title={title} lang={locale} bodyMode="article" availableLanguages={availableLanguages}>
   <ArticleHeader title={title} date={published ?? date} author={author} />
-  <div id="blog-content">
+  {/* Pagefind indexes only elements marked data-pagefind-body (multiple regions
+      per page are merged). Tags are exposed as filters via attribute capture. */}
+  <div id="blog-content" data-pagefind-body>
+    {(tags ?? []).map((tag: string) => (
+      <meta data-pagefind-filter="tag[content]" content={tag} />
+    ))}
     <article>
       {seriesContext ? (
         <SeriesNav {...seriesContext}><Content /></SeriesNav>

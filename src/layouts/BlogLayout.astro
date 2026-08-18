@@ -30,7 +30,7 @@ const { title, lang = 'en', bodyMode = 'article', availableLanguages = [null] } 
     <ImageViewer />
     <TableOfContents />
   </Fragment>
-  <SiteNav />
+  <SiteNav locale={lang} />
   <slot />
   <Fragment slot="scripts">
     <script src="../scripts/blog-language-selector.js"></script>
