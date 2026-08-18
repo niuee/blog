@@ -87,15 +87,15 @@ Seen through the glass from inside the car, the cab is laid out almost completel
 
 Looking back after arrival, the red tail lights come on in a row, and that sharp nose looks oddly blunt and quiet under the platform lighting. To the left, a stone retaining wall and an ivy-covered hillside — the sort of backdrop only a terminus gets. This is **Tobu-Nikko**, the end of the Nikko line.
 
-<img src="real-gate-notice.webp" alt="Ticket gates at Tobu-Nikko with a handwritten notice saying certain trains do not depart from this station" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+<img src="real-gate-bento.webp" alt="Ticket gates at Tobu-Nikko, each with a SPACIA X shaped bento box sitting on top" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
 
-*The ticket gates at Tobu-Nikko. That handwritten notice is the real manual for this line*
+*One per gate, lined up along the top — and they're not ornaments*
 
-Next to the gates on the way out is a very lived-in handwritten notice:
+Then, on the way out, something very Tobu: **there's a SPACIA X sitting on top of each ticket gate**.
 
-> スペーシアX8号／スペーシアX10号／きぬ・きぬがわ・会津号　⚠ 当駅からは発車しません
+Not models, not display pieces — bento boxes. White body, the same kumiko triangles and hexagons cut into the sides, a bit longer than a normal lunch box, lined up along the top of the gate machines as signage. Everyone tapping out walks right past them.
 
-"These services do not depart from this station." Not every SPACIA X runs the same way: after the Nikko and Kinugawa lines split at Shimo-Imaichi, some workings start from the Kinugawa-Onsen side instead. A whiteboard and a marker pen explain a branch that reads as pure abstraction on a timetable better than any route map could.
+Keep that in mind; we come back to it at the end.
 
 ## Shrunk to 1:150
 
@@ -229,7 +229,7 @@ That's a brutal test for a model — on an all-white body, every parting line an
 
 *The bento box. The windows become clear lids, and the food becomes the interior*
 
-And then there's this.
+And then there's this — the row on top of the ticket gates, up close.
 
 It's an ekiben container moulded as a SPACIA X cab car — the kumiko openings included — and it does one genuinely clever thing: **the hexagonal windows are clear lids**. So what shows through "inside the windows" isn't seats, it's lunch. The big windscreen is clear too, which turns the entire cab into a viewing panel.
 
