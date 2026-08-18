@@ -87,6 +87,12 @@ This is the car with the Cockpit Lounge and the Café Counter. An open lounge sp
 
 It's also the only bodyside in the set with **no black window band** at all.
 
+<img src="model-car1-windows.webp" alt="Close-up of the N scale Tobu N100 SPACIA X car 1 bodyside, showing the kumiko openings and hexagonal windows" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*Up close the two kinds of opening separate: black ones are decoration, the ones showing an interior are real windows*
+
+Up close, the flank turns out to hold two kinds of opening: black triangles and diamonds punched straight through with nothing behind them, and hexagonal windows with clear parts fitted and an interior visible through them. At a distance they read as one pattern; only near to does it come apart.
+
 ### Car 2 — the band returns
 
 <img src="model-car2-side.webp" alt="Broadside view of the N scale Tobu N100 SPACIA X car 2, with a row of square windows inside a black band" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
@@ -131,6 +137,26 @@ Its roof carries two pantographs like car 3's, so traction is concentrated in ca
 
 *From another angle, that blank panel turns out to have depth — the bodyside's fold lines show up best here*
 
+### Car 6 — four compartments and a suite
+
+<img src="model-car6-side.webp" alt="Broadside view of the N scale Tobu N100 SPACIA X car 6, with pale and dark brown hexagonal windows set in the kumiko pattern" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*Car 6 in profile — the spacing of the windows draws the floor plan*
+
+Car 6, at the other end of the set, is kumiko pattern like car 1 — so the "X" only grows on the two cab cars, with the four intermediate cars all wearing the black band.
+
+Same pattern, though, and an entirely different arrangement of windows. Counting from the cab end: first **three pale hexagonal windows grouped together**, then **four dark brown hexagons spaced noticeably further apart**, and finally the door and that "6".
+
+Line that up with the real car's layout and it gets interesting. Car 6 is private rooms end to end: one 7-person Cockpit Suite plus four 4-person Compartments. The three grouped windows are the Suite; the four widely spaced ones are one window per compartment.
+
+Which means **you can stand on the platform and count the rooms from outside**. The model goes a step further and spells it out with interior colours: pale for the Suite, dark brown for the four Compartments, perfectly legible through the glazing.
+
+<img src="model-car6-angle.webp" alt="Three-quarter view of the N scale Tobu N100 SPACIA X car 6" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*Car 6 at an angle — the same nose tooling as car 1, wrapped around a completely different car*
+
+Step back and the pattern density along the whole set turns out to have been honest all along about what each car is doing: car 1 is an open lounge, so its windows run continuous and close together; car 6 is private rooms, so they break into separate cells; the four cars between are rows of seats, so they get the regular black band. The exterior isn't just good-looking — it's also a floor plan.
+
 ### What's on the roof
 
 <img src="model-roof-detail.webp" alt="Top-down detail of the roof of an N scale Tobu N100 SPACIA X intermediate car, showing pantograph, arrestors and cable runs" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
@@ -152,6 +178,10 @@ In daylight, car 1's hexagonal windows are a quiet pale green. Switch the interi
 The headlights come up at the same time, with warm light spilling from the cab side window. That's the moment it registers that the Cockpit Lounge's warm lighting colour is a decision made on the real train; the model is only shrinking it.
 
 ## The trouble with white
+
+<img src="model-head-on.webp" alt="Head-on view of the N scale Tobu N100 SPACIA X, white nose facing the camera" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*Head-on. No stripe, no badge — only shape left*
 
 Step back and look at the set as a whole: almost no waistline, no colour stripe, no broad corporate livery colour. The entire visual weight is carried by the shapes of the openings and that one black band.
 

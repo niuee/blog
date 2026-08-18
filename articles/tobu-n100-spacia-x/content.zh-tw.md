@@ -87,6 +87,12 @@ Cockpit Suite 是這台車的頂規，概念取自私人飛機：可移動的沙
 
 順帶一提，這也是全編成上唯一一種**沒有黑色窗帶**的車側。
 
+<img src="model-car1-windows.webp" alt="東武 N100 系 SPACIA X 1 號車 N 規模型車側特寫，組子紋開口與六角形車窗" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*湊近看才分得出來：黑色的是裝飾開口，透出內裝的才是真正的窗*
+
+湊近看，這面車側其實分成兩種開口：純粹挖穿、內側沒有東西的黑色三角與菱形，以及裝了透明件、看得到內裝的六角形車窗。兩者在遠處是同一片圖案，靠近了才會分家。
+
 ### 2 號車——黑帶回來了
 
 <img src="model-car2-side.webp" alt="東武 N100 系 SPACIA X 2 號車的 N 規模型側面全景，黑色窗帶內是一排方形車窗" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
@@ -131,6 +137,26 @@ Cockpit Suite 是這台車的頂規，概念取自私人飛機：可移動的沙
 
 *換個角度，那片留白其實是有厚度的白——車體側面的折面在這裡看得最清楚*
 
+### 6 號車——四間包廂，一間 Suite
+
+<img src="model-car6-side.webp" alt="東武 N100 系 SPACIA X 6 號車的 N 規模型側面全景，組子紋中透出淺色與深褐色的六角形車窗" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*6 號車側面。窗戶的疏密直接畫出了裡面的隔間*
+
+編成另一端的 6 號車，和 1 號車一樣是滿滿的組子紋——所以「X」其實只長在兩端的先頭車上，中間四節都是黑窗帶。
+
+但同樣是組子紋，兩節車的窗完全不是同一種排法。從駕駛室這端數過去：先是**三扇連在一起的淺色六角窗**，接著是**四扇間距明顯拉開的深褐色六角窗**，最後才是車門與那個「6」。
+
+對照實車的配置，這件事就變得很有趣了——6 號車整節都是包廂：一間 7 人用的 Cockpit Suite，加上四間 4 人用的 Compartment。連著的三扇是 Suite，後面分得開開的四扇，正好一間包廂一扇窗。
+
+也就是說，**你可以站在月台上，從車外數出裡面有幾間房**。模型還進一步用內裝件的顏色把它講清楚：Suite 那側是淺色，四間 Compartment 是深褐色，隔著透明件看過去一目瞭然。
+
+<img src="model-car6-angle.webp" alt="東武 N100 系 SPACIA X 6 號車 N 規模型的斜角特寫" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*6 號車斜角。和 1 號車是同一個模具的前頭，卻是完全不同性格的一節車*
+
+回頭看整個編成會發現，車側圖案的疏密其實一路都在誠實地反映裡面在做什麼：1 號車是開放的 Lounge，窗就連續密集；6 號車是隔間，窗就一格一格分開；中間四節是排排坐的座位車，就換成規律的黑窗帶。這台車的外觀不只是好看，它同時是一張平面圖。
+
 ### 車頂上的東西
 
 <img src="model-roof-detail.webp" alt="東武 N100 系 SPACIA X 中間車 N 規模型的車頂俯視特寫，可見集電弓、避雷器與配線" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
@@ -152,6 +178,10 @@ Cockpit Suite 是這台車的頂規，概念取自私人飛機：可移動的沙
 前頭的頭燈也同時亮起，配上駕駛室側窗透出的暖光——這個時候才會意識到，Cockpit Lounge 那種偏暖的照明色，是實車就決定好的東西，模型只是把它縮小了而已。
 
 ## 白色的難處
+
+<img src="model-head-on.webp" alt="東武 N100 系 SPACIA X N 規模型的正面視角，白色車頭正對鏡頭" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*正面。沒有色帶、沒有標誌，只剩下形狀*
 
 回頭看整組車：幾乎沒有腰帶線、沒有色帶、沒有大面積企業識別色。所有的視覺重量都由開口的形狀、以及那條黑窗帶承擔。
 
