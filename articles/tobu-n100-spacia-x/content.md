@@ -2,7 +2,7 @@
 title: "Tobu N100 SPACIA X: Nikko's White, Folded into a Limited Express"
 published: 2026-08-18
 author: vee
-tags: [railway, japan, tobu, model-railway, wip]
+tags: [railway, japan, tobu, model-railway, ekiben]
 ---
 
 # Tobu N100 SPACIA X: Nikko's White, Folded into a Limited Express
@@ -53,17 +53,53 @@ The Cockpit Suite is the flagship, conceived around a private jet: movable sofas
 
 Packing six products into one train is rare for a Japanese private-railway limited express, where the usual instinct is to standardise seating for efficiency. The N100 bets the other way — that the trip to Nikko is itself worth selling as an experience.
 
+## The real thing, from the inside
+
+Specs and design aside, it comes down to being on board.
+
+### One window, one room
+
+<img src="real-compartment-window.webp" alt="Hexagonal window inside a Tobu N100 SPACIA X compartment, with pleated curtains and a floor lamp" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*The hexagonal window in a compartment — the frame shape carries straight through from outside to inside*
+
+This is one of those hexagonal windows from the inside. From outside it's a single cell in the kumiko pattern; from in here it's the whole view.
+
+Notably, the interior doesn't drop the geometric vocabulary. Finely pleated curtains sit either side of the window, with wood-toned battens and a small orange ball as the tieback. The floor lamp on the left has a pierced scrollwork shade, so the light it throws leaves the same "pattern cut out of lines" impression on the wall. The whole car runs warm — beige, wood and yellow light — the exact opposite of the cold gofun white outside.
+
+There's an `AC 100V 60Hz 2A` socket on the wall too. Not romantic, but it reminds you this is a 2020s tourist-and-commuter limited express, not a heritage train.
+
+### "Cockpit" isn't just a marketing word
+
+<img src="real-cab.webp" alt="The driving cab of a Tobu N100 SPACIA X seen through glass from inside the car" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*The cab. Those sharp window frames are styling from outside and field of view from the driver's seat*
+
+"Cockpit Suite" and "Cockpit Lounge" turn out not to be purely marketing once you're on board.
+
+Seen through the glass from inside the car, the cab is laid out almost completely open: a bank of switches and gauges to the left, displays in the centre, the master controller to the right, and the black driver's seat in the middle. The interesting part is the windows — the acutely angled frames that read as styling from outside are, from the driver's seat, a way of cutting the view into one large panel straight ahead plus angled fill on either side. Form and function are the same decision here.
+
+### The end of the line
+
+<img src="real-platform.webp" alt="Tobu N100 SPACIA X at a platform with tail lights lit, a plush bear held in the foreground" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*Arrival. Tail lights on, passengers spreading out along the platform*
+
+Looking back after arrival, the red tail lights come on in a row, and that sharp nose looks oddly blunt and quiet under the platform lighting. To the left, a stone retaining wall and an ivy-covered hillside — the sort of backdrop only a terminus gets.
+
+<img src="real-gate-notice.webp" alt="Ticket gates at Tobu-Nikko with a handwritten notice saying certain trains do not depart from this station" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*The ticket gates. That handwritten notice is the real manual for this line*
+
+Next to the gates on the way out is a very lived-in handwritten notice:
+
+> スペーシアX8号／スペーシアX10号／きぬ・きぬがわ・会津号　⚠ 当駅からは発車しません
+
+"These services do not depart from this station." Not every SPACIA X runs the same way: after the Nikko and Kinugawa lines split at Shimo-Imaichi, some workings start from the Kinugawa-Onsen side instead. A whiteboard and a marker pen explain a branch that reads as pure abstraction on a timetable better than any route map could.
+
 ## Shrunk to 1:150
 
 Beyond the real thing, this train is a popular modelling subject, and it would be a waste if it weren't.
-
-<img src="model-body-shell.webp" alt="N scale model bodyshell of a Tobu N100 SPACIA X cab car, sitting on a desk" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
-
-*The cab car bodyshell on its own — the design language reads more clearly than on a fully assembled model*
-
-Lifting the shell off the chassis is, oddly, the best way to read the design. At 1:150 the side openings are still physically cut through, with smoked glazing fitted behind them, so the "X" is formed by real frames rather than printed on. The "SPACIA X" marking and the tiny `TOBU LIMITED EXPRESS` line beneath it hold their strokes at roughly fingernail size, which is respectable printing.
-
-The nose is worth a look too: the windscreen is a single large curved clear part, tapering down into a nose cone that looks carved rather than moulded, with a dark obstacle-deflector shape and a mesh grille set below it. The roof-to-body parting line hides at the edge of the grey skirt, so the whole thing feels more solid than you'd expect.
 
 <img src="model-two-cab-cars.webp" alt="Two N scale Tobu N100 SPACIA X cab cars side by side on track" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
 
@@ -187,6 +223,24 @@ Step back and look at the set as a whole: almost no waistline, no colour stripe,
 
 That's a brutal test for a model — on an all-white body, every parting line and every unevenness in the paint gets amplified. Judging by these photos the white is laid down very evenly, and the boundary between body white and roof grey is crisp.
 
-## To be continued
+## Finally: the bento is a SPACIA X too
 
-This post will keep growing. Photos of the real train are still to come, along with the ekiben from along the line — riding a Nikko limited express without a boxed lunch always feels like something's missing.
+<img src="ekiben.webp" alt="Ekiben container moulded as a SPACIA X cab car, its windows clear lids showing the food inside" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*The bento box. The windows become clear lids, and the food becomes the interior*
+
+And then there's this.
+
+It's an ekiben container moulded as a SPACIA X cab car — the kumiko openings included — and it does one genuinely clever thing: **the hexagonal windows are clear lids**. So what shows through "inside the windows" isn't seats, it's lunch. The big windscreen is clear too, which turns the entire cab into a viewing panel.
+
+The "SPACIA X" marking with `TOBU LIMITED EXPRESS` beneath it, the white-to-grey break from roof down to skirt, even the mesh obstacle deflector under the nose — all of it survives being pressed into a single moulded plastic part. The design language holds up from the real train to 1:150 and on to a lunch box, which is about as good a proof of a strong shape as you can get.
+
+The box got kept, obviously.
+
+## In closing
+
+Whether a train gets remembered usually has little to do with how fast it goes.
+
+The N100's top speed is unremarkable against its peers. What makes it stick is that it treats "going to Nikko" as a single piece of work: the body is Tosho-gu's gofun white, the windows are Kanuma kumiko, the interior is a row of rooms with doors that close, and even the lunch box is the same shape.
+
+Watching it from the platform, looking out of a compartment window, setting it on a desk at 1:150 and going through it car by car, then meeting that same "X" again on a bento box — this train is the same object at every scale.
