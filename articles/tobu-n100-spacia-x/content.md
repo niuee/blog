@@ -73,7 +73,7 @@ With two cab cars side by side on the track, what stands out is how *asymmetrica
 
 ## Car by car
 
-Here's what makes this train interesting: **the bodyside design isn't uniform across the set**. Photograph each car separately and line them up, and you find the designers prepared two different vocabularies.
+Here's what makes this train interesting: **the bodyside design isn't uniform across the set**. Photograph each car separately and line them up, and you find the designers prepared two different vocabularies — and that the second one gets adjusted to suit each car's job.
 
 ### Car 1 — where the X lives
 
@@ -97,15 +97,41 @@ By car 2 the language has switched completely. A black window band runs along th
 
 Through the windows you can see the seats are brown-toned: these are the Premium Seats. The roof carries a single silver air conditioner and no pantograph — a plain trailer car.
 
-### Car 3, and what's on the roof
+### Cars 3 and 4 — twins, separated by the roof
+
+<img src="model-car3-side.webp" alt="Broadside view of the N scale Tobu N100 SPACIA X car 3, with a pantograph at each end of the roof" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*Car 3 in profile — one pantograph at each end*
+
+<img src="model-car4-side.webp" alt="Broadside view of the N scale Tobu N100 SPACIA X car 4, its roof carrying only an air conditioner" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*Car 4 in profile — same bodyside, and nothing at all on the roof*
+
+Cars 3 and 4 are the Standard Seat twins: black band, fifteen square windows, the same pointed hexagon at each end. The two flanks **could almost be laid on top of each other**. The seats behind the glazing are pale, instantly distinguishable from car 2's brown Premium Seats.
+
+Everything that separates them is on the roof. Car 3 carries a pantograph at each end — it's a powered car — while car 4's roof has nothing but the single centre air conditioner, to the point of looking bare. On a train with virtually no variation in its paint, identifying cars by their roofs turns out to be the game.
 
 <img src="model-car3-angle.webp" alt="Three-quarter view of the N scale Tobu N100 SPACIA X car 3, pantograph raised" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
 
-*Car 3. This angle shows the gangway bellows and the raised pantograph*
+*Car 3 at an angle — the gangway bellows, coupler and electrical jumper are all separate parts*
 
-Car 3 has the same black band and square windows, but the seats visible through them are now pale — Standard Seats. Same bodyside, different interior colour: a neat way for a model to encode the class difference.
+### Car 5 — the one with the badge
 
-The grey gangway bellows at the car end, the coupler and the electrical jumper below it are all separate parts, and the raised pantograph is the most immediate difference from car 2.
+<img src="model-car5-side.webp" alt="Broadside view of the N scale Tobu N100 SPACIA X car 5, the SPACIA X logo printed on the forward half of the bodyside" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*Car 5 in profile — only seven windows, with the forward half left blank*
+
+Car 5 is the easiest car in the set to pick out. A large white panel ahead of the door carries "SPACIA X" with `Tobu Limited Express` beneath it — where every other car puts a car number, this one puts the nameplate.
+
+The windows have thinned out too: the black band holds just seven, and the rest of the length is given over to that blank panel. The marking under the destination indicator spells out why: a wheelchair pictogram followed by a "5". This is the car with the wheelchair spaces in the real formation, where Box Seats and Standard Seats share a car and where equipment and accessible space eat into what would otherwise be seat windows.
+
+Its roof carries two pantographs like car 3's, so traction is concentrated in cars 3 and 5.
+
+<img src="model-car5-angle.webp" alt="Three-quarter view of the N scale Tobu N100 SPACIA X car 5 with the SPACIA X logo on the bodyside" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*From another angle, that blank panel turns out to have depth — the bodyside's fold lines show up best here*
+
+### What's on the roof
 
 <img src="model-roof-detail.webp" alt="Top-down detail of the roof of an N scale Tobu N100 SPACIA X intermediate car, showing pantograph, arrestors and cable runs" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
 
@@ -113,15 +139,17 @@ The grey gangway bellows at the car end, the coupler and the electrical jumper b
 
 Shoot from above and you realise the most complex surface on this train is the roof. Around the pantograph base sit lightning arrestors and switchgear boxes, with high-voltage cable runs and their insulators tracking the length of the roof — all separate grey parts, and their density is in sharp contrast with the blank white body below.
 
-### The car that carries the badge
+### With the lights on
 
-<img src="model-logo-car-angle.webp" alt="Three-quarter view of an N scale Tobu N100 SPACIA X intermediate car with the SPACIA X logo printed on the bodyside" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+<img src="model-car1-lit.webp" alt="N scale Tobu N100 SPACIA X car 1 with headlights and interior lighting on, warm orange light through the hexagonal windows" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
 
-*That big blank panel ahead of the door exists to hold the badge*
+*Powered up, the hexagonal windows behind the kumiko pattern finally come alive*
 
-One intermediate car leaves a large white panel ahead of its door, printed with "SPACIA X" and, below it, `Tobu Limited Express`. It's the easiest car in the set to pick out — where the other cars put a car number, this one puts the nameplate.
+The payoff, though, comes when you put power through it.
 
-Below the destination indicator sit two very small accessibility pictograms, which most likely makes this car 5, the car with the wheelchair spaces in the real formation. Printing at that size without smearing is a point in the model's favour.
+In daylight, car 1's hexagonal windows are a quiet pale green. Switch the interior lighting on and those same windows glow warm orange, a row of bright points strung along a white lattice. The solid black decorative openings stay black — so the question of which openings are real windows and which are just pattern gets answered, all at once, by the light.
+
+The headlights come up at the same time, with warm light spilling from the cab side window. That's the moment it registers that the Cockpit Lounge's warm lighting colour is a decision made on the real train; the model is only shrinking it.
 
 ## The trouble with white
 

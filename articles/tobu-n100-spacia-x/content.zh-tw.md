@@ -73,7 +73,7 @@ Cockpit Suite 是這台車的頂規，概念取自私人飛機：可移動的沙
 
 ## 一節一節看下去
 
-這台車有趣的地方是：**它的車側設計不是整編成統一的**。把每一節單獨拍下來排在一起，會看到設計師其實準備了兩套語彙。
+這台車有趣的地方是：**它的車側設計不是整編成統一的**。把每一節單獨拍下來排在一起，會看到設計師其實準備了兩套語彙，而且第二套還會隨著車輛的用途微調。
 
 ### 1 號車——X 的主場
 
@@ -97,15 +97,41 @@ Cockpit Suite 是這台車的頂規，概念取自私人飛機：可移動的沙
 
 透過窗戶看得到裡面的座椅是褐色系的，對應的是 Premium Seat。屋頂上只有一具銀色的冷氣，沒有集電弓，是一節單純的拖車。
 
-### 3 號車，以及屋頂上的東西
+### 3、4 號車——雙胞胎，差別全在屋頂
+
+<img src="model-car3-side.webp" alt="東武 N100 系 SPACIA X 3 號車的 N 規模型側面全景，車頂前後各有一具集電弓" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*3 號車側面。兩具集電弓一前一後*
+
+<img src="model-car4-side.webp" alt="東武 N100 系 SPACIA X 4 號車的 N 規模型側面全景，車頂只有一具冷氣" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*4 號車側面。同一套車側，屋頂上什麼都沒有*
+
+3 號車與 4 號車是 Standard Seat 的雙胞胎：黑窗帶、十五扇方窗、車端同樣收成尖六邊形，兩節車的側面**幾乎可以疊在一起**。窗內透出來的座椅是淺色的，和 2 號車那組褐色的 Premium Seat 一眼就分得出來。
+
+差別全部在屋頂上。3 號車前後各架了一具集電弓，是編成裡的動力車；4 號車屋頂上只剩中央那一具冷氣，乾淨到有點空。在一台幾乎沒有塗裝變化的白色列車上，這種「靠屋頂認車」的辨識方式其實滿有趣的。
 
 <img src="model-car3-angle.webp" alt="東武 N100 系 SPACIA X 3 號車的 N 規模型斜角特寫，車頂裝有集電弓" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
 
-*3 號車。從這個角度看得到車端的幌與抬起的集電弓*
+*3 號車斜角。車端的幌、連結器與電氣連結器都是分件*
 
-3 號車同樣是黑窗帶配方窗，但這次窗內透出來的座椅換成了淺色——Standard Seat。同一套車側、不同的內裝顏色，模型就用這種方式把等級差異做出來，其實滿聰明的。
+### 5 號車——掛廠標的那一節
 
-車端那圈灰色的幌、下方的連結器與電氣連結器都是分件，抬起的集電弓則是這節車和 2 號車最直接的差別。
+<img src="model-car5-side.webp" alt="東武 N100 系 SPACIA X 5 號車的 N 規模型側面全景，車側前半印有 SPACIA X 標誌" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*5 號車側面。窗戶只剩七扇，前半段整片留白*
+
+5 號車是全編成最好認的一節。車門前方留了一大片白牆，上面印著「SPACIA X」與下方的 `Tobu Limited Express`——別的車在這個位置放的是車號，這節放的是招牌。
+
+窗戶也明顯變少了，黑窗帶裡只有七扇方窗，其餘的長度全部讓給那片留白。行先表示器下方的標記則直接寫明了身分：一個輪椅圖示，加上一個「5」。這節就是實車編成裡設有輪椅席的車輛，Box Seat 與 Standard Seat 在這裡共處，機器與無障礙空間也吃掉了原本該是座位窗的位置。
+
+屋頂上和 3 號車一樣架了兩具集電弓，所以動力集中在 3、5 兩節。
+
+<img src="model-car5-angle.webp" alt="東武 N100 系 SPACIA X 5 號車 N 規模型斜角特寫，車側印有 SPACIA X 標誌" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+
+*換個角度，那片留白其實是有厚度的白——車體側面的折面在這裡看得最清楚*
+
+### 車頂上的東西
 
 <img src="model-roof-detail.webp" alt="東武 N100 系 SPACIA X 中間車 N 規模型的車頂俯視特寫，可見集電弓、避雷器與配線" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
 
@@ -113,15 +139,17 @@ Cockpit Suite 是這台車的頂規，概念取自私人飛機：可移動的沙
 
 從上往下拍才會發現，這台車最複雜的表面其實在屋頂。集電弓底座周圍散著避雷器、開關類的箱體，還有沿著車頂縱向拉過去的高壓配線與固定礙子——全部是灰色系的分件，密度和下面那片素白的車身形成強烈對比。
 
-### 掛著廠標的那一節
+### 點燈之後
 
-<img src="model-logo-car-angle.webp" alt="東武 N100 系 SPACIA X 中間車 N 規模型斜角特寫，車側妻面印有 SPACIA X 標誌" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
+<img src="model-car1-lit.webp" alt="東武 N100 系 SPACIA X 1 號車 N 規模型點亮頭燈與室內燈，六角形車窗透出暖橙色的光" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
 
-*車側前端的大面積白牆，就是給廠標留的位置*
+*通電之後，組子紋後面那幾扇六角形車窗才真正活過來*
 
-有一節中間車在車門前方留了一大片白牆，上面印著「SPACIA X」與下方的 `Tobu Limited Express`。這是全編成最容易辨認的一節——別的車在同樣位置放的是車號，這節放的是招牌。
+不過這台車真正的高潮是通電之後。
 
-行先表示器下方還有兩枚很小的無障礙標記，推測對應的是實車編成裡設有輪椅席的 5 號車。這種尺寸的印刷能不糊掉，算是這組模型的加分項。
+白天看，1 號車的六角形車窗是一片安靜的淺綠；點上室內燈，同樣幾扇窗透出來的變成暖橙色，在整面白色的組子紋上排成一列亮點。那些純黑的裝飾開口依然是黑的，於是「哪些是真的窗、哪些只是圖案」的答案，被燈光一次講清楚了。
+
+前頭的頭燈也同時亮起，配上駕駛室側窗透出的暖光——這個時候才會意識到，Cockpit Lounge 那種偏暖的照明色，是實車就決定好的東西，模型只是把它縮小了而已。
 
 ## 白色的難處
 
