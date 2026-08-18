@@ -19,7 +19,7 @@ const {
 } = Astro.props;
 ---
 
-<div id="series-nav" class="series-nav">
+<div id="series-nav" class="series-nav" data-pagefind-ignore>
   <span>Part {index + 1} of {total}</span>
   {' '}
   <a href={`${localePrefix}/series/${seriesSlug}`}>{seriesTitle}</a>
@@ -27,7 +27,7 @@ const {
 <slot />
 {
   (prev || next) && (
-    <div id="series-nav-bottom" class="series-nav-bottom">
+    <div id="series-nav-bottom" class="series-nav-bottom" data-pagefind-ignore>
       <div class="series-nav-bottom-row">
         {prev ? (
           <a
