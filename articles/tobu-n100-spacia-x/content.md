@@ -85,11 +85,11 @@ Seen through the glass from inside the car, the cab is laid out almost completel
 
 *Arrival. Tail lights on, passengers spreading out along the platform*
 
-Looking back after arrival, the red tail lights come on in a row, and that sharp nose looks oddly blunt and quiet under the platform lighting. To the left, a stone retaining wall and an ivy-covered hillside — the sort of backdrop only a terminus gets.
+Looking back after arrival, the red tail lights come on in a row, and that sharp nose looks oddly blunt and quiet under the platform lighting. To the left, a stone retaining wall and an ivy-covered hillside — the sort of backdrop only a terminus gets. This is **Tobu-Nikko**, the end of the Nikko line.
 
 <img src="real-gate-notice.webp" alt="Ticket gates at Tobu-Nikko with a handwritten notice saying certain trains do not depart from this station" class="image-shadow image-rounded" data-zoomable style="max-width: 100%; height: auto;" />
 
-*The ticket gates. That handwritten notice is the real manual for this line*
+*The ticket gates at Tobu-Nikko. That handwritten notice is the real manual for this line*
 
 Next to the gates on the way out is a very lived-in handwritten notice:
 
