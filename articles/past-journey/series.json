@@ -1,0 +1,10 @@
+{
+  "title": "Past Journey",
+  "description": "A look back at my journey as a software developer, one chapter at a time.",
+  "i18n": {
+    "zh-tw": {
+      "title": "回顧來時路",
+      "description": "回顧我作為軟體開發者一路走來的旅程，一次一個篇章。"
+    }
+  }
+}
